@@ -9,12 +9,14 @@ let package = Package(
         .library(name: "FenixuzCore", targets: ["FenixuzCore"])
     ],
     dependencies: [
+        .package(name: "TGUIKit", path: "../TGUIKit"),
         .package(name: "Localization", path: "../Localization")
     ],
     targets: [
         .target(
             name: "FenixuzCore",
             dependencies: [
+                .product(name: "TGUIKit", package: "TGUIKit", condition: nil),
                 .product(name: "Localization", package: "Localization", condition: nil)
             ],
             path: "Sources/FenixuzCore")

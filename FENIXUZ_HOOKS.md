@@ -44,3 +44,29 @@ Notes:
 - `tg://` and `telegram://` URL schemes stay, so Telegram links still open in Novagram.
 - The "Check for Updates" menu item (tag 1000) is removed by `installFenixuzHooks()` in every build; upstream removes it only in `APP_STORE` builds.
 - `MARKETING_VERSION` is still upstream's `13.1.0`. Our App Store line is `1.0.x` (last shipped 1.0.5, build 137); pick the version before the first upload.
+
+## Port of the old fork (branch `feature/novagram-port`, 2026-10-26)
+
+Plan: `../PORT_MAP_macOS13.md`. Build with `./fenix-build.sh` (`./fenix-build.sh appstore` also sets `APP_STORE` inside the packages, see "APP_STORE" below).
+
+### Step 1: identity and App Store hygiene
+
+| File | Change |
+| ---- | ------ |
+| `Telegram-Mac/Info.plist` | `CFBundleDisplayName` = `Novagram` (after `CFBundleDevelopmentRegion`) |
+| `Telegram-Mac/Telegram-Sandbox.entitlements` | removed `com.apple.developer.associated-domains` (`webcredentials:telegram.org`, 13.1 passkeys). telegram.org does not list our app id, so it can never validate for team ZDBP5RSRZF |
+| `Telegram.xcodeproj/project.pbxproj` | Telegram's `Resources/config/GoogleService-Info.plist` removed from the app Resources phase (build file `274DF1DB2DC0BE0400188E7A`; the file reference stays). Firebase is not used (`FirebaseApp.configure()` is commented out upstream). `PrivacyInfo.xcprivacy` added (file ref `FE10DEC04E14C190FFFFFFF0` in group `supporting-files`, Resources build file `FE10DEC04E14C190FFFFFFF1`) |
+| `Telegram-Mac/PrivacyInfo.xcprivacy` (ours) | copied from the old fork (no tracking; required-reason APIs UserDefaults CA92.1, FileTimestamp C617.1, DiskSpace E174.1, SystemBootTime 35F9.1) |
+| `Telegram.xcodeproj/xcshareddata/xcschemes/{Release,Telegram,TelegramShare}.xcscheme` | `BuildableName = "Telegram.app"` → `"Novagram.app"` |
+| `.gitignore` | Novagram block (`.claude/`, `screenshots/`, `*.bak`, `*.tmp`, `DerivedData/`, `Telegram-Mac/NovagramAds.local.xcconfig`) |
+| `fenix-build.sh` (ours) | Debug build with the real pass/fail result (DerivedData `/tmp/tgmac13-dd`, log `/tmp/fenix13-build.log`) |
+
+Not ported: the old `uz.fenixuz.macapp` → `uz.fenixuz.app` container migration (`ApiCredentials`). A sandboxed app can only open app-group containers listed in its entitlements, so the move never had access to the old group.
+
+### FenixuzCore contents from the old fork
+
+`FenixuzGhostMode`, `FenixuzL10n`, `FenixuzBrandColors`, `FenixuzSettingsIcons`, `FenixuzDemoCodeFetcher` copied unchanged. `Package.swift` now also depends on `TGUIKit`.
+
+### APP_STORE
+
+`APP_STORE` reaches the app target through `Novagram.xcconfig` (`TYPE[config=Release]`), but NOT the packages: 36 `#if APP_STORE` sites in packages (PremiumUI, StarsUI, AuthUI, SettingsUI, BoostUI, ChatUI, MessageUtils, TelegramTheme) need `SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) APP_STORE'` on the `xcodebuild` command line, as `buildbox/build-mac.sh` does. Every App Store archive must pass it.

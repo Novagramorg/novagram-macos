@@ -29,3 +29,11 @@ core-xprojects/tlottie/build
 .swiftpm/
 .ci-build-logs/
 *.profraw
+
+# Novagram
+.claude/
+screenshots/
+*.bak
+*.tmp
+DerivedData/
+Telegram-Mac/NovagramAds.local.xcconfig
