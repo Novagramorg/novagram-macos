@@ -31,6 +31,8 @@ extension Double {
     return string
 }
 
+public var localizedValueTransform: (String) -> String = { $0 } // Fenixuz
+
 private func dictFromLocalization(_ value: Localization) -> [String: String] {
     var dict: [String: String] = [:]
     for entry in value.entries {
@@ -56,7 +58,7 @@ private func dictFromLocalization(_ value: Localization) -> [String: String] {
             dict["\(key)_other"] = other
         }
     }
-    return dict
+    return dict.mapValues(localizedValueTransform) // Fenixuz
 }
 
 public func applyUILocalization(_ settings: LocalizationSettings) {
@@ -262,13 +264,13 @@ internal func _LocalizedStringFor(_ key: String, primary: Language, secondary: L
         if returnNilIfMissing && resolved == key {
             return nil
         }
-        return resolved
+        return localizedValueTransform(resolved) // Fenixuz
     }
     let resolved = NSLocalizedString(key, comment: "")
     if returnNilIfMissing && resolved == key {
         return nil
     }
-    return resolved
+    return localizedValueTransform(resolved) // Fenixuz
 }
 
 public func _NSLocalizedString(_ key: String) -> String {

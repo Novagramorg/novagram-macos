@@ -1,6 +1,7 @@
 #if !APP_STORE
 
 import Cocoa
+import FenixuzCore // Fenixuz
 import TGUIKit
 import TelegramCore
 
@@ -763,6 +764,7 @@ private func resetUpdater() {
 private var updaterSource: UpdaterSource? = nil
 
 func updater_resetWithUpdaterSource(_ source: UpdaterSource, force: Bool = true) {
+    guard FenixuzBranding.allowsTelegramUpdater else { return } // Fenixuz
     let state = stateValue.with { $0 }
     switch state.loadingState {
     case .readyToInstall:

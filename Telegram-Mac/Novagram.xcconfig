@@ -1,0 +1,9 @@
+// Novagram build settings, included at the end of Debug.xcconfig and Release.xcconfig.
+
+// Sparkle is off: the upstream feed would install the official Telegram over Novagram.
+// An empty URL crashes the updater, so it points at a dead local address instead.
+SFEED_URL = https:$(SIMPLE_SLASH)/127.0.0.1/none.xml
+
+// Release builds go to the Mac App Store: APP_STORE code paths and the "appstore" data folder.
+SOURCE[config=Release] = APP_STORE
+TYPE[config=Release] = -D'APP_STORE'

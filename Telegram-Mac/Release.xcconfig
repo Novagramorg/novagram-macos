@@ -5,3 +5,4 @@ SOURCE = STABLE
 
 TYPE = -D'STABLE'
 OTHER_SWIFT_FLAGS = $(TYPE)
+#include "Novagram.xcconfig"

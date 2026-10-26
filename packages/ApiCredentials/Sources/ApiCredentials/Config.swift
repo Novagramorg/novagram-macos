@@ -2,17 +2,17 @@ import Cocoa
 
 public final class ApiEnvironment {
     public static var apiId:Int32 {
-        return 9
+        return 35846757
     }
     public static var apiHash:String {
-        return "3975f648bb682ee889f35483bc618d1c"
+        return "67cdc52f3eda13727603d4e779ee2894"
     }
     
     public static var bundleId: String {
-        return "ru.keepcoder.Telegram"
+        return "uz.fenixuz.app"
     }
     public static var teamId: String {
-        return "6N38VWS5BX"
+        return "ZDBP5RSRZF"
     }
     
     

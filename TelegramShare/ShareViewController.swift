@@ -11,6 +11,7 @@ import Localization
 import FoundationUtils
 import RLottie
 import PasscodeCore
+import FenixuzCore // Fenixuz
 
 class ShareViewController: NSViewController {
 
@@ -65,6 +66,7 @@ class ShareViewController: NSViewController {
         }).start()
         localizationSemaphore.wait()
         
+        localizedValueTransform = FenixuzBranding.rebrand // Fenixuz
         if let localization = localization {
             applyUILocalization(localization)
         }

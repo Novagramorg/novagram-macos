@@ -1,6 +1,7 @@
 import Cocoa
 import ApiCredentials
 import CrashRecoveryUI
+import FenixuzCore // Fenixuz
 
 @_silgen_name("OPENSSL_init_crypto")
 private func OPENSSL_init_crypto(_ opts: UInt64, _ settings: OpaquePointer?) -> Int32
@@ -13,6 +14,7 @@ if let groupURL = ApiEnvironment.legacyContainerURL {
     armCrashMarker(folder: groupURL.appendingPathComponent(ApiEnvironment.prefix).path)
 }
 
+installFenixuzHooks() // Fenixuz
 installTelegramThemeHooks()
 installGeneralRowsHooks()
 installInputDataUIHooks()

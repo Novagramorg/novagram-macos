@@ -10,3 +10,4 @@ SOURCE = DEBUG
 
 TYPE = -D'BETA'
 OTHER_SWIFT_FLAGS = $(TYPE)
+#include "Novagram.xcconfig"
