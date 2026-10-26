@@ -36,7 +36,7 @@ public struct FenixuzL10n {
         FenixuzL10n(languageCode: languageCode)
     }
 
-    private func pick(en: String, uz: String, ru: String) -> String {
+    func pick(en: String, uz: String, ru: String) -> String {
         switch langCode {
         case "uz": return uz
         case "ru": return ru

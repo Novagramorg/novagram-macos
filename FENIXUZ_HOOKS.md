@@ -80,3 +80,28 @@ Two products:
 ### APP_STORE
 
 `APP_STORE` reaches the app target through `Novagram.xcconfig` (`TYPE[config=Release]`), but NOT the packages: 36 `#if APP_STORE` sites in packages (PremiumUI, StarsUI, AuthUI, SettingsUI, BoostUI, ChatUI, MessageUtils, TelegramTheme) need `SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) APP_STORE'` on the `xcodebuild` command line, as `buildbox/build-mac.sh` does. Every App Store archive must pass it.
+
+### Step 5: small package edits (no new hook structs)
+
+Packages that now depend on `FenixuzCore` (`.package(name: "FenixuzCore", path: "../FenixuzCore")` + product, both lines `// Fenixuz`): ChatHistoryModel, SidebarUI, StoriesUI, PeerInfoUI, ChatListUI, ChatUI. ShortPeerRow depends on product `FenixuzShare` in its shared `common` list (its sources are symlinked into the `ShortPeerRowShare` target). Packages FenixuzCore itself depends on (AlertsUI, GeneralRows, InputDataUI, InAppSettings, TelegramUtils, AvatarUI, …) must never import it: run `deps.py`-style checks before adding one.
+
+| Feature | File | Change |
+| ------- | ---- | ------ |
+| F30 whole-chat translate without Premium | `ChatHistoryModel/.../ChatLiveTranslateContext.swift` | `if !peer.isPremium && !FenixuzPremiumUnlock.wholeChatTranslate {`; both `return (…, peer?.isPremium == true || FenixuzPremiumUnlock.wholeChatTranslate, autoTranslate)` |
+| F30 folder tags without Premium | `SidebarUI/.../ChatListFilterController.swift` (`toggleColor`), `ChatListFiltersListController.swift` (`toggleTags`) | `&& !FenixuzPremiumUnlock.folderTags` on the Premium check |
+| F29 story save + HD without Premium | `StoriesUI/.../StoryModalController.swift` (HD item, save item), `StoryChatContent.swift` (`preferHighQualityStories`) | `context.isPremium \|\| FenixuzPremiumUnlock.storiesSaveAndHD`; `setting && (isPremium \|\| …)`. The old fork never changed `StoryChatContent`, so HD there was cosmetic |
+| F31 ID row | `PeerInfoUI/.../{User,Group,Channel}InfoEntries.swift` `case .peerId` | label `ID`, copy menu "Copy ID", click copies too, toast "ID copied" (`FenixuzL10n.peerInfo_*`). Channel value `-100<id>`, legacy group `-<id>` |
+| F31 ID row on by default | `InAppSettings/.../FastSettings.swift` `canViewPeerId` | reads `pro_messager/show_peer_id`, then `kCanViewPeerId`, default `true`; setter also writes `show_peer_id` |
+| F31 Novagram Info | `PeerInfoUI/.../PeerInfoController.swift` | `getRightBarViewOnce` → `BarView(40, …)`; `viewDidLoad` adds the info button (`fenixuzAddInfoButton`); `requestUpdateRightBar` recolours it. New file `PeerInfoUI/.../FenixuzPeerInfoModal.swift` (modal + button helpers) |
+| F43 auto-approve (peer info) | `PeerInfoController.swift` entries `mapToQueue` | `FenixuzAutoApproveManager.shared.checkAndApprove(...)` when `joinRequestsCount > 0` |
+| F32 mutual contact 🤝 | `ChatListUI/.../ChatListRowItem.swift` (title), `ShortPeerRow/.../ShortPeerRowItem.swift` (title) | `FenixuzMutualContact.title(_, for:)` (in `FenixuzShare`) |
+| F16 view first message | `ChatUI/.../ChatController.swift` chat "…" menu after Info | item when `pro_messager/show_view_first_message`, calls `chatInteraction.scrollToTheFirst()` |
+| F41 phone retry | `ChatController.swift` phone-number menu | "Retry" item when the number did not resolve (`peer == nil`) |
+| F10 chat list paging | `ChatListUI/.../ChatListController.swift` | `fenixPageRetry` property; scroll handler is now the `pageScrollHandler` constant; dropped request inside the 0.5 s guard is rescheduled. New file `ChatListUI/.../FenixuzChatListPageRetry.swift` |
+| F23 app name | `TelegramUtils/.../System.swift` | `appName = "Novagram"` (alert headers etc.) |
+| F23 archive name | `ChatHistoryModel/.../SenderController.swift` | `"Novagram Archive"` |
+| F23 About | `SettingsUI/.../AboutModalController.swift` | `APP_VERSION_STRING` drops the build-type suffix (Stable/AppStore/Beta); copyright `Copyright © <year> NOVAGRAM` |
+| F40 "Update app" | `ChatUI/.../ChatMessageItem.swift` `invokeUpdateApp` | `#if APP_STORE \|\| true`: always opens `itunesAppLink` (Novagram App Store page), never the Sparkle check |
+| X-C2-2 crash recovery | `CrashRecoveryUI/.../CrashRecovery.swift` | App Store link → Novagram (`id6768202244`), website → `https://novagram.org` |
+
+Decision: the old Mac build's red accent palette (`#b40000` / `#ff3b30`, from the Fenixuz brand) is NOT ported. The Novagram icon and the iOS app are blue, and Telegram's own blue palette stays.

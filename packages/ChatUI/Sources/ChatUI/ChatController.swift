@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -7369,6 +7370,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                             item.isEnabled = false
                         }
                         menu.addItem(item)
+                        if peer == nil { menu.addItem(ContextMenuItem(FenixuzL10n.current.phone_retry, handler: { [weak self] in self?.chatInteraction.openPhoneNumberContextMenu(phoneNumber) }, itemImage: MenuAnimation.menu_reload.value)) } // Fenixuz
                         
                         AppMenu.show(menu: menu, event: event, for: view)
                     }
@@ -10014,6 +10016,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                         self?.chatInteraction.openInfo(peerId, false, nil, nil)
                     }, itemImage: MenuAnimation.menu_show_info.value))
                 }
+                if FenixuzSettingsKey.bool("show_view_first_message") { items.append(ContextMenuItem(FenixuzL10n.current.settings_chat_firstMessage_title, handler: { [weak self] in self?.chatInteraction.scrollToTheFirst() }, itemImage: MenuAnimation.menu_sort_up.value)) } // Fenixuz
 
 
                 if let notificationSettings = peerView.notificationSettings as? TelegramPeerNotificationSettings, !self.isAdChat {

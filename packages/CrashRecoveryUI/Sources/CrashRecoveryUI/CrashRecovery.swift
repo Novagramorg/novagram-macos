@@ -55,8 +55,8 @@ private func systemPalette() -> ColorPalette {
     return whitePalette
 }
 
-private let appStoreURL = URL(string: "macappstore://apps.apple.com/app/id747648890")!
-private let websiteURL = URL(string: "https://macos.telegram.org")!
+private let appStoreURL = URL(string: "macappstore://apps.apple.com/app/id6768202244")! // Fenixuz
+private let websiteURL = URL(string: "https://novagram.org")! // Fenixuz
 
 private enum Text {
     static let title = strings().crashRecoveryTitle

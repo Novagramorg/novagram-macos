@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -545,6 +546,7 @@ public class PeerInfoController<Context: AccountContextProtocol>: EditableViewCo
     }
     public override func requestUpdateRightBar() {
         _rightBar?.style = barPresentation
+        fenixuzUpdateInfoButton(in: _rightBar, color: barPresentation.foregroundColor) // Fenixuz
     }
     
     public override var defaultBarTitle: String {
@@ -910,7 +912,7 @@ public class PeerInfoController<Context: AccountContextProtocol>: EditableViewCo
         return BarView(controller: self)
     }
     public override func getRightBarViewOnce() -> BarView {
-        return BarView(controller: self)
+        return BarView(40, controller: self) // Fenixuz
     }
     
     public override func returnKeyAction() -> KeyHandlerResult {
@@ -967,6 +969,7 @@ public class PeerInfoController<Context: AccountContextProtocol>: EditableViewCo
         _leftBar = super.getLeftBarViewOnce()
         _centerBar = super.getCenterBarViewOnce()
         _rightBar = super.getRightBarViewOnce()
+        fenixuzAddInfoButton(to: _rightBar, handler: { [weak self] in if let self, let peerView = self.peerView.with({ $0 }) { showModal(with: FenixuzInfoModalController(context: self.context, peerView: peerView), for: self.context.window) } }) // Fenixuz
 
         _centerBar.userInteractionEnabled = false
         _centerBar.isEventLess = true
@@ -1199,6 +1202,7 @@ public class PeerInfoController<Context: AccountContextProtocol>: EditableViewCo
             |> mapToQueue { view, state, appearance, inputActivities, channelMembers, mediaTabsData, _, inviteLinksCount, joinRequestsCount, availableReactions, threadData, threadPeer, stories, personalChannel, revenueState, tonRevenueState, webAppPermissionsState, savedMuicProfileState -> Signal<(PeerView, TableUpdateTransition, MessageHistoryThreadData?, EnginePeer?), NoError> in
                     
                     
+                if joinRequestsCount > 0 { FenixuzAutoApproveManager.shared.checkAndApprove(context: context, peerId: peerId, joinRequestsCount: joinRequestsCount) } // Fenixuz
                 let entries:[AppearanceWrapperEntry<PeerInfoSortableEntry>] = peerInfoEntries(view: view, threadData: threadData, threadPeer: threadPeer, arguments: arguments, inputActivities: inputActivities, channelMembers: channelMembers, mediaTabsData: mediaTabsData, inviteLinksCount: inviteLinksCount, joinRequestsCount: joinRequestsCount, availableReactions: availableReactions, source: source, stories: stories, personalChannel: personalChannel, revenueState: revenueState, tonRevenueState: tonRevenueState, webAppPermissionsState: webAppPermissionsState, savedMuicProfileState: savedMuicProfileState).map({PeerInfoSortableEntry(entry: $0)}).map({AppearanceWrapperEntry(entry: $0, appearance: appearance)})
                     let previous = previousEntries.swap(entries)
                     return prepareEntries(from: previous, to: entries, account: context.account, initialSize: initialSize.modify({$0}), peerId: peerId, arguments:arguments, animated: previous != nil) |> runOn(onMainQueue.swap(false) ? .mainQueue() : prepareQueue) |> map { (view, $0, threadData, threadPeer) }

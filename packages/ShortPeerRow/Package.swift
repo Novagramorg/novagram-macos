@@ -9,6 +9,7 @@ let common: [Target.Dependency] = [
     .product(name: "Postbox", package: "Postbox", condition: nil),
     .product(name: "ColorPalette", package: "ColorPalette", condition: nil),
     .product(name: "Localization", package: "Localization", condition: nil),
+    .product(name: "FenixuzShare", package: "FenixuzCore", condition: nil), // Fenixuz
 ]
 
 let package = Package(
@@ -34,6 +35,7 @@ let package = Package(
         .package(name: "InAppSettings", path: "../InAppSettings"),
         .package(name: "ThemeSettings", path: "../ThemeSettings"),
         .package(name: "rnoise", path: "../../submodules/telegram-ios/third-party/rnnoise"),
+        .package(name: "FenixuzCore", path: "../FenixuzCore"), // Fenixuz
     ],
     targets: [
         .target(

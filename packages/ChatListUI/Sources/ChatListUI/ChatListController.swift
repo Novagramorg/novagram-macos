@@ -762,6 +762,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
 
     
     private let filterDisposable = MetaDisposable()
+    private let fenixPageRetry = FenixuzChatListPageRetry() // Fenixuz
     
 
     
@@ -1226,7 +1227,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
             return !items.contains(where: { !($0 is ChatListEmptyRowItem) })
         }
 
-        genericView.tableView.setScrollHandler({ [weak self] scroll in
+        let pageScrollHandler: (ScrollPosition) -> Void = { [weak self] scroll in // Fenixuz
             
             let view = previousChatList.modify({$0})
             self?.removeRevealStateIfNeeded(nil)
@@ -1258,6 +1259,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
                     _ = animated.swap(false)
                     if let timestamp = strongSelf.state?.filterData.requestTimestamp {
                         if timestamp + 0.5 > CACurrentMediaTime() {
+                            strongSelf.fenixPageRetry.schedule(scroll, after: timestamp + 0.5 - CACurrentMediaTime(), tableView: strongSelf.genericView.tableView) // Fenixuz
                             return
                         }
                     }
@@ -1271,7 +1273,9 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
                 }
             }
             
-        })
+        } // Fenixuz
+        fenixPageRetry.handler = pageScrollHandler // Fenixuz
+        genericView.tableView.setScrollHandler(pageScrollHandler) // Fenixuz
         
         let filterView = chatListFilterPreferences(engine: context.engine) |> deliverOnMainQueue |> distinctUntilChanged
         let filterBadges = chatListFilterItems(engine: context.engine, accountManager: context.sharedContext.accountManager) |> deliverOnMainQueue |> distinctUntilChanged

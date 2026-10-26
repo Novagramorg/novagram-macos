@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Foundation
 import TelegramCore
 import SwiftSignalKit
@@ -425,7 +426,7 @@ public final class StoryContentContextImpl: StoryContentContext {
             )
             |> map { setting, peer -> Bool in
                 let isPremium = peer?.isPremium ?? false
-                return setting && isPremium
+                return setting && (isPremium || FenixuzPremiumUnlock.storiesSaveAndHD) // Fenixuz
             }
             |> distinctUntilChanged
 

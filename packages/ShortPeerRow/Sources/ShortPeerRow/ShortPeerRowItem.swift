@@ -1,3 +1,4 @@
+import FenixuzShare // Fenixuz
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -438,7 +439,7 @@ open class ShortPeerRowItem: GeneralRowItem {
         if let monoforumPeer, peer.isMonoForum {
             let _ = tAttr.append(string: monoforumPeer.displayTitle, color: enabled ? titleStyle.foregroundColor : customTheme?.grayTextColor ?? theme.colors.grayText, font: self.titleStyle.font)
         } else {
-            let _ = tAttr.append(string: isLookSavedMessage && account.peerId == peer.id ? strings().peerSavedMessages : (compactText ? peer.compactDisplayTitle + (account.testingEnvironment ? " [🤖]" : "") : peer.displayTitle), color: enabled ? titleStyle.foregroundColor : customTheme?.grayTextColor ?? theme.colors.grayText, font: self.titleStyle.font)
+            let _ = tAttr.append(string: FenixuzMutualContact.title(isLookSavedMessage && account.peerId == peer.id ? strings().peerSavedMessages : (compactText ? peer.compactDisplayTitle + (account.testingEnvironment ? " [🤖]" : "") : peer.displayTitle), for: peer), color: enabled ? titleStyle.foregroundColor : customTheme?.grayTextColor ?? theme.colors.grayText, font: self.titleStyle.font) // Fenixuz
         }
         
         

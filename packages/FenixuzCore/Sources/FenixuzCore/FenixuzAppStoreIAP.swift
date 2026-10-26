@@ -38,8 +38,6 @@ public enum FenixuzAppStoreIAP {
     /// turadi, kelajakda agar FBuildConfig kabi flag qo'shilsa, AppDelegate'dan to'ldiriladi.
     public static var isAppStoreBuild: Bool = false
 
-    /// Official Telegram for macOS App Store URL — Mac App Store deep-link sxemasi.
-    private static let officialTelegramAppStoreURL = "macappstore://apps.apple.com/app/telegram/id747648890"
 
     // MARK: - Bot-invoice gate
 

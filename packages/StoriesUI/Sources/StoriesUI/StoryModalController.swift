@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TGUIKit
 import Postbox
@@ -2956,7 +2957,7 @@ public final class StoryModalController<Context: AccountContextProtocol> : Modal
                 }
                 
                 if presentaion.mediaCall == nil {
-                    if context.isPremium {
+                    if context.isPremium || FenixuzPremiumUnlock.storiesSaveAndHD { // Fenixuz
                         
                         let hq = self?.genericView.storyContext?.stateValue?.slice?.additionalPeerData.preferHighQualityStories ?? false
                         
@@ -3001,7 +3002,7 @@ public final class StoryModalController<Context: AccountContextProtocol> : Modal
                     
                     if let resource = resource {
                         menu.addItem(ContextMenuItem(strings().storyMyInputSaveMedia, handler: {
-                            if context.isPremium {
+                            if context.isPremium || FenixuzPremiumUnlock.storiesSaveAndHD { // Fenixuz
                                 saveAs(resource, account: context.account)
                             } else {
                                 saveGalleryPremium()

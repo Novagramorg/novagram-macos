@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TGUIKit
 import Postbox
@@ -917,7 +918,7 @@ public class ChatListRowItem: TableRowItem {
                 if let peer = peer, peer.isMonoForum {
                     text = renderedPeer.chatOrMonoforumMainPeer?._asPeer().displayTitle
                 } else {
-                    text = peer?.displayTitle
+                    text = peer.map { FenixuzMutualContact.title($0.displayTitle, for: $0) } // Fenixuz
                 }
             }
             let _ = titleText.append(string: text, color: renderedPeer.peers[renderedPeer.peerId]?._asPeer() is TelegramSecretChat ? theme.chatList.secretChatTextColor : theme.chatList.textColor, font: .medium(.title))

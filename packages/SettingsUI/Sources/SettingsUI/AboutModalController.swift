@@ -17,7 +17,7 @@ public var APP_VERSION_STRING: String {
     #else
     vText += " Beta"
     #endif
-    return vText
+    return vText.components(separatedBy: " ").first ?? vText // Fenixuz
 }
 
 fileprivate class AboutModalView : Control {
@@ -30,7 +30,7 @@ fileprivate class AboutModalView : Control {
         formatter.dateFormat = "yyyy"
         
         
-        let copyrightLayout = TextViewLayout(.initialize(string: "Copyright © 2016 - \(formatter.string(from: Date(timeIntervalSinceReferenceDate: Date.timeIntervalSinceReferenceDate))) TELEGRAM MESSENGER", color: theme.colors.grayText, font: .normal(.text)), alignment: .center)
+        let copyrightLayout = TextViewLayout(.initialize(string: "Copyright © \(formatter.string(from: Date(timeIntervalSinceReferenceDate: Date.timeIntervalSinceReferenceDate))) NOVAGRAM", color: theme.colors.grayText, font: .normal(.text)), alignment: .center) // Fenixuz
         copyrightLayout.measure(width:frameRect.width - 40)
         
         

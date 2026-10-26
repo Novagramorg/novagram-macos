@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TelegramCore
 import CurrencyFormat
@@ -2538,9 +2539,8 @@ enum UserInfoEntry<Context: AccountContextProtocol>: PeerInfoEntry {
                 arguments.openQrStudio(from: control)
             })
         case let .peerId(_, value, viewType):
-            return  TextAndLabelItem(initialSize, stableId: stableId.hashValue, label: "PEER ID", copyMenuText: strings().textCopyText, text: value, context: arguments.context, viewType: viewType, canCopy: true, _copyToClipboard: {
-                arguments.copy(value)
-            })
+            let copyId: () -> Void = { copyToClipboard(value); showModalText(for: arguments.context.window, text: FenixuzL10n.current.peerInfo_idCopied) } // Fenixuz
+            return  TextAndLabelItem(initialSize, stableId: stableId.hashValue, label: FenixuzL10n.current.peerInfo_idLabel, copyMenuText: FenixuzL10n.current.peerInfo_copyId, text: value, context: arguments.context, viewType: viewType, callback: copyId, canCopy: true, _copyToClipboard: copyId) // Fenixuz
         case let .businessLocation(_, peer, location, viewType):
             return PeerInfoLocationRowItem(initialSize, stableId: stableId.hashValue, context: arguments.context, peer: peer._asPeer(), location: location, viewType: viewType, open: {
                 arguments.openLocation(peer._asPeer(), location)

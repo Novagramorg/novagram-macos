@@ -405,10 +405,11 @@ public class FastSettings {
 
     public static var canViewPeerId: Bool {
         get {
-            return UserDefaults.standard.bool(forKey: "kCanViewPeerId")
+            return UserDefaults(suiteName: "pro_messager")?.object(forKey: "show_peer_id") as? Bool ?? UserDefaults.standard.object(forKey: "kCanViewPeerId") as? Bool ?? true // Fenixuz
         }
         set {
             UserDefaults.standard.set(newValue, forKey: "kCanViewPeerId")
+            UserDefaults(suiteName: "pro_messager")?.set(newValue, forKey: "show_peer_id") // Fenixuz
         }
     }
     

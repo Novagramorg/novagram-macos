@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import Postbox
 import TelegramCore
@@ -1158,9 +1159,8 @@ enum ChannelInfoEntry<Context: AccountContextProtocol>: PeerInfoEntry {
                 arguments.openQrStudio(from: control)
             })
         case let .peerId(_, value, viewType):
-            return  TextAndLabelItem(initialSize, stableId: stableId.hashValue, label: "PEER ID", copyMenuText: strings().textCopyText, text: value, context: arguments.context, viewType: viewType, canCopy: true, _copyToClipboard: {
-                arguments.copy(value)
-            })
+            let copyId: () -> Void = { copyToClipboard(value); showModalText(for: arguments.context.window, text: FenixuzL10n.current.peerInfo_idCopied) } // Fenixuz
+            return  TextAndLabelItem(initialSize, stableId: stableId.hashValue, label: FenixuzL10n.current.peerInfo_idLabel, copyMenuText: FenixuzL10n.current.peerInfo_copyId, text: value, context: arguments.context, viewType: viewType, callback: copyId, canCopy: true, _copyToClipboard: copyId) // Fenixuz
         case let .report(_, viewType):
             return GeneralInteractedRowItem(initialSize, stableId: stableId.hashValue, name: strings().peerInfoReport, type: .none, viewType: viewType, action: { () in
                 arguments.report()
@@ -1378,7 +1378,7 @@ func channelInfoEntries<Context: AccountContextProtocol>(view: PeerView, argumen
                 aboutBlock.append(.userName(sectionId: .desc, value: usernames, viewType: .singleItem))
             }
             if FastSettings.canViewPeerId {
-                aboutBlock.append(.peerId(sectionId: .desc, value: "\(channel.id.id._internalGetInt64Value())", viewType: .singleItem))
+                aboutBlock.append(.peerId(sectionId: .desc, value: "-100\(channel.id.id._internalGetInt64Value())", viewType: .singleItem)) // Fenixuz
             }
             applyBlock(aboutBlock)
             

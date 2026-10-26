@@ -1,4 +1,5 @@
 import Foundation
+import FenixuzCore // Fenixuz
 import Postbox
 import SwiftSignalKit
 import TelegramCore
@@ -298,7 +299,7 @@ public final class ChatLiveTranslateContext {
             
             var translationState = translationState
             if let peer = peer {
-                if !peer.isPremium {
+                if !peer.isPremium && !FenixuzPremiumUnlock.wholeChatTranslate { // Fenixuz
                     let showPaywall = settings.paywall?.show ?? true
                     translationState?.paywall = showPaywall
                     isHidden = isHidden || !showPaywall
@@ -314,9 +315,9 @@ public final class ChatLiveTranslateContext {
             }
             
             if !isHidden && translationState?.fromLang != translationState?.toLang  {
-                return (translationState, appearance, peer?.isPremium == true, autoTranslate)
+                return (translationState, appearance, peer?.isPremium == true || FenixuzPremiumUnlock.wholeChatTranslate, autoTranslate) // Fenixuz
             } else {
-                return (nil, appearance, peer?.isPremium == true, autoTranslate)
+                return (nil, appearance, peer?.isPremium == true || FenixuzPremiumUnlock.wholeChatTranslate, autoTranslate) // Fenixuz
             }
             
         } |> deliverOnPrepareQueue

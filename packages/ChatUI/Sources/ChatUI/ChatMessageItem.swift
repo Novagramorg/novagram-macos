@@ -215,7 +215,7 @@ public class ChatMessageItem: ChatRowItem {
     /// `unsupported` is false for rich messages by design (ChatRowItem.unsupported), yet the card
     /// inside one offers the same update.
     public func invokeUpdateApp() {
-        #if APP_STORE
+        #if APP_STORE || true // Fenixuz
         LinkHooks.shared.openExternalLink(itunesAppLink, false)
         #else
         ChatHistoryUIHooks.shared.checkForUpdates()

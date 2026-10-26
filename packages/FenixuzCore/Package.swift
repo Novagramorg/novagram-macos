@@ -22,6 +22,8 @@ let package = Package(
         .target(
             name: "FenixuzShare",
             dependencies: [
+                .product(name: "TelegramCore", package: "TelegramCore", condition: nil),
+                .product(name: "Postbox", package: "Postbox", condition: nil),
                 .product(name: "Localization", package: "Localization", condition: nil)
             ],
             path: "Sources/FenixuzShare"),
