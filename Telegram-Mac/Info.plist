@@ -71,6 +71,8 @@
 	<string>We need access to your camera so that you can record video messages.</string>
 	<key>NSDownloadsFolderUsageDescription</key>
 	<string>We need access to your Downloads folder so that you can save files from chats.</string>
+	<key>NovagramAdsEnvironment</key>
+	<string>$(NOVAGRAM_ADS_ENVIRONMENT)</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026 Novagram. All rights reserved.</string>
 	<key>NSLocationAlwaysUsageDescription</key>

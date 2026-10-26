@@ -87,6 +87,9 @@ private struct FenixuzSettingsState: Equatable {
     var chatLockMasterEnabled: Bool
     // NovagramProxy opt-in — derived from FenixuzAutoProxyManager (owns the "pro_messager" key).
     var novagramProxyEnabled: Bool
+    // Hidden "Remove all ads" section: filled from NovagramAdsGate.uiState, not from defaults.
+    var adsRevealed: Bool = false
+    var showAds: Bool = true
 
     static func load() -> FenixuzSettingsState {
         let d = fenixuzDefaults
@@ -157,6 +160,7 @@ private enum FenixuzEntryId: Hashable {
     case sttEnabled, sttLanguage
     case protectionChatLock, protectionProxy, protectionForeign, protectionFooter
     case remindersUnread, autoApproveJoin, actionSuggestedFolders, actionAdminFolder, autoFooter
+    case adsRemoveAll
 }
 
 // iOS 1:1 — har bir row uchun rangli kvadrat ikonka (FenixuzIconColor + SF Symbol).
@@ -190,6 +194,7 @@ private func fenixuzSettingsRowIcon(_ id: FenixuzEntryId) -> CGImage? {
     case .autoApproveJoin:          map = ("person.crop.circle.badge.checkmark", .green)
     case .actionSuggestedFolders:   map = ("folder.badge.plus", .blue)
     case .actionAdminFolder:        map = ("star.circle.fill", .gold)
+    case .adsRemoveAll:             map = ("nosign", .red)
     default:                        map = nil
     }
     guard let (symbol, color) = map else { return nil }
@@ -205,6 +210,7 @@ private enum FenixuzEntry: Comparable, Identifiable {
     case disclosurePlaceholder(Int, FenixuzEntryId, String, String, GeneralViewType, String /* subKey */)
     case disclosureSTTLanguage(Int, FenixuzEntryId, String, String, GeneralViewType)
     case action(Int, FenixuzEntryId, String, String?, GeneralViewType, () -> Void)
+    case adsToggle(Int, FenixuzEntryId, String, String?, Bool, GeneralViewType)
     case footer(Int, FenixuzEntryId, String)
 
     var stableId: AnyHashable {
@@ -217,6 +223,7 @@ private enum FenixuzEntry: Comparable, Identifiable {
         case let .disclosurePlaceholder(_, id, _, _, _, _): return id
         case let .disclosureSTTLanguage(_, id, _, _, _): return id
         case let .action(_, id, _, _, _, _):         return id
+        case let .adsToggle(_, id, _, _, _, _):      return id
         case let .footer(_, id, _):                  return id
         }
     }
@@ -231,6 +238,7 @@ private enum FenixuzEntry: Comparable, Identifiable {
         case let .disclosurePlaceholder(idx, _, _, _, _, _): return idx
         case let .disclosureSTTLanguage(idx, _, _, _, _): return idx
         case let .action(idx, _, _, _, _, _): return idx
+        case let .adsToggle(idx, _, _, _, _, _): return idx
         case let .footer(idx, _, _): return idx
         }
     }
@@ -256,6 +264,8 @@ private enum FenixuzEntry: Comparable, Identifiable {
         case let (.action(l1, l2, l3, l4, l5, _), .action(r1, r2, r3, r4, r5, _)):
             return l1 == r1 && l2 == r2 && l3 == r3 && l4 == r4 && l5 == r5
         case let (.footer(l1, l2, l3), .footer(r1, r2, r3)): return l1 == r1 && l2 == r2 && l3 == r3
+        case let (.adsToggle(l1, l2, l3, l4, l5, l6), .adsToggle(r1, r2, r3, r4, r5, r6)):
+            return l1 == r1 && l2 == r2 && l3 == r3 && l4 == r4 && l5 == r5 && l6 == r6
         default: return false
         }
     }
@@ -337,6 +347,19 @@ private enum FenixuzEntry: Comparable, Identifiable {
                 type: .next,
                 viewType: viewType,
                 action: handler
+            )
+        case let .adsToggle(_, entryId, title, subtitle, value, viewType):
+            // `value` is the switch state (ON = ads removed), so the new `showAds` is the old switch state.
+            return GeneralInteractedRowItem(
+                initialSize, stableId: stableId,
+                name: title,
+                icon: fenixuzSettingsRowIcon(entryId),
+                description: subtitle,
+                type: .switchable(value),
+                viewType: viewType,
+                action: {
+                    NovagramAdsGate.setShowAds(value)
+                }
             )
         case let .footer(_, _, text):
             return GeneralTextRowItem(initialSize, stableId: stableId, text: text, viewType: .textBottomItem)
@@ -423,6 +446,12 @@ private func fenixuzSettingsEntries(state: FenixuzSettingsState, l10n: FenixuzL1
     entries.append(.toggle(next(), .protectionForeign, l10n.settings_protection_foreign_title, l10n.settings_protection_foreign_subtitle, state.blockForeignUsers, .lastItem, FenixuzDefaultsKey.blockForeignUsers))
     entries.append(.footer(next(), .protectionFooter, l10n.settings_protection_footer))
 
+    // Hidden "Remove all ads" (shown only while revealed from the version row in main Settings).
+    if state.adsRevealed {
+        entries.append(.section(sectionId)); sectionId += 1
+        entries.append(.adsToggle(next(), .adsRemoveAll, NovagramAdsGate.toggleTitle, NovagramAdsGate.toggleTip, !state.showAds, .singleItem))
+    }
+
     // trailing spacer
     entries.append(.section(sectionId))
 
@@ -443,6 +472,7 @@ private func prepareFenixuzTransition(left: [AppearanceWrapperEntry<FenixuzEntry
 class FenixuzSettingsController: TableViewController {
 
     private let disposable = MetaDisposable()
+    private let adsDisposable = MetaDisposable()
     private let statePromise = ValuePromise(FenixuzSettingsState.load(), ignoreRepeated: true)
     private let stateValue = Atomic(value: FenixuzSettingsState.load())
 
@@ -557,6 +587,13 @@ class FenixuzSettingsController: TableViewController {
             }
         )
 
+        adsDisposable.set((NovagramAdsGate.uiState.get() |> deliverOnMainQueue).start(next: { ads in
+            updateState { state in
+                state.adsRevealed = ads.revealed
+                state.showAds = ads.showAds
+            }
+        }))
+
         let initialSize = self.atomicSize
         let previousEntries = Atomic<[AppearanceWrapperEntry<FenixuzEntry>]>(value: [])
 
@@ -603,6 +640,7 @@ class FenixuzSettingsController: TableViewController {
 
     deinit {
         disposable.dispose()
+        adsDisposable.dispose()
     }
 
     override func viewWillDisappear(_ animated: Bool) {

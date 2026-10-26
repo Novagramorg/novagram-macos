@@ -243,3 +243,17 @@ Not ported: the old emerald Next button (`FenixuzBrandColors.primary`), same rea
 | `AuthUI/.../AuthController.swift` | the "NovagramProxy" text link at the top of the login screen is removed (owner: it belongs in Proxy Settings). The login proxy icon still appears after 10 s without a connection (upstream), so blocked users reach Proxy Settings |
 
 QrStudioUI, InviteLinksUI and ProxyUI depend on FenixuzCore (`// Fenixuz` Package.swift lines).
+
+### Novagram ads v2, app side
+
+| File | What |
+| --- | --- |
+| `packages/NovagramAdsBinary/` | NovagramAds SDK 3.0 binary package (NovagramAds, NovagramInsights, NovagramInsightsUI xcframeworks, macos-arm64_x86_64, min macOS 12.0, Swift 6.4). Update with `scripts/vendor-novagram-sdk.sh <sdk build dir>` |
+| `Telegram-Mac/novagram/NovagramAdsCenter.swift` + `NovagramAdActions`, `NovagramAdMenu`, `NovagramAdMessage`, `NovagramBannerAds`, `NovagramChatAds`, `NovagramSearchAds`, `NovagramVideoAds` | Ads logic (our ad first, Telegram's only as fallback and never for Premium, nothing while "Remove all ads" is on; events to our backend only). `NovagramAdsCenter`, not `NovagramAds`: that is the SDK module name |
+| `Telegram-Mac/novagram/NovagramAdsGate.swift`, `NovagramAdsAdminAuth.swift` | "Remove all ads" gate (`pro_messager` keys `fenix_show_ads`, `fenix_ads_section_revealed`), F08: 10 quick clicks on the Settings version row + admin login; the hidden section is back in Novagram Settings |
+| `Telegram-Mac/novagram/NovagramInsightsEntry.swift` | F09 hidden "Ads Analytics" row (id 914; 20 quick clicks on "Novagram Settings" + admin login), opens the NovagramInsightsUI window. No GeneralRows hook (hub package): a click on another row no longer resets the count |
+| `Telegram-Mac/packages-integration/hooks/NovagramAdsHooksInstall.swift` | installs every `NovagramAdsHooks` closure (from `installNovagramHooks()`); `openMediaIfOurs` returns early for non-ads |
+| `scripts/novagram-ads-local-config.sh` | writes the git-ignored `Telegram-Mac/NovagramAds.local.xcconfig` (`NOVAGRAM_ADS_ENVIRONMENT`, default development) |
+| `Telegram.xcodeproj/project.pbxproj` | `XCLocalSwiftPackageReference "packages/NovagramAdsBinary"` (`FE50AD500000000000000001`) in project `packageReferences`; products `…0002-0004` linked to the Telegram target only (build files `…0012-0014`); 12 Novagram sources (`…0020-0037`); Telegram target Debug + Release `MACOSX_DEPLOYMENT_TARGET = 14.0` (the SDK needs 12.0; 14.0 is the minimum the old Novagram shipped, and `scripts/xcode27.sh apply/revert` leaves it alone) |
+| `Telegram-Mac/Info.plist` | `NovagramAdsEnvironment = $(NOVAGRAM_ADS_ENVIRONMENT)` |
+| `Telegram-Mac/Novagram.xcconfig` | `NOVAGRAM_ADS_ENVIRONMENT = production`, `#include? "NovagramAds.local.xcconfig"`, `NOVAGRAM_ADS_ENVIRONMENT[config=Release] = production` |

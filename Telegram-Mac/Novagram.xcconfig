@@ -11,3 +11,12 @@ TYPE[config=Release] = -D'APP_STORE'
 // App Store Release: the APP_STORE code never references Sparkle, so drop its (weak) load command.
 // The "Novagram: strip Sparkle (App Store)" build phase then removes the framework and the SU* keys.
 OTHER_LDFLAGS[config=Release] = $(inherited) -Wl,-dead_strip_dylibs
+
+// Novagram ads (NovagramAds SDK). The build only names an environment: development | production.
+// Info.plist carries it to the app as NovagramAdsEnvironment = $(NOVAGRAM_ADS_ENVIRONMENT).
+// The git-ignored NovagramAds.local.xcconfig next to this file can override it for a local build
+// (create it with scripts/novagram-ads-local-config.sh).
+NOVAGRAM_ADS_ENVIRONMENT = production
+#include? "NovagramAds.local.xcconfig"
+// Release (Archive / App Store) is always production, whatever the local file says.
+NOVAGRAM_ADS_ENVIRONMENT[config=Release] = production

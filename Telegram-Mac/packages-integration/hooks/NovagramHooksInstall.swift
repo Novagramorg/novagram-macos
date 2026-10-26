@@ -14,4 +14,5 @@ func installNovagramHooks() {
     }
     NovagramHooks.install(hooks)
     installNovagramSettingsHooks()
+    installNovagramAdsHooks()
 }

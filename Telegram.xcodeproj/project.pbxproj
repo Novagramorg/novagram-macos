@@ -7,6 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FE50AD500000000000000012 /* NovagramAds in Frameworks */ = {isa = PBXBuildFile; productRef = FE50AD500000000000000002 /* NovagramAds */; };
+		FE50AD500000000000000013 /* NovagramInsights in Frameworks */ = {isa = PBXBuildFile; productRef = FE50AD500000000000000003 /* NovagramInsights */; };
+		FE50AD500000000000000014 /* NovagramInsightsUI in Frameworks */ = {isa = PBXBuildFile; productRef = FE50AD500000000000000004 /* NovagramInsightsUI */; };
+		FE50AD500000000000000021 /* NovagramAdsCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000020 /* NovagramAdsCenter.swift */; };
+		FE50AD500000000000000023 /* NovagramAdActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000022 /* NovagramAdActions.swift */; };
+		FE50AD500000000000000025 /* NovagramAdMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000024 /* NovagramAdMenu.swift */; };
+		FE50AD500000000000000027 /* NovagramAdMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000026 /* NovagramAdMessage.swift */; };
+		FE50AD500000000000000029 /* NovagramBannerAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000028 /* NovagramBannerAds.swift */; };
+		FE50AD50000000000000002B /* NovagramChatAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD50000000000000002A /* NovagramChatAds.swift */; };
+		FE50AD50000000000000002D /* NovagramSearchAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD50000000000000002C /* NovagramSearchAds.swift */; };
+		FE50AD50000000000000002F /* NovagramVideoAds.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD50000000000000002E /* NovagramVideoAds.swift */; };
+		FE50AD500000000000000031 /* NovagramInsightsEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000030 /* NovagramInsightsEntry.swift */; };
+		FE50AD500000000000000033 /* NovagramAdsGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000032 /* NovagramAdsGate.swift */; };
+		FE50AD500000000000000035 /* NovagramAdsAdminAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000034 /* NovagramAdsAdminAuth.swift */; };
+		FE50AD500000000000000037 /* NovagramAdsHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000036 /* NovagramAdsHooksInstall.swift */; };
 		FE304E0B000000000000002D /* FenixuzBlockingPurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002C /* FenixuzBlockingPurchaseManager.swift */; };
 		FE304E0B000000000000002B /* NovagramSettingsLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002A /* NovagramSettingsLinks.swift */; };
 		FE304E0B0000000000000029 /* NovagramSettingsHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */; };
@@ -1055,6 +1070,18 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FE50AD500000000000000020 /* NovagramAdsCenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdsCenter.swift; sourceTree = "<group>"; };
+		FE50AD500000000000000022 /* NovagramAdActions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdActions.swift; sourceTree = "<group>"; };
+		FE50AD500000000000000024 /* NovagramAdMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdMenu.swift; sourceTree = "<group>"; };
+		FE50AD500000000000000026 /* NovagramAdMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdMessage.swift; sourceTree = "<group>"; };
+		FE50AD500000000000000028 /* NovagramBannerAds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramBannerAds.swift; sourceTree = "<group>"; };
+		FE50AD50000000000000002A /* NovagramChatAds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramChatAds.swift; sourceTree = "<group>"; };
+		FE50AD50000000000000002C /* NovagramSearchAds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSearchAds.swift; sourceTree = "<group>"; };
+		FE50AD50000000000000002E /* NovagramVideoAds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramVideoAds.swift; sourceTree = "<group>"; };
+		FE50AD500000000000000030 /* NovagramInsightsEntry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramInsightsEntry.swift; sourceTree = "<group>"; };
+		FE50AD500000000000000032 /* NovagramAdsGate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdsGate.swift; sourceTree = "<group>"; };
+		FE50AD500000000000000034 /* NovagramAdsAdminAuth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdsAdminAuth.swift; sourceTree = "<group>"; };
+		FE50AD500000000000000036 /* NovagramAdsHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdsHooksInstall.swift; sourceTree = "<group>"; };
 		FE304E0B000000000000002C /* FenixuzBlockingPurchaseManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzBlockingPurchaseManager.swift; sourceTree = "<group>"; };
 		FE304E0B000000000000002A /* NovagramSettingsLinks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsLinks.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsHooksInstall.swift; sourceTree = "<group>"; };
@@ -2132,6 +2159,9 @@
 				7BE4259A2C3D4D73BBBC2302 /* SelectCountryUI in Frameworks */,
 				53C2655B791449A18A453BBD /* GroupsInCommonUI in Frameworks */,
 				FE10DEC04E14C190FEFE0003 /* FenixuzCore in Frameworks */,
+				FE50AD500000000000000012 /* NovagramAds in Frameworks */,
+				FE50AD500000000000000013 /* NovagramInsights in Frameworks */,
+				FE50AD500000000000000014 /* NovagramInsightsUI in Frameworks */,
 				5105D43394A54BCB8773E53C /* QrStudioUI in Frameworks */,
 				B2011E3EB7D84C48A0B9509D /* CrashRecoveryUI in Frameworks */,
 				E9E2F04E0D564351A4C88842 /* CrashReports in Frameworks */,
@@ -2361,6 +2391,17 @@
 			isa = PBXGroup;
 			children = (
 				FE304E0B000000000000002C /* FenixuzBlockingPurchaseManager.swift */,
+				FE50AD500000000000000020 /* NovagramAdsCenter.swift */,
+				FE50AD500000000000000022 /* NovagramAdActions.swift */,
+				FE50AD500000000000000024 /* NovagramAdMenu.swift */,
+				FE50AD500000000000000026 /* NovagramAdMessage.swift */,
+				FE50AD500000000000000028 /* NovagramBannerAds.swift */,
+				FE50AD50000000000000002A /* NovagramChatAds.swift */,
+				FE50AD50000000000000002C /* NovagramSearchAds.swift */,
+				FE50AD50000000000000002E /* NovagramVideoAds.swift */,
+				FE50AD500000000000000030 /* NovagramInsightsEntry.swift */,
+				FE50AD500000000000000032 /* NovagramAdsGate.swift */,
+				FE50AD500000000000000034 /* NovagramAdsAdminAuth.swift */,
 				FE304E0B000000000000002A /* NovagramSettingsLinks.swift */,
 				FE304E0B0000000000000002 /* FenixuzSettingsController.swift */,
 				FE304E0B0000000000000004 /* FenixuzAboutController.swift */,
@@ -3484,6 +3525,7 @@
 			children = (
 				FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */,
 				FE304E0B0000000000000026 /* NovagramHooksInstall.swift */,
+				FE50AD500000000000000036 /* NovagramAdsHooksInstall.swift */,
 				CCBF4A99D5A10A0B1C382FF5 /* AboutFeatureUIHooksInstall.swift */,
 				AC8D28ED05E0406EA99ADE81 /* AddTonBalanceHooksInstall.swift */,
 				080162D2AEFFAA5ABBB528F1 /* AffiliateHooksInstall.swift */,
@@ -3793,6 +3835,9 @@
 				857E4375FE0F41E9A737B925 /* SelectCountryUI */,
 				8C849FFE3CF443CEAAFD9A65 /* GroupsInCommonUI */,
 				FE10DEC04E14C190FEFE0002 /* FenixuzCore */,
+				FE50AD500000000000000002 /* NovagramAds */,
+				FE50AD500000000000000003 /* NovagramInsights */,
+				FE50AD500000000000000004 /* NovagramInsightsUI */,
 				019B2BAFB79C48F1A4A5666E /* QrStudioUI */,
 				7110771E0000000000000002 /* TLottie */,
 				A49FDE6EE2CE45CC94854F90 /* CrashRecoveryUI */,
@@ -4029,6 +4074,7 @@
 			packageReferences = (
 				8412CCD8FD1ED53B957DC5A9 /* XCLocalSwiftPackageReference "packages/AvatarUI" */,
 				F0255D56305311A9001994C2 /* XCLocalSwiftPackageReference "packages/TelegramUtils" */,
+				FE50AD500000000000000001 /* XCLocalSwiftPackageReference "packages/NovagramAdsBinary" */,
 			);
 			productRefGroup = D098C7161D7E175A007784E4 /* Products */;
 			projectDirPath = "";
@@ -4720,6 +4766,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				FE304E0B000000000000002D /* FenixuzBlockingPurchaseManager.swift in Sources */,
+				FE50AD500000000000000021 /* NovagramAdsCenter.swift in Sources */,
+				FE50AD500000000000000023 /* NovagramAdActions.swift in Sources */,
+				FE50AD500000000000000025 /* NovagramAdMenu.swift in Sources */,
+				FE50AD500000000000000027 /* NovagramAdMessage.swift in Sources */,
+				FE50AD500000000000000029 /* NovagramBannerAds.swift in Sources */,
+				FE50AD50000000000000002B /* NovagramChatAds.swift in Sources */,
+				FE50AD50000000000000002D /* NovagramSearchAds.swift in Sources */,
+				FE50AD50000000000000002F /* NovagramVideoAds.swift in Sources */,
+				FE50AD500000000000000031 /* NovagramInsightsEntry.swift in Sources */,
+				FE50AD500000000000000033 /* NovagramAdsGate.swift in Sources */,
+				FE50AD500000000000000035 /* NovagramAdsAdminAuth.swift in Sources */,
+				FE50AD500000000000000037 /* NovagramAdsHooksInstall.swift in Sources */,
 				FE304E0B000000000000002B /* NovagramSettingsLinks.swift in Sources */,
 				FE304E0B0000000000000029 /* NovagramSettingsHooksInstall.swift in Sources */,
 				FE304E0B0000000000000003 /* FenixuzSettingsController.swift in Sources */,
@@ -5028,7 +5086,7 @@
 					"$(PROJECT_DIR)/core-xprojects/dav1d/build/dav1d/lib",
 					"$(PROJECT_DIR)/core-xprojects/tde2e/build/tde2e/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 13.1.0;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CODE_SIGN_FLAGS = "";
@@ -5258,7 +5316,7 @@
 					"$(PROJECT_DIR)/core-xprojects/dav1d/build/dav1d/lib",
 					"$(PROJECT_DIR)/core-xprojects/tde2e/build/tde2e/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 13.1.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CODE_SIGN_FLAGS = "";
@@ -5318,6 +5376,10 @@
 		F0255D56305311A9001994C2 /* XCLocalSwiftPackageReference "packages/TelegramUtils" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = packages/TelegramUtils;
+		};
+		FE50AD500000000000000001 /* XCLocalSwiftPackageReference "packages/NovagramAdsBinary" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = packages/NovagramAdsBinary;
 		};
 /* End XCLocalSwiftPackageReference section */
 
@@ -6207,6 +6269,21 @@
 		8108E8A15C9EE293636E539F /* PasscodeCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PasscodeCore;
+		};
+		FE50AD500000000000000002 /* NovagramAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FE50AD500000000000000001 /* XCLocalSwiftPackageReference "packages/NovagramAdsBinary" */;
+			productName = NovagramAds;
+		};
+		FE50AD500000000000000003 /* NovagramInsights */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FE50AD500000000000000001 /* XCLocalSwiftPackageReference "packages/NovagramAdsBinary" */;
+			productName = NovagramInsights;
+		};
+		FE50AD500000000000000004 /* NovagramInsightsUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FE50AD500000000000000001 /* XCLocalSwiftPackageReference "packages/NovagramAdsBinary" */;
+			productName = NovagramInsightsUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
