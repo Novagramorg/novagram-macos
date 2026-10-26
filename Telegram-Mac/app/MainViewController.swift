@@ -213,7 +213,7 @@ final class UpdateTabController: GenericViewController<UpdateTabView> {
         genericView.set(background: .clear, for: .Normal)
         genericView.isHidden = true
         
-        #if APP_STORE
+        #if APP_STORE && FENIXUZ_UPDATE_PILL // Fenixuz
         
         let signal = Signal<Void, NoError>.single(Void()) |> then(.single(Void()) |> delay(24 * 60 * 60, queue: .mainQueue()) |> restart)
 
@@ -227,7 +227,7 @@ final class UpdateTabController: GenericViewController<UpdateTabView> {
             execute(inapp: inAppLink.external(link: itunesAppLink, false))
             control.isHidden = true
         }, for: .Click)
-        #else
+        #elseif FENIXUZ_UPDATE_PILL // Fenixuz
         disposable.set((appUpdateStateSignal |> deliverOnMainQueue).start(next: { [weak self] state in
             switch state.loadingState {
             case let .readyToInstall(item):

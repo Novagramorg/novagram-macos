@@ -64,3 +64,8 @@ public extension FenixuzL10n {
     var hiddenChats_hide: String { pick(en: "Hide Chat", uz: "Chatni yashirish", ru: "Скрыть чат") }
     var hiddenChats_unhide: String { pick(en: "Unhide Chat", uz: "Yashirin chatlardan chiqarish", ru: "Показать чат") }
 }
+
+public extension FenixuzL10n {
+    var stt_buttonTip: String { pick(en: "Speech to Text", uz: "Ovozni matnga", ru: "Голос в текст") }
+    var stt_recordingTip: String { pick(en: "Listening… click to stop", uz: "Tinglanmoqda… to'xtatish uchun bosing", ru: "Слушаю… нажмите, чтобы остановить") }
+}

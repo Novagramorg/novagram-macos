@@ -6,6 +6,7 @@ import Postbox
 import TGUIKit
 import ApiCredentials
 import AppKit
+import FenixuzCore // Fenixuz
 
 
 
@@ -181,7 +182,7 @@ final class UNUserNotificationsOld : UNUserNotifications, NSUserNotificationCent
     @objc func userNotificationCenter(_ center: NSUserNotificationCenter, didDismissAlert notification: NSUserNotification) {
         if let userInfo = notification.userInfo, let timestamp = userInfo["timestamp"] as? Int32, let _ = userInfo["accountId"] as? Int64, let messageId = getNotificationMessageId(userInfo: userInfo, for: "reply") {
             
-            bindings.applyMaxReadIndexInteractively(MessageIndex(id: messageId, timestamp: timestamp))
+            if !FenixuzGhostMode.isActive { bindings.applyMaxReadIndexInteractively(MessageIndex(id: messageId, timestamp: timestamp)) } // Fenixuz
         }
     }
     

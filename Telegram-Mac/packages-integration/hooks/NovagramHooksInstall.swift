@@ -13,4 +13,5 @@ func installNovagramHooks() {
         context.bindings.rootNavigation().push(controller)
     }
     NovagramHooks.install(hooks)
+    installNovagramSettingsHooks()
 }

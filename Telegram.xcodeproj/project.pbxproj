@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FE304E0B000000000000002B /* NovagramSettingsLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002A /* NovagramSettingsLinks.swift */; };
+		FE304E0B0000000000000029 /* NovagramSettingsHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */; };
 		FE304E0B0000000000000003 /* FenixuzSettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000002 /* FenixuzSettingsController.swift */; };
 		FE304E0B0000000000000005 /* FenixuzAboutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000004 /* FenixuzAboutController.swift */; };
 		FE304E0B0000000000000007 /* FenixuzTipsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000006 /* FenixuzTipsController.swift */; };
@@ -1052,6 +1054,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FE304E0B000000000000002A /* NovagramSettingsLinks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsLinks.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsHooksInstall.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000002 /* FenixuzSettingsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzSettingsController.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000004 /* FenixuzAboutController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzAboutController.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000006 /* FenixuzTipsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzTipsController.swift; sourceTree = "<group>"; };
@@ -2354,6 +2358,7 @@
 		FE304E0B0000000000000001 /* novagram */ = {
 			isa = PBXGroup;
 			children = (
+				FE304E0B000000000000002A /* NovagramSettingsLinks.swift */,
 				FE304E0B0000000000000002 /* FenixuzSettingsController.swift */,
 				FE304E0B0000000000000004 /* FenixuzAboutController.swift */,
 				FE304E0B0000000000000006 /* FenixuzTipsController.swift */,
@@ -3474,6 +3479,7 @@
 		6372082D9E10A84DB7B7EC94 /* hooks */ = {
 			isa = PBXGroup;
 			children = (
+				FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */,
 				FE304E0B0000000000000026 /* NovagramHooksInstall.swift */,
 				CCBF4A99D5A10A0B1C382FF5 /* AboutFeatureUIHooksInstall.swift */,
 				AC8D28ED05E0406EA99ADE81 /* AddTonBalanceHooksInstall.swift */,
@@ -4686,6 +4692,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE304E0B000000000000002B /* NovagramSettingsLinks.swift in Sources */,
+				FE304E0B0000000000000029 /* NovagramSettingsHooksInstall.swift in Sources */,
 				FE304E0B0000000000000003 /* FenixuzSettingsController.swift in Sources */,
 				FE304E0B0000000000000005 /* FenixuzAboutController.swift in Sources */,
 				FE304E0B0000000000000007 /* FenixuzTipsController.swift in Sources */,

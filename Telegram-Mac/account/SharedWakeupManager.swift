@@ -2,6 +2,7 @@ import Cocoa
 import SwiftSignalKit
 import Postbox
 import TelegramCore
+import FenixuzCore // Fenixuz
 
 
 
@@ -64,6 +65,7 @@ class SharedWakeupManager {
         
          NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(receiveWakeNote(_:)), name: NSWorkspace.screensDidWakeNotification, object: nil)
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(receiveSleepNote(_:)), name: NSWorkspace.screensDidSleepNotification, object: nil)
+        NotificationCenter.default.addObserver(forName: FenixuzGhostMode.didChangeNotification, object: nil, queue: .main) { [weak self] _ in self?.updateAccounts() } // Fenixuz
 
         
         _ = (inForeground |> deliverOnMainQueue).start(next: { value in
@@ -176,7 +178,7 @@ class SharedWakeupManager {
             
             let based = appDelegate?.supportAccountContextValue?.find(account.id)
             
-            account.shouldKeepOnlinePresence.set(.single((primary || based != nil) && self.inForeground))
+            account.shouldKeepOnlinePresence.set(.single((primary || based != nil) && self.inForeground && !FenixuzGhostMode.isActive)) // Fenixuz
             account.shouldKeepBackgroundDownloadConnections.set(.single(tasks.backgroundDownloads))
             
             if !stateManagmentReseted.contains(account.id) {

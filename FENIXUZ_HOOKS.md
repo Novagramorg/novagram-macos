@@ -105,3 +105,89 @@ Packages that now depend on `FenixuzCore` (`.package(name: "FenixuzCore", path: 
 | X-C2-2 crash recovery | `CrashRecoveryUI/.../CrashRecovery.swift` | App Store link → Novagram (`id6768202244`), website → `https://novagram.org` |
 
 Decision: the old Mac build's red accent palette (`#b40000` / `#ff3b30`, from the Fenixuz brand) is NOT ported. The Novagram icon and the iOS app are blue, and Telegram's own blue palette stays.
+
+### Step 7: chat and chat list features
+
+New dependency on FenixuzCore (both Package.swift lines `// Fenixuz`): GalleryUI, AudioPlayerCore (ChatUI, ChatListUI, StoriesUI, ChatHistoryModel already had it).
+
+New Novagram files inside Telegram packages (ours, whole file):
+
+| File | What |
+| ---- | ---- |
+| `ChatUI/.../FenixuzAskBeforeSend.swift` | `fenixuzConfirmBeforeSend` alert for stickers / voice |
+| `ChatUI/.../FenixuzMessageMenuItems.swift` | forward without sender name, edit before forward, edit history item |
+| `ChatUI/.../FenixuzRoundVideo.swift` | attach menu item + sender for round video from a file |
+| `ChatListUI/.../FenixuzGhostButton.swift` | Ghost toggle in the chat list header (assets `FenixGhostActive/Inactive.imageset` in `Telegram-Mac/Assets.xcassets`) |
+| `ChatListUI/.../FenixuzChatListMenu.swift` | chat lock set/remove (when a master PIN exists) and hide/unhide items |
+| `FenixuzCore/FenixuzOutgoing.swift`, `FenixuzChatListFilter.swift`, `FenixuzChatLockGate.swift` | helpers the hooks below call |
+
+| Feature | File | Change |
+| ------- | ---- | ------ |
+| F14 deleted messages | `ChatUI/.../ChatController.swift` | `deletedMessagesDisposable` (+ dispose in deinit); `viewDidLoad` subscribes to `account.stateManager.deletedMessages` → `FenixuzDeletedMessages.recordDeleted`, re-sets the location when a tombstone was created; history pass `let msgEntries = FenixuzDeletedMessages.shared.process(view.entries, ...)` |
+| F15 edit history | `ChatController.swift` history pass | `FenixuzEditedHistoryManager.shared.processMessages(...)` |
+| F15 edit history menu | `ChatUI/.../ChatMessageMenuItems.swift` edited-at block | `fenixuzEditedHistoryMenuItem` → `NovagramHooks.presentEditedHistory` |
+| X-A-1 / X-A-2 | `ChatMessageMenuItems.swift` after `secondBlock.append(forwardItem)` | `fenixuzForwardMenuItems` |
+| F13 Ghost (chat) | `ChatController.swift` | passive read `applyMaxReadIndex` gated; send path applies the read index while Ghost is on (replying implies reading); `canInteractiveRead` returns false; `clearMentions`, `clearReactions`, view counts, mention seen, reaction seen (reaction animation still plays), live location seen, recording activity gated |
+| F13 Ghost (typing) | `ChatUI/.../ChatInputView.swift` | `.typingText` only when Ghost is off or `isPresent == false` |
+| F13 Ghost (media) | `GalleryUI/.../GalleryViewer.swift`, `ChatUI/.../SingleTimeMediaViewer.swift`, `AudioPlayerCore/.../AudioPlayerController.swift` | `markMessageContentAsConsumedInteractively` skipped while Ghost is on |
+| F13 Ghost (stories) | `StoriesUI/.../StoryChatContent.swift` | the three `markAsSeen(id:)` return early |
+| F13 Ghost (chat list) | `ChatListUI/.../ChatListRowItem.swift` `markAsRead` | `clearPeerUnseenPersonalMessagesInteractively` gated; `PeersListController.swift` header: `ghost` button next to proxy (update, title width, layout) |
+| F21 ask before send | `ChatController.swift` | `sendAppFile` and `sendMedias`: the original `invoke` closure is renamed (`fenixuzSendAppFile` / `fenixuzSendMedias`) and `invoke` now asks first; `sendMedia` (recorded voice) is renamed `fenixuzSendMedia` and the new `chatInteraction.sendMedia` asks first (cancel also cancels the voice send animation). The old fork only gated `sendMedias`, so recorded voice was never confirmed |
+| F17 outgoing transforms | `ChatHistoryModel/.../SenderController.swift` | text `enqueue` gains `skipAutoTranslate: Bool = false`; auto text + auto translate after the media preview block; style entity appended to the text entities; heart effect (`FenixuzOutgoing.effectId`) in the text path and in `enqueue(media:[Media]...)`; `recordSent(media)` remembers the last sticker; `sendAutoSticker` after the text messages are enqueued |
+| F19 round video | `ChatUI/.../ChatInputAttachView.swift` | item after the File item (hidden when the channel bans round videos) |
+| F11 / F12 hidden chats, foreign block | `ChatListUI/.../ChatListController.swift` | one `prepare.removeAll(where: FenixuzChatListFilter.isFiltered...)` after the pending-removals filter (covers additional items too); Cmd+Shift+H installed once (`FenixuzHiddenChatsShortcut.install()` in `viewDidLoad`; the old fork added a monitor per chat list) |
+| F28 hide folders | `ChatListController.swift` | `fenixLastFolderTabs`, both tab subscriptions use `FenixuzChatListFilter.hideFolders ? [] : filters.list`; a block observer of `FenixSettingsChanged` (generic class, no `@objc`) re-applies tabs and stories; removed in `deinit` |
+| F29 hide stories | `ChatListController.swift` (archive/stories group row), `PeersListController.swift` `hasStories` | `FenixuzChatListFilter.showStories` |
+| F20 chat lock | `PeersListController.swift` `open(with:...)` first line | `FenixuzChatPincode.requiresUnlock(...)` reopens with all arguments (incl. `fullWidthTopics`) after the PIN; unlocked chats stay open for the session |
+| F20 / F11 row menu | `ChatListRowItem.swift` before `let blocks` | `thirdGroup.append(contentsOf: fenixuzChatListMenuItems(...))` |
+
+Not ported: F33 "Sneak peek" row item. 13.1 has a native Preview item (`chatListContextPreview`), and the old item only opened the chat normally (it did send read receipts).
+
+### Login (AuthUI)
+
+AuthUI depends on FenixuzCore (`// Fenixuz` on both Package.swift lines).
+
+| Feature | File | Change |
+| ------- | ---- | ------ |
+| F22 NovagramProxy on login | `AuthUI/.../AuthController.swift` `AuthView` | `novagramProxyButton` (text link, top centre `y: 18`), styled in `updateLocalizationAndTheme`, excluded from the step-view stretch loop in `layout()` (without it the button got a full-height hit area that swallowed footer clicks); `AuthController` handler + `toggleNovagramProxy()` (FenixuzAutoProxyManager on/off + alert) |
+| F37 demo login | `AuthController.swift` | `sendCode` first line `FenixuzDemoCodeFetcher.prewarmIfDemo`; after `code_entry_c.update(...)` `autoFillIfDemo(... applyExternalLoginCode)`; `.passwordEntry` first line `dismissIfActive()` |
+| F23 login logo | `AuthUI/.../Auth_PhoneNumber.swift` (`logo`), `Auth_Token.swift` (`logoView`, QR centre) | `NSImageView` with `NSApp.applicationIconImage` instead of the Telegram airplane Lottie (4.1 copycat risk) |
+
+Not ported: the old emerald Next button (`FenixuzBrandColors.primary`), same reason as the palette (blue brand).
+
+### Novagram screens and managers (app target)
+
+| File | What |
+| --- | --- |
+| `Telegram-Mac/novagram/` | Novagram Settings and its sub-screens (About, Tips, Text style, Auto-text, Auto-translate, Translation language, Bots, All accounts, Analytics, Edited history) and the app-side managers (UnreadReminder, SuggestedFolders, Analytics, StatisticsClient/Config). The screens use the concrete `AccountContext` and the bridge `TableViewController`. Auto-text is now an `InputDataController` (13.x has no `GeneralInputRowItem`); keys `auto_text_enabled` and `auto_text_content` are unchanged. The hidden "Remove all ads" section is left out until `FenixuzAdsGate` is ported |
+| `Telegram-Mac/novagram/novagram_bots.json`, `russia_proxies.txt` | App resources read through `Bundle.main` (Bots catalogue, `FenixuzAutoProxy` pool) |
+| `Telegram-Mac/novagram/NovagramSettingsLinks.swift` | `tg://novagrampro`, `tg://novagram/<f>`, `tg://fenixuz/<f>`, `tg://settings/novagrampro[/<f>]` (f = about, bots, tips, text_style, auto_text, auto_translate, translate_language, translation_language, language) |
+| `Telegram-Mac/packages-integration/hooks/NovagramHooksInstall.swift` | `installNovagramHooks()`: `NovagramHooks.presentEditedHistory` pushes `FenixuzEditedHistoryController`; calls `installNovagramSettingsHooks()` |
+| `Telegram-Mac/packages-integration/hooks/NovagramSettingsHooksInstall.swift` | Rows: Accounts 910, gold Novagram Settings 911, Novagram Bots 912, Analytics 913 (914 reserved for Ads Analytics). Hides paid rows and inline accounts |
+| `packages/SettingsUI/Sources/SettingsUI/NovagramSettingsHooks.swift` | `NovagramSettingsHooks`: extra Settings rows (`rows(context, .accounts/.top)`, ids 900–998), `selectedRowId`, `rowsUpdated`, `hidePaidRows`, `showInlineAccounts`, `versionRowClick` (reserved for the ads gate). Neutral defaults |
+
+### Settings, accounts and app shell (Telegram files, every line `// Fenixuz`)
+
+| File | Change |
+| --- | --- |
+| `Telegram-Mac/app/main.swift` | `installNovagramHooks()` after `installFenixuzHooks()` |
+| `packages/SettingsUI/.../AccountViewController.swift` | `case novagram(index:viewType:row:)` + stableId/index/item lines; Novagram rows before Add Account and before My Profile; inline account loop gated by `showInlineAccounts`; Premium/Stars/TON/Business/Gift block gated by `!hidePaidRows` (F01, Apple 3.1.1); version row asks `versionRowClick` first; `appUpdateState` combined with `rowsUpdated`; selection branch from `selectedRowId` |
+| `packages/SettingsUI/.../EditAccountInfoController.swift`, `LogoutViewController.swift` | literal `3` account limit → `maximumNumberOfAccounts` (2 lines each) |
+| `packages/TelegramUtils/.../AccountUtils.swift` | `maximumNumberOfAccounts = 999` |
+| `packages/InAppSettings/.../AccountsLimit.swift` | `normalAccountsLimit = 999` |
+| `Telegram-Mac/packages-integration/hooks/SettingsHooksInstall.swift` | `appUpdateState = .single(nil)` (no Sparkle "Update" row) |
+| `Telegram-Mac/app/MainViewController.swift` | `UpdateTabController`: both update-pill branches behind the never-set `FENIXUZ_UPDATE_PILL` (2 `#if` lines) |
+| `Telegram-Mac/app/AppDelegate.swift` | `import FenixuzCore`; `applyMaxReadIndexInteractively` skipped in Ghost mode; `FenixuzAnalyticsManager.shared.start(sharedContext:)` and `FenixuzAutoProxyManager.shared.start(accountManager:)` after `sharedApplicationContextValue`; `Dock.setCustomAppIcon(path: nil)` before `launchInterface()` |
+| `Telegram-Mac/app/ApplicationContext.swift` | `import FenixuzCore`; unread reminder start (after `AppMenu.closeAll()`), clear (in `clearReadNotifiesDisposable`), stop (deinit); hide folders also hides the folder rail: `fenixEffectiveSidebar(_:)`, `fenixEffectiveSidebarShown`, used in `updateLeftSidebar` (bar position, current/previous), split-view insets and `applyWindowChrome`; `FenixuzChatListFilter.settingsChanged` observer → `fenixHideFoldersRailChanged` |
+| `Telegram-Mac/account/SharedWakeupManager.swift` | `import FenixuzCore`; no online presence in Ghost mode; `FenixuzGhostMode.didChangeNotification` observer → `updateAccounts()` |
+| `Telegram-Mac/account/AccountContext.swift` | `requestApplicationIcons` commented out (no server app icons) |
+| `Telegram-Mac/utils/UNUserNotifications.swift` | `import FenixuzCore`; notification dismiss does not mark read in Ghost mode |
+| `Telegram-Mac/utils/InAppLinks.swift` | `case novagramSettings(link:context:feature:)`, its `link` accessor, `execute` case, and the pre-check in `inApp(for:)` before `parseInAppLink` |
+| `Telegram.xcodeproj/project.pbxproj` | group `novagram` (`FE304E0B0000000000000001`) under `Telegram-Mac`; all app files above as `FE304E0B…0002`–`…002B` (Sources / Resources of target `Telegram`) |
+
+### F18 speech-to-text button
+
+| File | Change |
+| --- | --- |
+| `ChatUI/.../FenixuzSpeechToTextButton.swift` (ours) | button + `FenixuzSpeechToTextManager` driver. Sits inside the message field, left of the emoji/actions buttons (13.1 rebuilt the input around the glass row, so the old slot next to the send button is gone). Dictated text replaces the input; any manual change of the input stops dictation. Setting `pro_messager/stt_enabled` (default on, as in the old Mac build) |
+| `ChatUI/.../ChatInputView.swift` `ChatInputContainerView` | `fenixSpeechToText` lazy property; `textViewSize` reserves `FenixuzSpeechToTextButton.reservedWidth`; `updateLayout` places the button after the actions view (hidden for rich drafts and non-text input states) |

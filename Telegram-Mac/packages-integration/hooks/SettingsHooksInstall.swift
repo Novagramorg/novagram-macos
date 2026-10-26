@@ -374,7 +374,7 @@ func installSettingsUIHooks() {
         #if APP_STORE
             appUpdateState = .single(nil)
         #else
-        appUpdateState = appUpdateStateSignal |> map(Optional.init)
+        appUpdateState = .single(nil) // Fenixuz
         #endif
         return appUpdateState
     }, pushAppUpdate: { navigation in

@@ -105,6 +105,7 @@ public final class ChatInputContainerView: FlippableView {
     /// Created lazily (only while shown).
     fileprivate var expandRichButton: ImageButton?
     public var openRichEditor: (() -> Void)?
+    fileprivate lazy var fenixSpeechToText = FenixuzSpeechToTextButton(chatInteraction: chatInteraction) // Fenixuz
 
     public let glassWrapper: GlassContainerView
 
@@ -293,7 +294,7 @@ public final class ChatInputContainerView: FlippableView {
         let sendSlot = self.sendSlot(gap: gap)
         let containerWidth = width - edge - leftInset - gap - sendSlot.outside - edge
         let textLeftInset: CGFloat = 10 + sendAsInset
-        let actionsWidth = actionsView.visibleWidth + sendSlot.inField
+        let actionsWidth = actionsView.visibleWidth + sendSlot.inField + FenixuzSpeechToTextButton.reservedWidth // Fenixuz
         let textWidth = max(0, containerWidth - textLeftInset - actionsWidth)
         let height = self.textView.height(for: textWidth)
         return (NSMakeSize(textWidth, min(max(height, textView.min_height), textView.max_height)), height)
@@ -536,6 +537,7 @@ public final class ChatInputContainerView: FlippableView {
         transition.updateFrame(view: actionsView, frame: actionsFrame)
         actionsView.updateLayout(size: actionsFrame.size, transition: transition)
         actionsView.isHidden = richDraftPreview != nil
+        fenixSpeechToText.layout(in: textFieldContainer, rightEdge: fieldContentWidth - actionsView.visibleWidth, bottomY: textY + textSize.height, hidden: richDraftPreview != nil || (chatInteraction.presentation.state != .normal && chatInteraction.presentation.state != .editing), transition: transition) // Fenixuz
 
         if springsFieldMerge, transition.isAnimated {
             sendButton.frame = sendFrame.offsetBy(dx: -ChatInputContainerView.sendAppearOffset, dy: 0)

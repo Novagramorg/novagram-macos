@@ -8,12 +8,13 @@
 #   ./fenix-build.sh run        build, then launch Novagram.app on success
 #   ./fenix-build.sh appstore   build with APP_STORE also set inside the packages
 #                               (Xcode passes it to the app target only; packages get it from the command line)
+#   FENIX_DD=/tmp/other-dd FENIX_LOG=/tmp/other.log ./fenix-build.sh   separate DerivedData (parallel builds)
 
 set -o pipefail
 cd "$(dirname "$0")"
 
-LOG=/tmp/fenix13-build.log
-DD=/tmp/tgmac13-dd
+LOG="${FENIX_LOG:-/tmp/fenix13-build.log}"
+DD="${FENIX_DD:-/tmp/tgmac13-dd}"
 APP="$DD/Build/Products/Debug/Novagram.app"
 MODE="${1:-}"
 

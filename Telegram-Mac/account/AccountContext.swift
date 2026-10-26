@@ -966,7 +966,7 @@ final class AccountContext {
             self?.contentConfig = settings
         }))
 
-        actionsDisposable.add(requestApplicationIcons(engine: engine).start())
+        // actionsDisposable.add(requestApplicationIcons(engine: engine).start()) // Fenixuz
     }
     #endif
 

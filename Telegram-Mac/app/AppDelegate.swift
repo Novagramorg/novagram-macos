@@ -48,6 +48,7 @@ import StarsUI
 import PerfLab
 #endif
 import SettingsUI
+import FenixuzCore // Fenixuz
 
 //#if BETA || DEBUG
 //import Firebase
@@ -475,6 +476,7 @@ class AppDelegate: NSResponder, NSApplicationDelegate, NSUserNotificationCenterD
         }
         
         
+        Dock.setCustomAppIcon(path: nil) // Fenixuz
         launchInterface()
         
         
@@ -936,7 +938,7 @@ class AppDelegate: NSResponder, NSApplicationDelegate, NSUserNotificationCenterD
                         contextValue.context.bindings.rootNavigation().controller.updateController()
                     }
                 }, applyMaxReadIndexInteractively: { index in
-                    if let context = self.contextValue?.context {
+                    if let context = self.contextValue?.context, !FenixuzGhostMode.isActive { // Fenixuz
                         _ = context.engine.messages.applyMaxReadIndexInteractively(index: index).start()
                     }
 
@@ -947,6 +949,8 @@ class AppDelegate: NSResponder, NSApplicationDelegate, NSUserNotificationCenterD
                 let sharedApplicationContext = SharedApplicationContext(sharedContext: sharedContext, notificationManager: sharedNotificationManager, sharedWakeupManager: sharedWakeupManager)
                 
                 self.sharedApplicationContextValue = sharedApplicationContext
+                FenixuzAnalyticsManager.shared.start(sharedContext: sharedContext) // Fenixuz
+                FenixuzAutoProxyManager.shared.start(accountManager: accountManager) // Fenixuz
                 
                 self.supportAccountContextValue = .init(applicationContext: sharedApplicationContext)
                 

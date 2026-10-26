@@ -1,3 +1,3 @@
 import Foundation
 
-public let normalAccountsLimit: Int = 3
+public let normalAccountsLimit: Int = 999 // Fenixuz
