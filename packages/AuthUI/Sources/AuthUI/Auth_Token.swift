@@ -184,7 +184,7 @@ public final class Auth_TokenView : View {
     }
     
     private func updateLottie() {
-        self.logoView.image = NSApp.applicationIconImage // Fenixuz
+        self.logoView.image = FenixuzQrLogo.image(side: self.logoView.frame.width) // Fenixuz
         self.logoView.imageScaling = .scaleProportionallyUpOrDown // Fenixuz
         
     }

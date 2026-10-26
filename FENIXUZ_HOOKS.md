@@ -230,3 +230,16 @@ Not ported: the old emerald Next button (`FenixuzBrandColors.primary`), same rea
 | `AuthUI/.../AuthController.swift` | `State.botTokenAvailable/botTokenError`; `bot_token_c`; `updateState` sets the link handlers and shows `bot_token_c` first when requested (`else if` keeps the upstream QR/phone flow); `loginWithBotToken`; `index(of:)` treats it like the QR screen; theme refresh |
 | `AuthUI/.../AuthController.swift` `checkPasskeyAvailability` | `guard FenixuzLoginFeatures.passkeys` — 13.1 App Store builds auto-open the macOS passkey sheet on the first screen; passkeys for telegram.org cannot work for our app id (the old published app had no passkeys) |
 | `SettingsUI/.../PrivacyAndSecurityViewController.swift` | Passkeys row also requires `FenixuzLoginFeatures.passkeys`; SettingsUI depends on FenixuzCore (`// Fenixuz` Package.swift lines) |
+
+### Novagram logo in QR codes, NovagramProxy in Proxy Settings
+
+| File | Change |
+| --- | --- |
+| `packages/FenixuzCore/.../FenixuzQrLogo.swift` (ours) | app icon cut to a circle with a transparent ring (same as iOS `FenixuzQrLogo`) |
+| `AuthUI/.../Auth_Token.swift` | login QR centre `logoView` shows `FenixuzQrLogo` |
+| `InviteLinksUI/.../InviteLinkQrController.swift` | centre `logoView` is an `NSImageView` with `FenixuzQrLogo` (was the airplane Lottie); exported QR image uses `.custom(FenixuzQrLogo)` instead of `login_qr_cap` |
+| `QrStudioUI/.../QrStudioExportStickers.swift` | `qrStudioDecodeExportPlane` returns the Novagram logo (one frame) instead of the airplane animation; covers the live QR Studio view and its export |
+| `ProxyUI/.../NovagramProxyEntries.swift` (ours), `ProxyListController.swift` | NovagramProxy switch + description at the top of Proxy Settings; the data signal also listens to `FenixuzAutoProxyManager.shared.uiState` |
+| `AuthUI/.../AuthController.swift` | the "NovagramProxy" text link at the top of the login screen is removed (owner: it belongs in Proxy Settings). The login proxy icon still appears after 10 s without a connection (upstream), so blocked users reach Proxy Settings |
+
+QrStudioUI, InviteLinksUI and ProxyUI depend on FenixuzCore (`// Fenixuz` Package.swift lines).

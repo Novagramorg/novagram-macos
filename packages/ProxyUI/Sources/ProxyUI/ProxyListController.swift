@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -62,7 +63,7 @@ extension ProxyServerSettings {
 
 
 
-private func proxyListSettingsEntries(_ state: ProxyListState, status: ConnectionStatus, statuses: [ProxyServerSettings : ProxyServerStatus], arguments: ProxyListArguments, showUseCalls: Bool) -> [InputDataEntry] {
+private func proxyListSettingsEntries(_ state: ProxyListState, status: ConnectionStatus, statuses: [ProxyServerSettings : ProxyServerStatus], arguments: ProxyListArguments, showUseCalls: Bool, novagramProxy: Bool, accountManager: AccountManager<TelegramAccountManagerTypes>) -> [InputDataEntry] { // Novagram
     var entries: [InputDataEntry] = []
     
     var sectionId: Int32 = 0
@@ -70,6 +71,7 @@ private func proxyListSettingsEntries(_ state: ProxyListState, status: Connectio
     
     entries.append(.sectionId(sectionId, type: .normal))
     sectionId += 1
+    entries.append(contentsOf: novagramProxyEntries(sectionId: &sectionId, index: &index, enabled: novagramProxy, accountManager: accountManager)) // Novagram
     
     struct UpdateEnableRow : Equatable {
         let enabled: Bool
@@ -244,7 +246,7 @@ public func proxyListController(accountManager: AccountManager<TelegramAccountMa
         updateDisposable.set(updateProxySettingsInteractively(accountManager: accountManager, {$0.withUpdatedUseForCalls(enable)}).start())
     })
     
-    let controller = InputDataController(dataSignal: combineLatest(queue: prepareQueue, statePromise.get(), network.connectionStatus, statuses.statuses(), appearanceSignal) |> map {proxyListSettingsEntries($0.0, status: $0.1, statuses: $0.2, arguments: arguments, showUseCalls: showUseCalls)} |> map { InputDataSignalValue(entries: $0) }, title: strings().proxySettingsTitle, validateData: {
+    let controller = InputDataController(dataSignal: combineLatest(queue: prepareQueue, statePromise.get(), network.connectionStatus, statuses.statuses(), appearanceSignal, FenixuzAutoProxyManager.shared.uiState.get()) |> map {proxyListSettingsEntries($0.0, status: $0.1, statuses: $0.2, arguments: arguments, showUseCalls: showUseCalls, novagramProxy: $0.4, accountManager: accountManager)} |> map { InputDataSignalValue(entries: $0) }, title: strings().proxySettingsTitle, validateData: { // Novagram
         data in
         
         if data[_p_id_add] != nil {

@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TGUIKit
 import SwiftSignalKit
@@ -55,7 +56,7 @@ private final class InviteLinkQrRowView: TableRowView {
     private let disposable = MetaDisposable()
     private let cardView = View(frame: NSMakeRect(0, 0, cardSize.width, cardSize.height))
     private let imageView = ImageView(frame: NSMakeRect(0, 0, codeSize.width, codeSize.height))
-    private let logoView = LottiePlayerView(frame: NSMakeRect(0, 0, 40, 40))
+    private let logoView = NSImageView(frame: NSMakeRect(0, 0, 40, 40)) // Fenixuz
     private let textView = TextView()
 
     required init(frame frameRect: NSRect) {
@@ -93,11 +94,7 @@ private final class InviteLinkQrRowView: TableRowView {
     }
 
     private func updateLogo() {
-        if window != nil, let data = LocalAnimatedSticker.login_airplane.data {
-            self.logoView.set(LottieAnimation(compressed: data, key: .init(key: .bundle("login_airplane"), size: self.logoView.frame.size, backingScale: Int(System.backingScale), fitzModifier: nil), playPolicy: .loop))
-        } else {
-            self.logoView.set(nil)
-        }
+        self.logoView.image = FenixuzQrLogo.image(side: self.logoView.frame.width) // Fenixuz
     }
 
     override func set(item: TableRowItem, animated: Bool = false) {
@@ -128,7 +125,7 @@ private final class InviteLinkQrRowView: TableRowView {
 
 private func inviteLinkQrImage(_ link: String) -> Signal<CGImage?, NoError> {
     let size = NSMakeSize(768, 768)
-    return qrCode(string: link, color: dayClassicPalette.text, backgroundColor: dayClassicPalette.background, icon: .custom(theme.icons.login_qr_cap))
+    return qrCode(string: link, color: dayClassicPalette.text, backgroundColor: dayClassicPalette.background, icon: .custom(FenixuzQrLogo.cgImage(pixelSide: 256) ?? theme.icons.login_qr_cap)) // Fenixuz
     |> map { _, generate -> CGImage? in
         return generate(TransformImageArguments(corners: ImageCorners(), imageSize: size, boundingSize: size, intrinsicInsets: NSEdgeInsets(), scale: 1.0))?.generateImage()
     }
