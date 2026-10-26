@@ -40,3 +40,4 @@ Telegram-Mac/NovagramAds.local.xcconfig
 
 # Novagram release archives
 build/
+PROJECT_LOG.md
