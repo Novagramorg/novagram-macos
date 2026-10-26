@@ -1133,9 +1133,9 @@ public struct NovagramL10n {
     /// so the chat list will look almost empty. Better said here than discovered later.
     public var botlogin_info: String {
         pick(
-            en: "Paste the token BotFather gave you. A bot session only shows chats where the bot has received a message — most Telegram features stay unavailable.",
-            uz: "BotFather bergan tokenni joylang. Bot sessiyasi faqat bot xabar olgan chatlarni ko'rsatadi — Telegram'ning aksar imkoniyatlari ishlamaydi.",
-            ru: "Вставьте токен, выданный BotFather. Сессия бота показывает только чаты, куда боту писали — большинство функций Telegram недоступны."
+            en: "Paste the token BotFather gave you. A bot session only shows chats where the bot has received a message — most Novagram features stay unavailable.",
+            uz: "BotFather bergan tokenni joylang. Bot sessiyasi faqat bot xabar olgan chatlarni ko'rsatadi — Novagram'ning aksar imkoniyatlari ishlamaydi.",
+            ru: "Вставьте токен, выданный BotFather. Сессия бота показывает только чаты, куда боту писали — большинство функций Novagram недоступны."
         )
     }
 
@@ -1161,9 +1161,9 @@ public struct NovagramL10n {
 
     public var botlogin_error_invalid: String {
         pick(
-            en: "That token isn't valid. It should look like 123456789:ABCdef… — send /mytoken to @BotFather to get it again.",
-            uz: "Bu token yaroqsiz. U 123456789:ABCdef… ko'rinishida bo'lishi kerak — @BotFather'ga /mytoken yuborib, qaytadan oling.",
-            ru: "Этот токен недействителен. Он должен выглядеть как 123456789:ABCdef… — отправьте /mytoken боту @BotFather, чтобы получить его снова."
+            en: "Invalid token. Get it again from @BotFather.",
+            uz: "Token yaroqsiz. @BotFather'dan qayta oling.",
+            ru: "Неверный токен. Получите его у @BotFather."
         )
     }
 

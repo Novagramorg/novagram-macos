@@ -555,9 +555,9 @@ public enum NovagramAutoProxyStrings {
 
     public static func toggleTip(langCode: String) -> String {
         switch langCode {
-        case "uz": return "Yoqilsa — Telegram bloklangan hududlarda ham avtomat tanlangan proxy orqali ulanadi"
-        case "ru": return "Вкл — Telegram подключается через автоматически подобранный прокси даже там, где он заблокирован"
-        default:   return "On — connects Telegram through an auto-selected proxy so it works even where blocked"
+        case "uz": return "Yoqilsa — Novagram bloklangan hududlarda ham avtomat tanlangan proxy orqali ulanadi"
+        case "ru": return "Вкл — Novagram подключается через автоматически подобранный прокси даже там, где он заблокирован"
+        default:   return "On — Novagram connects through an auto-selected proxy so it works even where blocked"
         }
     }
 
@@ -567,9 +567,9 @@ public enum NovagramAutoProxyStrings {
 
     public static func enabledAlert(langCode: String) -> String {
         switch langCode {
-        case "uz": return "NovagramProxy yoqildi. Endi Telegram bloklangan hududda ham avtomat proxy orqali ulanadi."
-        case "ru": return "NovagramProxy включён. Теперь Telegram подключается через автоподобранный прокси даже там, где он заблокирован."
-        default:   return "NovagramProxy enabled. Telegram now connects through an auto-selected proxy even where it's blocked."
+        case "uz": return "NovagramProxy yoqildi. Endi Novagram bloklangan hududda ham avtomat proxy orqali ulanadi."
+        case "ru": return "NovagramProxy включён. Теперь Novagram подключается через автоподобранный прокси даже там, где он заблокирован."
+        default:   return "NovagramProxy enabled. Novagram now connects through an auto-selected proxy even where it's blocked."
         }
     }
 

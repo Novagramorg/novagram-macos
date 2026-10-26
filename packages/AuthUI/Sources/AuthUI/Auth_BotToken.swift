@@ -123,6 +123,11 @@ private final class Auth_BotTokenInputView: View, NSTextFieldDelegate {
         tokenField.isBordered = false
         tokenField.isBezeled = false
         tokenField.usesSingleLineMode = true
+        // One scrolling line: a 45+ character token must not wrap inside the 18 pt field.
+        tokenField.maximumNumberOfLines = 1
+        tokenField.lineBreakMode = .byClipping
+        tokenField.cell?.wraps = false
+        tokenField.cell?.isScrollable = true
         tokenField.delegate = self
 
         tokenField.placeholderAttributedString = .initialize(string: NovagramL10n.current.botlogin_placeholder, color: theme.colors.grayText, font: .code(.text))
