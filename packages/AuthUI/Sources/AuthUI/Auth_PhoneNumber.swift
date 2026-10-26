@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Foundation
 import TGUIKit
 import AppKit
@@ -101,6 +102,8 @@ public final class Auth_PhoneNumberView : View {
 
     private var takeToken:(()->Void)?
     private var takeNext:((String)->Void)?
+    fileprivate let botTokenButton = TextButton() // Fenixuz
+    fileprivate var takeBotToken: (() -> Void)? // Fenixuz
     private var loginWithPasskey:(()->Void)?
 
     private var locked: Bool = false
@@ -135,6 +138,7 @@ public final class Auth_PhoneNumberView : View {
         }, for: .Click)
 
         passkeyButton.isHidden = true
+        if FenixuzLoginFeatures.botToken { container.addSubview(botTokenButton); botTokenButton.set(handler: { [weak self] _ in self?.takeBotToken?() }, for: .Click) } // Fenixuz
 
         addSubview(container)
 
@@ -165,6 +169,7 @@ public final class Auth_PhoneNumberView : View {
 
         passkeyButton.scaleOnClick = true
         qrButton.scaleOnClick = true
+        fenixuzStyleBotTokenLink(botTokenButton) // Fenixuz
         
         nextView.updateLocalizationAndTheme(theme: theme)
 
@@ -178,6 +183,7 @@ public final class Auth_PhoneNumberView : View {
 
         var totalHeight = self.header.height + Auth_Insets.betweenHeader + input.frame.height + Auth_Insets.betweenNextView + Auth_Insets.nextHeight
         totalHeight += 10 + passkeyButton.frame.height
+        totalHeight += fenixuzBotTokenLinkHeight(botTokenButton) // Fenixuz
 
 
         self.container.setFrameSize(NSMakeSize(frame.width, totalHeight))
@@ -191,6 +197,7 @@ public final class Auth_PhoneNumberView : View {
         self.nextView.centerX(y: self.input.frame.maxY + Auth_Insets.betweenNextView)
 
         passkeyButton.centerX(y: qrButton.frame.maxY - 10)
+        botTokenButton.centerX(y: max(nextView.frame.maxY, passkeyButton.frame.maxY) + 10) // Fenixuz
 
         self.container.center()
     }
@@ -301,6 +308,7 @@ public final class Auth_PhoneNumberController: GenericViewController<Auth_PhoneN
     public func set(number: String) {
         self.genericView.set(number)
     }
+    func fenixuzSetTakeBotToken(_ f: @escaping () -> Void) { genericView.takeBotToken = f } // Fenixuz
     
     public override func firstResponder() -> NSResponder? {
         return genericView.firstResponder

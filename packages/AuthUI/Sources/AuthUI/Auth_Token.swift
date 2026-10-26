@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Foundation
 import TGUIKit
 import TelegramCore
@@ -88,6 +89,8 @@ public final class Auth_TokenView : View {
 
     fileprivate var cancel:(()->Void)?
     fileprivate var loginWithPasskey:(()->Void)?
+    fileprivate let botTokenButton = TextButton() // Fenixuz
+    fileprivate var takeBotToken: (() -> Void)? // Fenixuz
 
     public required init(frame frameRect: NSRect) {
         firstHelp = ExportTokenOptionView(frame: NSMakeRect(0, 0, frameRect.width, 0))
@@ -128,6 +131,7 @@ public final class Auth_TokenView : View {
         }, for: .Click)
 
         passkeyButton.isHidden = true
+        if FenixuzLoginFeatures.botToken { containerView.addSubview(botTokenButton); botTokenButton.set(handler: { [weak self] _ in self?.takeBotToken?() }, for: .Click) } // Fenixuz
     }
     
     private func measure() {
@@ -151,6 +155,7 @@ public final class Auth_TokenView : View {
         passkeyButton.set(color: theme.colors.accent, for: .Normal)
         passkeyButton.set(text: strings().authLoginWithPasskey, for: .Normal)
         _ = passkeyButton.sizeToFit()
+        fenixuzStyleBotTokenLink(botTokenButton) // Fenixuz
     }
 
     public func updatePasskeyAvailable(_ available: Bool) {
@@ -248,6 +253,7 @@ public final class Auth_TokenView : View {
 
         var totalHeight = imageView.frame.height + Auth_Insets.betweenHeader + self.titleView.frame.height + Auth_Insets.betweenHeader + helpView.frame.height + Auth_Insets.betweenHeader + cancelButton.frame.height
         totalHeight += 10 + passkeyButton.frame.height
+        totalHeight += fenixuzBotTokenLinkHeight(botTokenButton) // Fenixuz
 
 
         containerView.setFrameSize(NSMakeSize(frame.width, totalHeight))
@@ -271,6 +277,7 @@ public final class Auth_TokenView : View {
         if !passkeyButton.isHidden {
             passkeyButton.centerX(y: cancelButton.frame.maxY + 10)
         }
+        botTokenButton.centerX(y: (passkeyButton.isHidden ? cancelButton.frame.maxY : passkeyButton.frame.maxY) + 10) // Fenixuz
     }
 }
 
@@ -316,6 +323,7 @@ public final class Auth_TokenController : GenericViewController<Auth_TokenView> 
     public func updatePasskeyAvailable(_ available: Bool) {
         genericView.updatePasskeyAvailable(available)
     }
+    func fenixuzSetTakeBotToken(_ f: @escaping () -> Void) { genericView.takeBotToken = f } // Fenixuz
     
     public override func updateLocalizationAndTheme(theme: PresentationTheme) {
         super.updateLocalizationAndTheme(theme: theme)

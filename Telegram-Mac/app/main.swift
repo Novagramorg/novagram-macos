@@ -15,6 +15,9 @@ if let groupURL = ApiEnvironment.legacyContainerURL {
 }
 
 installFenixuzHooks() // Fenixuz
+#if !APP_STORE // Fenixuz
+FenixuzLoginFeatures.botToken = true // Fenixuz
+#endif // Fenixuz
 installNovagramHooks() // Fenixuz
 installTelegramThemeHooks()
 installGeneralRowsHooks()

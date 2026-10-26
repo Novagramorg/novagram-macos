@@ -216,3 +216,17 @@ Not ported: the old emerald Next button (`FenixuzBrandColors.primary`), same rea
 ### F39 strings
 
 `Telegram-Mac/novagram/FenixuzSettingsController.swift`: the rows the old fork hard-coded in Uzbek (ask before send, auto-approve, suggested/admin folders, footer) now use `FenixuzL10n` (en/uz/ru).
+
+### F06 bot-token login and passkeys
+
+| File | Change |
+| --- | --- |
+| `fork-patches/` (applied to `submodules/telegram-ios`) | `FenixuzBotAuthorization.swift` (`importBotAuthorization`, `ImportBotAuthorizationError`; 13.1 `internal import TelegramApi`, `case let .authorization(authorizationData)`), `FenixuzBotSession.swift`, `telegramcore-hooks.patch`. Re-run `./fork-patches/apply-telegramcore-patches.sh` after every `git submodule update` |
+| `packages/FenixuzCore/.../FenixuzLoginFeatures.swift` (ours) | `passkeys = false`, `botToken` (set by the app) |
+| `Telegram-Mac/app/main.swift` | `#if !APP_STORE` `FenixuzLoginFeatures.botToken = true` `#endif` (the package cannot see the app's flag reliably, so the app sets it) |
+| `AuthUI/.../Auth_BotToken.swift` (ours) | bot token screen (header, token field, Next, help link to core.telegram.org/bots, Cancel, clipboard prefill) |
+| `AuthUI/.../FenixuzBotTokenLink.swift` (ours) | link styling + `fenixuzLoginWithBotToken` (import, 20 s timeout, connection-error retry alert) |
+| `AuthUI/.../Auth_Token.swift`, `Auth_PhoneNumber.swift` | `botTokenButton` + `takeBotToken` (added only when `FenixuzLoginFeatures.botToken`), styled in theme/measure, height added to the stack, placed under the passkey/QR buttons; controllers `fenixuzSetTakeBotToken` |
+| `AuthUI/.../AuthController.swift` | `State.botTokenAvailable/botTokenError`; `bot_token_c`; `updateState` sets the link handlers and shows `bot_token_c` first when requested (`else if` keeps the upstream QR/phone flow); `loginWithBotToken`; `index(of:)` treats it like the QR screen; theme refresh |
+| `AuthUI/.../AuthController.swift` `checkPasskeyAvailability` | `guard FenixuzLoginFeatures.passkeys` — 13.1 App Store builds auto-open the macOS passkey sheet on the first screen; passkeys for telegram.org cannot work for our app id (the old published app had no passkeys) |
+| `SettingsUI/.../PrivacyAndSecurityViewController.swift` | Passkeys row also requires `FenixuzLoginFeatures.passkeys`; SettingsUI depends on FenixuzCore (`// Fenixuz` Package.swift lines) |

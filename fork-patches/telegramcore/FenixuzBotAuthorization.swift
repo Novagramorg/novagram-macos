@@ -1,7 +1,7 @@
 import Foundation
 import Postbox
 import SwiftSignalKit
-import TelegramApi
+internal import TelegramApi
 import MtProtoKit
 
 // Bot-token login (Novagram / Fenixuz fork). Port of the iOS fork's
