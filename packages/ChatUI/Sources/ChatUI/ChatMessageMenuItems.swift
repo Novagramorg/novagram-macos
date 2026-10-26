@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Foundation
 import Cocoa
 import TGUIKit
@@ -588,6 +589,8 @@ public func chatMenuItems(for message: Message, entry: ChatHistoryEntry?, textLa
         }
 
         if let adAttribute = data.message.adAttribute {
+            if let items = NovagramAdsHooks.shared.menuItems(adAttribute.opaqueId, context.window) { return items } // Fenixuz
+            let isNovagramAd = NovagramAdsHooks.isOurs(opaqueId: adAttribute.opaqueId) // Fenixuz
             
             if adAttribute.sponsorInfo != nil || adAttribute.additionalInfo != nil {
                 
@@ -654,7 +657,7 @@ public func chatMenuItems(for message: Message, entry: ChatHistoryEntry?, textLa
 
             }
             
-            if !context.premiumIsBlocked {
+            if !context.premiumIsBlocked && !isNovagramAd { // Fenixuz
                 items.append(ContextMenuItem(strings().chatContextHideAd, handler: {
                     if context.isPremium, let opaqueId = message.adAttribute?.opaqueId {
                         _ = context.engine.accountData.updateAdMessagesEnabled(enabled: false).startStandalone()

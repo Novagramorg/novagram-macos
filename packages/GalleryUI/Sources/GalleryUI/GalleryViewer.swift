@@ -382,11 +382,12 @@ public class GalleryViewer: NSResponder {
             self.close()
             closeAllModals(window: self.window)
             
+            let fenixuzOurs = NovagramAdsHooks.shared.recordClickIfOurs(adAttribute.opaqueId) // Fenixuz
             GalleryHooks.shared.openAdUrl(adAttribute.url, context, { [weak self] peerId, toChat, messageId, action in
                 self?.openInfo(peerId, toChat, messageId, action)
             })
             
-            context.engine.messages.markAdAction(opaqueId: adAttribute.opaqueId, media: true, fullscreen: true)
+            if !fenixuzOurs { context.engine.messages.markAdAction(opaqueId: adAttribute.opaqueId, media: true, fullscreen: true) } // Fenixuz
         }
         interactions.openLink = { [weak self] url in
             guard let self else {

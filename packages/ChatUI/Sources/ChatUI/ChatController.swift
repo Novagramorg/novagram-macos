@@ -3658,9 +3658,9 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         
         let adMessages:Signal<(fixed: Message?, opportunistic: [Message], version: Int), NoError>
         if let ad = self.adMessages {
-            adMessages = ad.allMessages
+            adMessages = NovagramAdsHooks.shared.withInjectedAd(ad.allMessages, context, self.chatLocation.peerId) // Fenixuz
         } else {
-            adMessages = .single((nil, [], 0))
+            adMessages = NovagramAdsHooks.shared.withInjectedAd(.single((nil, [], 0)), context, self.chatLocation.peerId) // Fenixuz
         }
         
         
@@ -4284,6 +4284,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         }
         
         chatInteraction.removeAd = { [weak self] opaqueId in
+            if NovagramAdsHooks.shared.hideIfOurs(opaqueId) { return } // Fenixuz
             self?.adMessages?.remove(opaqueId: opaqueId)
         }
         
@@ -7803,6 +7804,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         }
         
         chatInteraction.markAdAction = { [weak self] opaqueId, media in
+            if NovagramAdsHooks.shared.reportClickIfOurs(opaqueId, context) { return } // Fenixuz
             self?.adMessages?.markAction(opaqueId: opaqueId, media: media)
         }
         
@@ -7811,6 +7813,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         }
         
         chatInteraction.markAdAsSeen = { [weak self] opaqueId in
+            if NovagramAdsHooks.shared.recordViewIfOurs(opaqueId) { return } // Fenixuz
             self?.adMessages?.markAsSeen(opaqueId: opaqueId)
         }
         
@@ -9184,6 +9187,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
 
                 if !readAds.isEmpty {
                     for data in readAds {
+                        if NovagramAdsHooks.shared.recordViewIfOurs(data) { continue } // Fenixuz
                         strongSelf.adMessages?.markAsSeen(opaqueId: data)
                     }
                 }
@@ -11276,7 +11280,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         
         _ = chatInteraction.inputOverlayHeight.swap(mode == .preview ? previewChatBottomInset : ChatHistoryBottomRowItem.minimumInputOverlayHeight)
                 
-        if chatLocation.peerId.namespace == Namespaces.Peer.CloudChannel || chatLocation.peerId.namespace == Namespaces.Peer.CloudUser, mode == .history {
+        if chatLocation.peerId.namespace == Namespaces.Peer.CloudChannel || chatLocation.peerId.namespace == Namespaces.Peer.CloudUser, mode == .history, NovagramAdsHooks.shared.showAds() { // Fenixuz
             self.adMessages = .init(context: context, height: sizeValue.get() |> map { $0 .height}, peerId: chatLocation.peerId)
         } else {
             self.adMessages = nil

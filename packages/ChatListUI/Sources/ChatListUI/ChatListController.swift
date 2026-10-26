@@ -204,16 +204,19 @@ public struct UICustomLinkAction : UIChatListTextAction {
     
     public func action() {
         let context = self.context
+        if NovagramAdsHooks.shared.bannerOpenIfOurs(self.id, context) { return } // Fenixuz
         ChatUIHooks.shared.executeInAppLink(self.url.nsstring, context, { peerId, _, messageId, action in
             context.bindings.rootNavigation().push(ChatListUIHooks.shared.makeChatAdditionControllerWithFocus(context, .peer(peerId), .init(messageId: messageId), action))
         })
     }
     
     public func dismiss() {
+        if NovagramAdsHooks.shared.bannerDismissIfOurs(self.id, context) { return } // Fenixuz
         _ = context.engine.notices.dismissServerProvidedSuggestion(suggestion: self.id).start()
     }
     
     public func isEqual(_ rhs: UIChatListTextAction) -> Bool {
+        if let rhs = rhs as? UICustomLinkAction, NovagramAdsHooks.shared.bannerIsOurs(self.id) || NovagramAdsHooks.shared.bannerIsOurs(rhs.id) { return self.id == rhs.id } // Fenixuz
         if let _ = rhs as? UICustomLinkAction {
             return true
         } else {
@@ -225,7 +228,7 @@ public struct UICustomLinkAction : UIChatListTextAction {
     private let id: String
     private let url: String
     public var canDismiss: Bool {
-        return true
+        return NovagramAdsHooks.shared.bannerCanDismiss(self.id) // Fenixuz
     }
     
     public init(context: any AccountContextProtocol, id: String, url: String, title: ServerSuggestionInfo.Item.Text, subtitle: ServerSuggestionInfo.Item.Text) {
@@ -953,7 +956,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
         let previousLayout: Atomic<SplitViewState> = Atomic(value: context.layout)
                 
         
-        let suggestions = combineLatest(context.engine.notices.getServerProvidedSuggestions(), ChatListUIHooks.shared.crashReportCard(context))
+        let suggestions = combineLatest(NovagramAdsHooks.shared.bannerSuggestions(context, context.engine.notices.getServerProvidedSuggestions()), ChatListUIHooks.shared.crashReportCard(context)) // Fenixuz
         let birthdays: Signal<[UIChatListBirthday], NoError> = combineLatest(context.engine.notices.getServerDismissedSuggestions(), context.account.stateManager.contactBirthdays) |> map { dismissed, list in
             return (list.filter {
                 $0.value.isToday

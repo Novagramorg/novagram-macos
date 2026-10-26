@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TGUIKit
 import SwiftSignalKit
@@ -89,6 +90,7 @@ public enum ChatListSearchEntryStableId: Hashable {
     case emptySearch
     case foundStories
     case disclaimer
+    case novagramAdPeerId(PeerId) // Fenixuz
     public func hash(into hasher: inout Hasher) {
         switch self {
         case let .localPeerId(peerId):
@@ -130,6 +132,7 @@ public enum ChatListSearchEntryStableId: Hashable {
             hasher.combine("foundStories")
         case .disclaimer:
             hasher.combine("disclaimer")
+        case let .novagramAdPeerId(peerId): hasher.combine("novagramAdPeerId"); hasher.combine(peerId.hashValue) // Fenixuz
         }
     }
 }
@@ -153,6 +156,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
     case loadingPlaceholder
     case emptyList(listType: SearchTags.ListType, postState: TelegramGlobalPostSearchState?, isPremium: Bool, query: String)
     case disclaimer(String)
+    case novagramAdPeer(Peer, String, Int) // Fenixuz
     var stableId: ChatListSearchEntryStableId {
         switch self {
         case let .localPeer(peer, _, secretChat, _, _, _, _):
@@ -187,6 +191,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
             return .foundStories
         case .disclaimer:
             return .disclaimer
+        case let .novagramAdPeer(peer, _, _): return .novagramAdPeerId(peer.id) // Fenixuz
         }
     }
     
@@ -218,6 +223,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
             return 0
         case .disclaimer:
             return 100000000
+        case let .novagramAdPeer(_, _, index): return index // Fenixuz
         }
     }
     
@@ -329,6 +335,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
             } else {
                 return false
             }
+        case let .novagramAdPeer(peer, token, index): if case let .novagramAdPeer(rhsPeer, rhsToken, rhsIndex) = rhs { return peer.isEqual(rhsPeer) && token == rhsToken && index == rhsIndex } else { return false } // Fenixuz
         }
     }
     
@@ -629,6 +636,7 @@ fileprivate func prepareEntries(from:[AppearanceWrapperEntry<ChatListSearchEntry
             return SearchStoryFoundItem(initialSize, stableId: entry.stableId, list: state, context: arguments.context, query: query, action: {
                 arguments.openStorySearch(state)
             })
+        case let .novagramAdPeer(peer, token, _): return fenixuzSearchAdRow(initialSize, peer: peer, token: token, context: arguments.context, stableId: entry.stableId, contextMenuItems: { peerContextMenuItems(peer: peer, pinnedItems: pinnedItems, arguments: arguments, isRecent: false) }) // Fenixuz
         case let .disclaimer(text):
             return GeneralTextRowItem(initialSize, stableId: entry.stableId, height: 50, text: .markdown(text, linkHandler: { link in
                 if link == "grossing" {
@@ -1059,7 +1067,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                         location = globalTags.location(.allChats, communityId: communityId)
                         if globalTags.isEmpty {
                         
-                            let adPeers: Signal<[AdPeer], NoError>
+                            var adPeers: Signal<[AdPeer], NoError> // Fenixuz
                             
                             if query.length >= 4 {
                                 adPeers = combineLatest(context.engine.peers.searchAdPeers(query: query), searchAdState) |> map { peers, state in
@@ -1068,6 +1076,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                                     })
                                     return peers
                                 }
+                                adPeers = NovagramAdsHooks.shared.searchTelegramFallback(context, query, adPeers) // Fenixuz
                             } else {
                                 adPeers = .single([])
                             }
@@ -1306,8 +1315,8 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                     hashtagSearch = .single(([], false, nil))
                 }
                 
-                return combineLatest(queue: prepareQueue, foundLocalPeers, foundRemotePeers, foundRemoteMessages, isRevealed, globalStorySearchState, hashtagSearch, messagesSourceValue)
-                    |> map { localPeers, remotePeers, remoteMessages, isRevealed, storySearchState, hashtagSearch, messagesSourceValue -> ([ChatListSearchEntry], Bool, SearchMessagesState?, SearchMessagesResult?) in
+                return combineLatest(queue: prepareQueue, foundLocalPeers, foundRemotePeers, foundRemoteMessages, isRevealed, globalStorySearchState, hashtagSearch, messagesSourceValue, NovagramAdsHooks.shared.promotedSearchPeer(context, query)) // Fenixuz
+                    |> map { localPeers, remotePeers, remoteMessages, isRevealed, storySearchState, hashtagSearch, messagesSourceValue, promoted -> ([ChatListSearchEntry], Bool, SearchMessagesState?, SearchMessagesResult?) in
                         
                         assertUniqueSearchEntries(remotePeers.0)
                         assertUniqueSearchEntries(remotePeers.1)
@@ -1353,6 +1362,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                             }
 
                             entries.append(.separator(text: strings().searchSeparatorGlobalPeers, index: 10000, state: state))
+                            if let promoted { entries.append(.novagramAdPeer(promoted.peer._asPeer(), promoted.token, 10000)) } // Fenixuz
                             
                             if !isRevealed {
                                 entries += remotePeers.1.prefix(5)
@@ -2203,6 +2213,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                 case let .globalPeerId(pId):
                     isGlobal = true
                     peerId = pId
+                case let .novagramAdPeerId(pId): isGlobal = true; peerId = pId // Fenixuz
                 case .savedMessages:
                     peerId = context.peerId
                 default:
@@ -2362,6 +2373,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
         if let item = item as? RecentPeerRowItem, let adPeer = item.adPeer {
             context.engine.messages.markAdAction(opaqueId: adPeer.opaqueId, media: false, fullscreen: false)
         }
+        if let item = item as? RecentPeerRowItem, let token = item.novagramAdToken { NovagramAdsHooks.shared.searchRecordClick(token) } // Fenixuz
         
         if let id = id {
             self.open(id, messageId, close)

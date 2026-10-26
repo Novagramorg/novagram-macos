@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -537,6 +538,7 @@ public class ChatMessageItem: ChatRowItem {
                         }
                     }
                 }
+                if NovagramAdsHooks.shared.openMediaIfOurs(message, message.media.first, context, self?.table, (self?.webpageLayout as? WPMediaLayout)?.parameters) { return } // Fenixuz
                 showChatGallery(context: context, message: message, self?.table, (self?.webpageLayout as? WPMediaLayout)?.parameters, type: .alone, chatMode: chatInteraction.mode, chatLocation: chatInteraction.chatLocation, cachedPeerData: chatInteraction.presentation.cachedData)
             }
             
