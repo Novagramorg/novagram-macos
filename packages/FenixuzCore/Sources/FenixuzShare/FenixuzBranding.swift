@@ -9,7 +9,7 @@ public enum FenixuzBranding {
     public static let allowsTelegramUpdater = false
 
     // Tag of the "Check for Updates" item in MainMenu.xib (upstream removes it only in APP_STORE builds).
-    static let checkForUpdatesMenuTag = 1000
+    public static let checkForUpdatesMenuTag = 1000
 
     public static func rebrand(_ value: String) -> String {
         return value

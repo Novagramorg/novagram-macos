@@ -11,7 +11,7 @@ import Localization
 import FoundationUtils
 import RLottie
 import PasscodeCore
-import FenixuzCore // Fenixuz
+import FenixuzShare // Fenixuz
 
 class ShareViewController: NSViewController {
 

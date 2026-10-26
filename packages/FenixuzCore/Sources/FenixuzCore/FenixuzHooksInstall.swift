@@ -1,5 +1,6 @@
 import AppKit
 import Localization
+@_exported import FenixuzShare
 
 private var menuObserver: NSObjectProtocol?
 

@@ -918,7 +918,7 @@
 		1ADD8BCCDC6049B68CE86BFE /* SimilarPeersHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4793112A0E44048B603D019 /* SimilarPeersHooksInstall.swift */; };
 		53C2655B791449A18A453BBD /* GroupsInCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = 8C849FFE3CF443CEAAFD9A65 /* GroupsInCommonUI */; };
 		FE10DEC04E14C190FEFE0003 /* FenixuzCore in Frameworks */ = {isa = PBXBuildFile; productRef = FE10DEC04E14C190FEFE0002 /* FenixuzCore */; };
-		FE10DEC04E14C190FEFE0004 /* FenixuzCore in Frameworks */ = {isa = PBXBuildFile; productRef = FE10DEC04E14C190FEFE0005 /* FenixuzCore */; };
+		FE10DEC04E14C190FEFE0004 /* FenixuzShare in Frameworks */ = {isa = PBXBuildFile; productRef = FE10DEC04E14C190FEFE0005 /* FenixuzShare */; };
 		5105D43394A54BCB8773E53C /* QrStudioUI in Frameworks */ = {isa = PBXBuildFile; productRef = 019B2BAFB79C48F1A4A5666E /* QrStudioUI */; };
 		7110771E0000000000000004 /* TLottie in Frameworks */ = {isa = PBXBuildFile; productRef = 7110771E0000000000000002 /* TLottie */; };
 		7110771E0000000000000005 /* TLottie in Frameworks */ = {isa = PBXBuildFile; productRef = 7110771E0000000000000003 /* TLottie */; };
@@ -2012,7 +2012,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FE10DEC04E14C190FEFE0004 /* FenixuzCore in Frameworks */,
+				FE10DEC04E14C190FEFE0004 /* FenixuzShare in Frameworks */,
 				9AB6DAD8DF0C1248CC621AFB /* PasscodeCore in Frameworks */,
 				C20617830079F8F7D835E5CB /* ShortPeerRowShare in Frameworks */,
 				2037C058F06EC3DBD00E2F08 /* AvatarUIShare in Frameworks */,
@@ -3638,7 +3638,7 @@
 			);
 			name = TelegramShare;
 			packageProductDependencies = (
-				FE10DEC04E14C190FEFE0005 /* FenixuzCore */,
+				FE10DEC04E14C190FEFE0005 /* FenixuzShare */,
 				8108E8A15C9EE293636E539F /* PasscodeCore */,
 				14388EF519B427EE2034DD9C /* ShortPeerRowShare */,
 				2DBE492FD219DCD254A93957 /* AvatarUIShare */,
@@ -5964,9 +5964,9 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = FenixuzCore;
 		};
-		FE10DEC04E14C190FEFE0005 /* FenixuzCore */ = {
+		FE10DEC04E14C190FEFE0005 /* FenixuzShare */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = FenixuzCore;
+			productName = FenixuzShare;
 		};
 		019B2BAFB79C48F1A4A5666E /* QrStudioUI */ = {
 			isa = XCSwiftPackageProductDependency;

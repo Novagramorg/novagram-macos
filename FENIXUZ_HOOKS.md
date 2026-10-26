@@ -63,9 +63,19 @@ Plan: `../PORT_MAP_macOS13.md`. Build with `./fenix-build.sh` (`./fenix-build.sh
 
 Not ported: the old `uz.fenixuz.macapp` → `uz.fenixuz.app` container migration (`ApiCredentials`). A sandboxed app can only open app-group containers listed in its entitlements, so the move never had access to the old group.
 
-### FenixuzCore contents from the old fork
+### FenixuzCore package layout
 
-`FenixuzGhostMode`, `FenixuzL10n`, `FenixuzBrandColors`, `FenixuzSettingsIcons`, `FenixuzDemoCodeFetcher` copied unchanged. `Package.swift` now also depends on `TGUIKit`.
+Two products:
+
+- `FenixuzShare` (target `Sources/FenixuzShare`, depends on Localization only): `FenixuzBranding`. Linked by the share extension, which must stay light (TGUIKit/AlertsUI pull ffmpeg and opus into the appex and break its link).
+- `FenixuzCore` (re-exports `FenixuzShare`): everything else. Linked by the app and by the Telegram packages that host our hooks.
+
+`FenixuzCore` contents copied from the old fork (app-target files there become `public` here): `FenixuzGhostMode`, `FenixuzL10n`, `FenixuzBrandColors`, `FenixuzSettingsIcons`, `FenixuzDemoCodeFetcher`, `FenixuzDeletedMessages` (temp `fenixdel.log` file logger dropped), `FenixuzEditedHistoryManager`, `FenixuzForeignUserBlock`, `FenixuzForeignUserBannerView`, `FenixuzHiddenChatsManager`, `FenixuzChatPincodeManager`, `FenixuzChatPincodeViewController`, `FenixuzAutoApproveManager` (takes `any AccountContextProtocol`), `FenixuzAutoProxy`, `FenixuzSpeechToTextManager`, `FenixuzAppStoreIAP`, `FenixuzTextStyle` (enum split out of the old text style screen). New: `NovagramHooks` (closures the app installs so packages can open our app-target screens).
+
+| File | Change |
+| ---- | ------ |
+| `Telegram.xcodeproj/project.pbxproj` | TelegramShare target links product `FenixuzShare` instead of `FenixuzCore` (build file `FE10DEC04E14C190FEFE0004`, product dependency `FE10DEC04E14C190FEFE0005`) |
+| `TelegramShare/ShareViewController.swift` | `import FenixuzShare` (was `import FenixuzCore`) |
 
 ### APP_STORE
 
