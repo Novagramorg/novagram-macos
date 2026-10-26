@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TGUIKit
 import SwiftSignalKit
@@ -763,6 +764,8 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
     
     private let filterDisposable = MetaDisposable()
     private let fenixPageRetry = FenixuzChatListPageRetry() // Fenixuz
+    private var fenixLastFolderTabs: [ChatListFilter] = [] // Fenixuz
+    private var fenixSettingsObserver: NSObjectProtocol? // Fenixuz
     
 
     
@@ -773,6 +776,13 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
     
     public override func viewDidLoad() {
         super.viewDidLoad()
+        FenixuzHiddenChatsShortcut.install() // Fenixuz
+        fenixSettingsObserver = NotificationCenter.default.addObserver(forName: FenixuzChatListFilter.settingsChanged, object: nil, queue: .main, using: { [weak self] _ in // Fenixuz
+            guard let self else { return } // Fenixuz
+            if case .filter = self.mode {} else { self.updateFilter { $0.withUpdatedTabs(FenixuzChatListFilter.hideFolders ? [] : self.fenixLastFolderTabs) } } // Fenixuz
+            if !FenixuzChatListFilter.showStories { self.completeUndefiedStates(animated: true) } // Fenixuz
+            self.updateState { $0 } // Fenixuz
+        }) // Fenixuz
         
         let initialSize = self.atomicSize
         let context = self.context
@@ -1020,6 +1030,8 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
                     return false
                 })
             }
+            let fenixMyPhone = (context.myPeer as? TelegramUser)?.phone // Fenixuz
+            prepare.removeAll(where: { FenixuzChatListFilter.isFiltered(peerId: $0.0.renderedPeer.peerId, mainPeer: $0.0.renderedPeer.chatMainPeer?._asPeer(), myPhone: fenixMyPhone) }) // Fenixuz
             var mapped: [UIChatListEntry] = prepare.map { item in
                 let space: PeerActivitySpace
                 var generalStatus: ItemHideStatus? = nil
@@ -1042,7 +1054,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
                         mapped.append(.group(i, group, animateGroupNextTransition.swap(nil) == group.id, hideStatus, state.controllerAppear, state.appear == .short, storyState))
                     }
                     if state.mode == .plain, state.filterData.filter == .allChats, !update.list.hasLater {
-                        if update.list.groupItems.isEmpty, let storyState = storyState, !storyState.items.isEmpty {
+                        if FenixuzChatListFilter.showStories, update.list.groupItems.isEmpty, let storyState = storyState, !storyState.items.isEmpty { // Fenixuz
                             mapped.append(.group(0, .init(id: .archive, topMessage: nil, items: [], unreadCount: 0), animateGroupNextTransition.swap(nil) == .archive, hideStatus, state.controllerAppear, state.appear == .short, storyState))
                         }
                     }
@@ -1302,9 +1314,10 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
             }))
         case .folder:
             filterDisposable.set(filterView.start(next: { [weak self] filters in
+                self?.fenixLastFolderTabs = filters.list // Fenixuz
                 self?.updateFilter( { current in
                     var current = current
-                    current = current.withUpdatedTabs(filters.list)
+                    current = current.withUpdatedTabs(FenixuzChatListFilter.hideFolders ? [] : filters.list) // Fenixuz
                         .withUpdatedSidebar(filters.sidebar)
                         .withUpdatedShowTags(filters.showTags)
                     return current
@@ -1313,9 +1326,10 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
         default:
             var first: Bool = true
             filterDisposable.set(combineLatest(filterView, filterBadges).start(next: { [weak self] filters, badges in
+                self?.fenixLastFolderTabs = filters.list // Fenixuz
                 self?.updateFilter( { current in
                     var current = current
-                    current = current.withUpdatedTabs(filters.list)
+                    current = current.withUpdatedTabs(FenixuzChatListFilter.hideFolders ? [] : filters.list) // Fenixuz
                         .withUpdatedSidebar(filters.sidebar)
                         .withUpdatedShowTags(filters.showTags)
                     if !first, let updated = filters.list.first(where: { ChatListUIHooks.shared.chatListFilterId($0) == ChatListUIHooks.shared.chatListFilterId(current.filter) }) {
@@ -1951,6 +1965,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
     
     
     deinit {
+        if let fenixSettingsObserver { NotificationCenter.default.removeObserver(fenixSettingsObserver) } // Fenixuz
         removePeerIdGroupDisposable.dispose()
         disposable.dispose()
         reorderDisposable.dispose()

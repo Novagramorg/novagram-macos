@@ -1718,7 +1718,7 @@ public class ChatListRowItem: TableRowItem {
 
     public static func markAsRead(context: any AccountContextProtocol, peerId: PeerId) {
         _ = context.engine.messages.togglePeersUnreadMarkInteractively(peerIds: [peerId], setToValue: false).start()
-        _ = clearPeerUnseenPersonalMessagesInteractively(account: context.account, peerId: peerId, threadId: nil).start()
+        if !FenixuzGhostMode.isActive { _ = clearPeerUnseenPersonalMessagesInteractively(account: context.account, peerId: peerId, threadId: nil).start() } // Fenixuz
     }
 
     public static func markTopicAsRead(context: any AccountContextProtocol, peerId: PeerId, threadId: Int64) {
@@ -2374,6 +2374,7 @@ public class ChatListRowItem: TableRowItem {
                 }, itemImage: MenuAnimation.menu_unarchive.value))
             }
             
+            thirdGroup.append(contentsOf: fenixuzChatListMenuItems(peerId: peerId, accountPeerId: context.peerId, savedMessages: mode.savedMessages, window: context.window)) // Fenixuz
             let blocks:[[ContextMenuItem]] = [headGroup, zeroGroup, firstGroup,
                                               secondGroup,
                                               thirdGroup].filter { !$0.isEmpty }

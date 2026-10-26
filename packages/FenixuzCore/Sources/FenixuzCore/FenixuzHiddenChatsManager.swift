@@ -22,7 +22,13 @@ public final class FenixuzHiddenChatsManager {
     public static let shared = FenixuzHiddenChatsManager()
 
     private let defaults = UserDefaults(suiteName: kHiddenChatsSuite)
-    private var hiddenIds: Set<Int64> = []
+    // Read from the chat list preparation queue, written on the main thread.
+    private let lockObject = NSLock()
+    private var _hiddenIds: Set<Int64> = []
+    private var hiddenIds: Set<Int64> {
+        get { lockObject.lock(); defer { lockObject.unlock() }; return _hiddenIds }
+        set { lockObject.lock(); _hiddenIds = newValue; lockObject.unlock() }
+    }
     
     /// Runtime state: whether hidden chats are currently revealed (unlocked) in this session
     private(set) var isRevealed: Bool = false

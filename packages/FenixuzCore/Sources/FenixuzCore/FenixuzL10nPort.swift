@@ -59,3 +59,8 @@ public extension FenixuzL10n {
 public extension FenixuzL10n {
     var attach_roundVideo: String { pick(en: "Send as Round Video", uz: "Dumaloq video sifatida yuborish", ru: "Отправить как кружок") }
 }
+
+public extension FenixuzL10n {
+    var hiddenChats_hide: String { pick(en: "Hide Chat", uz: "Chatni yashirish", ru: "Скрыть чат") }
+    var hiddenChats_unhide: String { pick(en: "Unhide Chat", uz: "Yashirin chatlardan chiqarish", ru: "Показать чат") }
+}
