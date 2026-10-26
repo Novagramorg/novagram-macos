@@ -75,7 +75,7 @@ elif git -C "$SUBMODULE" apply --check "$PATCH" 2> /dev/null; then
 else
     echo "ERROR: telegramcore-hooks.patch does not apply cleanly and is not already applied."
     echo "The submodule has probably moved to a new upstream commit — re-apply the hooks by hand"
-    echo "(see FENIXUZ_HOOKS.md 'Bot token login') and regenerate the patch with:"
+    echo "(see NOVAGRAM_HOOKS.md 'Bot token login') and regenerate the patch with:"
     echo "  git -C submodules/telegram-ios diff -- submodules/TelegramCore/Sources/ > fork-patches/telegramcore-hooks.patch"
     fail=1
 fi

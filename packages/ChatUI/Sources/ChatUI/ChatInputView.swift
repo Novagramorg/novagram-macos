@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Foundation
 import Cocoa
 import TGUIKit
@@ -105,7 +105,7 @@ public final class ChatInputContainerView: FlippableView {
     /// Created lazily (only while shown).
     fileprivate var expandRichButton: ImageButton?
     public var openRichEditor: (() -> Void)?
-    fileprivate lazy var fenixSpeechToText = FenixuzSpeechToTextButton(chatInteraction: chatInteraction) // Fenixuz
+    fileprivate lazy var novagramSpeechToText = NovagramSpeechToTextButton(chatInteraction: chatInteraction) // Novagram
 
     public let glassWrapper: GlassContainerView
 
@@ -294,7 +294,7 @@ public final class ChatInputContainerView: FlippableView {
         let sendSlot = self.sendSlot(gap: gap)
         let containerWidth = width - edge - leftInset - gap - sendSlot.outside - edge
         let textLeftInset: CGFloat = 10 + sendAsInset
-        let actionsWidth = actionsView.visibleWidth + sendSlot.inField + FenixuzSpeechToTextButton.reservedWidth // Fenixuz
+        let actionsWidth = actionsView.visibleWidth + sendSlot.inField + NovagramSpeechToTextButton.reservedWidth // Novagram
         let textWidth = max(0, containerWidth - textLeftInset - actionsWidth)
         let height = self.textView.height(for: textWidth)
         return (NSMakeSize(textWidth, min(max(height, textView.min_height), textView.max_height)), height)
@@ -537,7 +537,7 @@ public final class ChatInputContainerView: FlippableView {
         transition.updateFrame(view: actionsView, frame: actionsFrame)
         actionsView.updateLayout(size: actionsFrame.size, transition: transition)
         actionsView.isHidden = richDraftPreview != nil
-        fenixSpeechToText.layout(in: textFieldContainer, rightEdge: fieldContentWidth - actionsView.visibleWidth, bottomY: textY + textSize.height, hidden: richDraftPreview != nil || (chatInteraction.presentation.state != .normal && chatInteraction.presentation.state != .editing), transition: transition) // Fenixuz
+        novagramSpeechToText.layout(in: textFieldContainer, rightEdge: fieldContentWidth - actionsView.visibleWidth, bottomY: textY + textSize.height, hidden: richDraftPreview != nil || (chatInteraction.presentation.state != .normal && chatInteraction.presentation.state != .editing), transition: transition) // Novagram
 
         if springsFieldMerge, transition.isAnimated {
             sendButton.frame = sendFrame.offsetBy(dx: -ChatInputContainerView.sendAppearOffset, dy: 0)
@@ -1807,7 +1807,7 @@ public class ChatInputView: View, Notifable {
         if chatInteraction.interactionContext.peerId != chatInteraction.peerId, let peer = chatInteraction.presentation.peer, !peer.isChannel && !markNextTextChangeToFalseActivity {
             sendActivityDisposable.set((Signal<Bool, NoError>.single(!state.effectiveInput.inputText.isEmpty) |> then(Signal<Bool, NoError>.single(false) |> delay(4.0, queue: Queue.mainQueue()))).start(next: { [weak self] isPresent in
                 if let chatInteraction = self?.chatInteraction, let peer = chatInteraction.presentation.peer, !peer.isChannel && chatInteraction.presentation.state != .editing {
-                    if self?.chatInteraction.peerIsAccountPeer == true, !FenixuzGhostMode.isActive || !isPresent { // Fenixuz
+                    if self?.chatInteraction.peerIsAccountPeer == true, !NovagramGhostMode.isActive || !isPresent { // Novagram
                         chatInteraction.interactionContext.account.updateLocalInputActivity(peerId: .init(peerId: peer.id, category: chatInteraction.mode.activityCategory(chatInteraction.chatLocation.threadId)), activity: .typingText, isPresent: isPresent)
                     }
                 }

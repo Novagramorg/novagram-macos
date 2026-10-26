@@ -1,5 +1,5 @@
 import Cocoa
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import LocalAnimations
 import TelegramContext
 import TelegramTheme
@@ -273,7 +273,7 @@ public func ChatListFiltersListController(context: any AccountContextProtocol, e
     }, limitExceeded: {
         environment.showPremiumLimit(.folders)
     }, toggleTags: { value in
-        if !context.isPremium && !FenixuzPremiumUnlock.folderTags { // Fenixuz
+        if !context.isPremium && !NovagramPremiumUnlock.folderTags { // Novagram
             showModalText(for: context.window, text: strings().chatListFolderPremiumAlert, button: strings().alertLearnMore, callback: { _ in
                 environment.showFolderTagsPremium()
             })

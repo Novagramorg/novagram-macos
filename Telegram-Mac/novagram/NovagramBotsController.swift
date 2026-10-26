@@ -4,7 +4,7 @@
 //
 //  Novagram Bots — macOS port.
 //
-//  One entry in NovagramPro settings (FenixuzSettingsController) pushes this
+//  One entry in NovagramPro settings (NovagramSettingsController) pushes this
 //  TableViewController. Bots are grouped into 4 categories sourced from
 //  novagram_bots.json (bundled resource — copy of the canonical JSON at
 //  /Users/codingtech/Documents/Telegram/novagram_bots.json).
@@ -19,7 +19,7 @@ import TGUIKit
 import TelegramCore
 import SwiftSignalKit
 import Localization
-import FenixuzCore
+import NovagramCore
 import Postbox
 
 // MARK: - JSON Codable models
@@ -259,7 +259,7 @@ class NovagramBotsController: TableViewController {
     private let disposable = MetaDisposable()
 
     override var defaultBarTitle: String {
-        return FenixuzL10n.current.bots_screenTitle
+        return NovagramL10n.current.bots_screenTitle
     }
 
     override var removeAfterDisapper: Bool {

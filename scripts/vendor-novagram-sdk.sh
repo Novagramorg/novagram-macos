@@ -64,4 +64,4 @@ PY
 done
 
 echo "Previous copies moved to $BACKUP"
-echo "Next: ./fenix-build.sh (Xcode embeds and signs the frameworks)."
+echo "Next: ./novagram-build.sh (Xcode embeds and signs the frameworks)."

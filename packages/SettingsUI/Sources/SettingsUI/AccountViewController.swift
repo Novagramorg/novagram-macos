@@ -167,7 +167,7 @@ private enum AccountInfoEntry<Context: AccountContextProtocol> : TableItemListNo
     case about(index: Int, viewType: GeneralViewType)
     case faq(index: Int, viewType: GeneralViewType)
     case ask(index: Int, viewType: GeneralViewType)
-    case novagram(index: Int, viewType: GeneralViewType, row: NovagramSettingsRow) // Fenixuz
+    case novagram(index: Int, viewType: GeneralViewType, row: NovagramSettingsRow) // Novagram
 
     case whiteSpace(index:Int, height:CGFloat)
     
@@ -233,7 +233,7 @@ private enum AccountInfoEntry<Context: AccountContextProtocol> : TableItemListNo
             return .index(26)
         case let .attach(index, _, _):
             return .index(27 + index)
-        case let .novagram(_, _, row): return .index(row.id) // Fenixuz
+        case let .novagram(_, _, row): return .index(row.id) // Novagram
         case let .whiteSpace(index, _):
             return .index(1000 + index)
         }
@@ -299,7 +299,7 @@ private enum AccountInfoEntry<Context: AccountContextProtocol> : TableItemListNo
             return index
         case let .ask(index, _):
             return index
-        case let .novagram(index, _, _): return index // Fenixuz
+        case let .novagram(index, _, _): return index // Novagram
         case let .update(index, _, _):
             return index
         case let .whiteSpace(index, _):
@@ -441,11 +441,11 @@ private enum AccountInfoEntry<Context: AccountContextProtocol> : TableItemListNo
             return GeneralInteractedRowItem(initialSize, stableId: stableId, name: strings().privacySettingsActiveSessions, icon: theme.icons.settingsSessions, activeIcon: theme.icons.settingsSessionsActive, type: count > 0 ? .nextContext("\(count)") : .none, viewType: viewType, action: {
                 arguments.presentController(SettingsNavigationHooks.shared.makeRecentSessionsController(arguments.context), true)
             }, inset:NSEdgeInsets(left: 12, right: 12), customTheme: .initialize(theme, background: .clear))
-        case let .novagram(_, viewType, row): // Fenixuz
-            return GeneralInteractedRowItem(initialSize, stableId: stableId, name: row.title, icon: row.icon, activeIcon: row.icon, nameStyle: ControlStyle(font: .normal(.title), foregroundColor: row.titleColor ?? theme.colors.text), type: .next, viewType: viewType, action: { row.action(arguments.context, { arguments.presentController($0, true) }) }, inset: NSEdgeInsets(left: 12, right: 12), customTheme: .initialize(theme, background: .clear)) // Fenixuz
+        case let .novagram(_, viewType, row): // Novagram
+            return GeneralInteractedRowItem(initialSize, stableId: stableId, name: row.title, icon: row.icon, activeIcon: row.icon, nameStyle: ControlStyle(font: .normal(.title), foregroundColor: row.titleColor ?? theme.colors.text), type: .next, viewType: viewType, action: { row.action(arguments.context, { arguments.presentController($0, true) }) }, inset: NSEdgeInsets(left: 12, right: 12), customTheme: .initialize(theme, background: .clear)) // Novagram
         case .about:
             return GeneralInteractedRowItem(initialSize, stableId: stableId, name: APP_VERSION_STRING, nameStyle: ControlStyle(font: .normal(.text), foregroundColor: theme.colors.grayText), type: .none, viewType: .modern(position: .single, insets: .init(left: 14)), action: {
-                if NovagramSettingsHooks.shared.versionRowClick(arguments.context) { return } // Fenixuz
+                if NovagramSettingsHooks.shared.versionRowClick(arguments.context) { return } // Novagram
                 copyToClipboard(APP_VERSION_STRING)
                 showModalText(for: arguments.context.window, text: strings().contextAlertCopied)
             }, inset: NSEdgeInsets(left: 12, right: 12), customTheme: .init(backgroundColor: .clear, highlightColor: .clear))
@@ -586,7 +586,7 @@ private func accountInfoEntries<Context: AccountContextProtocol>(peerView:PeerVi
 //
 //
     
-    if !context.isSupport, NovagramSettingsHooks.shared.showInlineAccounts { // Fenixuz
+    if !context.isSupport, NovagramSettingsHooks.shared.showInlineAccounts { // Novagram
         for account in accounts {
             if account.account.id != context.account.id {
                 entries.append(.accountRecord(index: index, viewType: .singleItem, info: account))
@@ -605,7 +605,7 @@ private func accountInfoEntries<Context: AccountContextProtocol>(peerView:PeerVi
 //    let hasPremium = accounts.filter({ $0.peer.isPremium })
 //    let normalCount = accounts.filter({ !$0.peer.isPremium }).count
 
-    for row in NovagramSettingsHooks.shared.rows(context, .accounts) { entries.append(.novagram(index: index, viewType: .singleItem, row: row)); index += 1 } // Fenixuz
+    for row in NovagramSettingsHooks.shared.rows(context, .accounts) { entries.append(.novagram(index: index, viewType: .singleItem, row: row)); index += 1 } // Novagram
     if accounts.count < effectiveLimit, !context.isSupport {
         entries.append(.addAccount(index: index, accounts, viewType: .singleItem))
         index += 1
@@ -614,7 +614,7 @@ private func accountInfoEntries<Context: AccountContextProtocol>(peerView:PeerVi
     index += 1
     
     
-    for row in NovagramSettingsHooks.shared.rows(context, .top) { entries.append(.novagram(index: index, viewType: .singleItem, row: row)); index += 1 } // Fenixuz
+    for row in NovagramSettingsHooks.shared.rows(context, .top) { entries.append(.novagram(index: index, viewType: .singleItem, row: row)); index += 1 } // Novagram
     entries.append(.stories(index: index, viewType: .singleItem))
     index += 1
 
@@ -697,7 +697,7 @@ private func accountInfoEntries<Context: AccountContextProtocol>(peerView:PeerVi
         index += 1
     }
     
-    if !context.premiumIsBlocked, !NovagramSettingsHooks.shared.hidePaidRows { // Fenixuz
+    if !context.premiumIsBlocked, !NovagramSettingsHooks.shared.hidePaidRows { // Novagram
         entries.append(.premium(index: index, viewType: .singleItem))
         index += 1
         
@@ -1134,7 +1134,7 @@ open class AccountViewController<Context: AccountContextProtocol> : TelegramGene
         let atomicSize = self.atomicSize
         
 
-        let appUpdateState: Signal<Any?, NoError> = combineLatest(SettingsHooks.shared.appUpdateState(), NovagramSettingsHooks.shared.rowsUpdated(context)) |> map { $0.0 } // Fenixuz
+        let appUpdateState: Signal<Any?, NoError> = combineLatest(SettingsHooks.shared.appUpdateState(), NovagramSettingsHooks.shared.rowsUpdated(context)) |> map { $0.0 } // Novagram
         
         
         let sessionsCount = context.activeSessionsContext.state |> map {
@@ -1227,7 +1227,7 @@ open class AccountViewController<Context: AccountContextProtocol> : TelegramGene
     
     open override func navigationWillChangeController() {
         if let navigation = navigation as? MajorNavigationController {
-            if let id = NovagramSettingsHooks.shared.selectedRowId(navigation.controller), let item = tableView.item(stableId: AnyHashable(AccountInfoEntryId.index(id))) { _ = tableView.select(item: item) } else if (navigation.controller as? SettingsSectionController)?.settingsSection == .dataAndStorage { // Fenixuz
+            if let id = NovagramSettingsHooks.shared.selectedRowId(navigation.controller), let item = tableView.item(stableId: AnyHashable(AccountInfoEntryId.index(id))) { _ = tableView.select(item: item) } else if (navigation.controller as? SettingsSectionController)?.settingsSection == .dataAndStorage { // Novagram
                 if let item = tableView.item(stableId: AnyHashable(AccountInfoEntryId.index(10))) {
                     _ = tableView.select(item: item)
                 }

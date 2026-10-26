@@ -345,7 +345,7 @@ public final class ChatInputAttachButton: View, MorphHoldObserving {
                         self?.chatInteraction.attachFile(false)
                     }, itemImage: MenuAnimation.menu_file.value))
                 }
-                if let item = fenixuzRoundVideoMenuItem(chatInteraction: chatInteraction) { items.append(item) } // Fenixuz
+                if let item = novagramRoundVideoMenuItem(chatInteraction: chatInteraction) { items.append(item) } // Novagram
 
 
                 if let channel = peer as? TelegramChannel {

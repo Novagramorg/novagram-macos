@@ -7,7 +7,7 @@ let package = Package(
     platforms: [.macOS(.v10_13)],
     products: [.library(name: "SidebarUI", targets: ["SidebarUI"])],
     dependencies: [
-        .package(name: "FenixuzCore", path: "../FenixuzCore"), // Fenixuz
+        .package(name: "NovagramCore", path: "../NovagramCore"), // Novagram
         .package(name: "InputDataUI", path: "../InputDataUI"),
         .package(name: "GeneralRows", path: "../GeneralRows"),
         .package(name: "TelegramContext", path: "../TelegramContext"),
@@ -24,7 +24,7 @@ let package = Package(
     ],
     targets: [
         .target(name: "SidebarUI", dependencies: [
-            .product(name: "FenixuzCore", package: "FenixuzCore", condition: nil), // Fenixuz
+            .product(name: "NovagramCore", package: "NovagramCore", condition: nil), // Novagram
             .product(name: "InputDataUI", package: "InputDataUI"),
             .product(name: "GeneralRows", package: "GeneralRows"),
             .product(name: "TelegramContext", package: "TelegramContext"),

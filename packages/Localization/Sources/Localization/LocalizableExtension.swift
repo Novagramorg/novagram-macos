@@ -31,7 +31,7 @@ extension Double {
     return string
 }
 
-public var localizedValueTransform: (String) -> String = { $0 } // Fenixuz
+public var localizedValueTransform: (String) -> String = { $0 } // Novagram
 
 private func dictFromLocalization(_ value: Localization) -> [String: String] {
     var dict: [String: String] = [:]
@@ -58,7 +58,7 @@ private func dictFromLocalization(_ value: Localization) -> [String: String] {
             dict["\(key)_other"] = other
         }
     }
-    return dict.mapValues(localizedValueTransform) // Fenixuz
+    return dict.mapValues(localizedValueTransform) // Novagram
 }
 
 public func applyUILocalization(_ settings: LocalizationSettings) {
@@ -264,13 +264,13 @@ internal func _LocalizedStringFor(_ key: String, primary: Language, secondary: L
         if returnNilIfMissing && resolved == key {
             return nil
         }
-        return localizedValueTransform(resolved) // Fenixuz
+        return localizedValueTransform(resolved) // Novagram
     }
     let resolved = NSLocalizedString(key, comment: "")
     if returnNilIfMissing && resolved == key {
         return nil
     }
-    return localizedValueTransform(resolved) // Fenixuz
+    return localizedValueTransform(resolved) // Novagram
 }
 
 public func _NSLocalizedString(_ key: String) -> String {

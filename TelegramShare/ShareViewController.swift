@@ -11,7 +11,7 @@ import Localization
 import FoundationUtils
 import RLottie
 import PasscodeCore
-import FenixuzShare // Fenixuz
+import NovagramShare // Novagram
 
 class ShareViewController: NSViewController {
 
@@ -66,7 +66,7 @@ class ShareViewController: NSViewController {
         }).start()
         localizationSemaphore.wait()
         
-        localizedValueTransform = FenixuzBranding.rebrand // Fenixuz
+        localizedValueTransform = NovagramBranding.rebrand // Novagram
         if let localization = localization {
             applyUILocalization(localization)
         }

@@ -6,7 +6,7 @@ import TelegramTheme
 
 public let clown: String = "🤡"
 
-public let itunesAppLink = "https://apps.apple.com/app/id6768202244" // Fenixuz
+public let itunesAppLink = "https://apps.apple.com/app/id6768202244" // Novagram
 public let XTRSTAR: String = "⭐️"
 public var GOLD: NSColor {
     return theme.colors.isDark ? NSColor(0xF5C555) : NSColor(0xD2720B)

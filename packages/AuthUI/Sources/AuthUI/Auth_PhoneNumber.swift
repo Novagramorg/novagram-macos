@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Foundation
 import TGUIKit
 import AppKit
@@ -15,7 +15,7 @@ import TelegramUtils
 import PhoneInputUI
 
 public final class Auth_LoginHeader : View {
-    private let logo: NSImageView = NSImageView(frame: Auth_Insets.logoSize.bounds) // Fenixuz
+    private let logo: NSImageView = NSImageView(frame: Auth_Insets.logoSize.bounds) // Novagram
     private let header: TextView = TextView()
     private let desc: TextView = TextView()
     private var descAttr: NSAttributedString?
@@ -53,8 +53,8 @@ public final class Auth_LoginHeader : View {
     }
     
     private func updateLottie() {
-        self.logo.image = NSApp.applicationIconImage // Fenixuz
-        self.logo.imageScaling = .scaleProportionallyUpOrDown // Fenixuz
+        self.logo.image = NSApp.applicationIconImage // Novagram
+        self.logo.imageScaling = .scaleProportionallyUpOrDown // Novagram
         
     }
     
@@ -102,8 +102,8 @@ public final class Auth_PhoneNumberView : View {
 
     private var takeToken:(()->Void)?
     private var takeNext:((String)->Void)?
-    fileprivate let botTokenButton = TextButton() // Fenixuz
-    fileprivate var takeBotToken: (() -> Void)? // Fenixuz
+    fileprivate let botTokenButton = TextButton() // Novagram
+    fileprivate var takeBotToken: (() -> Void)? // Novagram
     private var loginWithPasskey:(()->Void)?
 
     private var locked: Bool = false
@@ -138,7 +138,7 @@ public final class Auth_PhoneNumberView : View {
         }, for: .Click)
 
         passkeyButton.isHidden = true
-        if FenixuzLoginFeatures.botToken { container.addSubview(botTokenButton); botTokenButton.set(handler: { [weak self] _ in self?.takeBotToken?() }, for: .Click) } // Fenixuz
+        if NovagramLoginFeatures.botToken { container.addSubview(botTokenButton); botTokenButton.set(handler: { [weak self] _ in self?.takeBotToken?() }, for: .Click) } // Novagram
 
         addSubview(container)
 
@@ -169,7 +169,7 @@ public final class Auth_PhoneNumberView : View {
 
         passkeyButton.scaleOnClick = true
         qrButton.scaleOnClick = true
-        fenixuzStyleBotTokenLink(botTokenButton) // Fenixuz
+        novagramStyleBotTokenLink(botTokenButton) // Novagram
         
         nextView.updateLocalizationAndTheme(theme: theme)
 
@@ -183,7 +183,7 @@ public final class Auth_PhoneNumberView : View {
 
         var totalHeight = self.header.height + Auth_Insets.betweenHeader + input.frame.height + Auth_Insets.betweenNextView + Auth_Insets.nextHeight
         totalHeight += 10 + passkeyButton.frame.height
-        totalHeight += fenixuzBotTokenLinkHeight(botTokenButton) // Fenixuz
+        totalHeight += novagramBotTokenLinkHeight(botTokenButton) // Novagram
 
 
         self.container.setFrameSize(NSMakeSize(frame.width, totalHeight))
@@ -197,7 +197,7 @@ public final class Auth_PhoneNumberView : View {
         self.nextView.centerX(y: self.input.frame.maxY + Auth_Insets.betweenNextView)
 
         passkeyButton.centerX(y: qrButton.frame.maxY - 10)
-        botTokenButton.centerX(y: max(nextView.frame.maxY, passkeyButton.frame.maxY) + 10) // Fenixuz
+        botTokenButton.centerX(y: max(nextView.frame.maxY, passkeyButton.frame.maxY) + 10) // Novagram
 
         self.container.center()
     }
@@ -308,7 +308,7 @@ public final class Auth_PhoneNumberController: GenericViewController<Auth_PhoneN
     public func set(number: String) {
         self.genericView.set(number)
     }
-    func fenixuzSetTakeBotToken(_ f: @escaping () -> Void) { genericView.takeBotToken = f } // Fenixuz
+    func novagramSetTakeBotToken(_ f: @escaping () -> Void) { genericView.takeBotToken = f } // Novagram
     
     public override func firstResponder() -> NSResponder? {
         return genericView.firstResponder

@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Foundation
 import Cocoa
 import TGUIKit
@@ -589,8 +589,8 @@ public func chatMenuItems(for message: Message, entry: ChatHistoryEntry?, textLa
         }
 
         if let adAttribute = data.message.adAttribute {
-            if let items = NovagramAdsHooks.shared.menuItems(adAttribute.opaqueId, context.window) { return items } // Fenixuz
-            let isNovagramAd = NovagramAdsHooks.isOurs(opaqueId: adAttribute.opaqueId) // Fenixuz
+            if let items = NovagramAdsHooks.shared.menuItems(adAttribute.opaqueId, context.window) { return items } // Novagram
+            let isNovagramAd = NovagramAdsHooks.isOurs(opaqueId: adAttribute.opaqueId) // Novagram
             
             if adAttribute.sponsorInfo != nil || adAttribute.additionalInfo != nil {
                 
@@ -657,7 +657,7 @@ public func chatMenuItems(for message: Message, entry: ChatHistoryEntry?, textLa
 
             }
             
-            if !context.premiumIsBlocked && !isNovagramAd { // Fenixuz
+            if !context.premiumIsBlocked && !isNovagramAd { // Novagram
                 items.append(ContextMenuItem(strings().chatContextHideAd, handler: {
                     if context.isPremium, let opaqueId = message.adAttribute?.opaqueId {
                         _ = context.engine.accountData.updateAdMessagesEnabled(enabled: false).startStandalone()
@@ -1258,7 +1258,7 @@ public func chatMenuItems(for message: Message, entry: ChatHistoryEntry?, textLa
            
             forwardItem.submenu = forwardMenu
             secondBlock.append(forwardItem)
-            secondBlock.append(contentsOf: fenixuzForwardMenuItems(message: message, chatInteraction: data.chatInteraction)) // Fenixuz
+            secondBlock.append(contentsOf: novagramForwardMenuItems(message: message, chatInteraction: data.chatInteraction)) // Novagram
         }
         /*
          else if data.message.id.peerId.namespace == Namespaces.Peer.SecretChat, !data.message.containsSecretMedia {
@@ -1589,7 +1589,7 @@ public func chatMenuItems(for message: Message, entry: ChatHistoryEntry?, textLa
                 result = strings().chatContextEditedAt(string)
             }
             sevenBlock.append(ContextMenuItem(result, itemImage: MenuAnimation.menu_edited.value))
-            sevenBlock.append(fenixuzEditedHistoryMenuItem(message: message, chatInteraction: data.chatInteraction)) // Fenixuz
+            sevenBlock.append(novagramEditedHistoryMenuItem(message: message, chatInteraction: data.chatInteraction)) // Novagram
         }
         
         

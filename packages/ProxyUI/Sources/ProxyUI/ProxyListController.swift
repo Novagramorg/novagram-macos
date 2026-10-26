@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -246,7 +246,7 @@ public func proxyListController(accountManager: AccountManager<TelegramAccountMa
         updateDisposable.set(updateProxySettingsInteractively(accountManager: accountManager, {$0.withUpdatedUseForCalls(enable)}).start())
     })
     
-    let controller = InputDataController(dataSignal: combineLatest(queue: prepareQueue, statePromise.get(), network.connectionStatus, statuses.statuses(), appearanceSignal, FenixuzAutoProxyManager.shared.uiState.get()) |> map {proxyListSettingsEntries($0.0, status: $0.1, statuses: $0.2, arguments: arguments, showUseCalls: showUseCalls, novagramProxy: $0.4, accountManager: accountManager)} |> map { InputDataSignalValue(entries: $0) }, title: strings().proxySettingsTitle, validateData: { // Novagram
+    let controller = InputDataController(dataSignal: combineLatest(queue: prepareQueue, statePromise.get(), network.connectionStatus, statuses.statuses(), appearanceSignal, NovagramAutoProxyManager.shared.uiState.get()) |> map {proxyListSettingsEntries($0.0, status: $0.1, statuses: $0.2, arguments: arguments, showUseCalls: showUseCalls, novagramProxy: $0.4, accountManager: accountManager)} |> map { InputDataSignalValue(entries: $0) }, title: strings().proxySettingsTitle, validateData: { // Novagram
         data in
         
         if data[_p_id_add] != nil {

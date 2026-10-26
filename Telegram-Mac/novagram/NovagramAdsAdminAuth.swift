@@ -11,14 +11,14 @@
 //  binary, never the credentials. The rounds make an offline guess from the binary expensive; the UI
 //  also throttles: 5 wrong tries lock the prompt for 5 minutes. The typed values are never stored.
 //
-//  Port of iOS submodules/Fenixuz/ProMessager/Sources/FenixAdsAdminAuth.swift — same salt, rounds and
+//  Port of iOS submodules/Novagram/ProMessager/Sources/NovagramAdsAdminAuth.swift — same salt, rounds and
 //  digest, so one admin credential works on both apps. Same UserDefaults keys (pro_messager suite).
 //
 
 import Cocoa
 import CommonCrypto
 import TGUIKit
-import FenixuzCore
+import NovagramCore
 
 enum NovagramAdsAdminAuth {
     private static let saltHex = "6ced8c7f8279470c768f8739196a445b"
@@ -146,7 +146,7 @@ enum NovagramAdsAdminAuth {
     /// Asks for the admin login + password. `completion(true)` only on a match; cancel, a wrong entry and
     /// an active lockout all end in `completion(false)` (after explaining why). Main thread.
     static func presentPrompt(window: Window, completion: @escaping (Bool) -> Void) {
-        let strings = FenixuzL10n.current
+        let strings = NovagramL10n.current
         if let lockedUntil {
             let minutes = max(1, Int((lockedUntil.timeIntervalSinceNow / secondsPerMinute).rounded(.up)))
             alert(for: window, info: strings.ads_admin_locked(minutes: minutes))

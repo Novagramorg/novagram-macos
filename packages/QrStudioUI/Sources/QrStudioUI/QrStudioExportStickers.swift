@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Foundation
 import AppKit
 import ImageIO
@@ -33,7 +33,7 @@ final class QrStudioExportSticker {
 private let qrStudioExportMaxFrames = 600
 
 func qrStudioDecodeExportPlane(pixelSide: Int) -> QrStudioExportSticker? {
-    if let logo = FenixuzQrLogo.cgImage(pixelSide: pixelSide, ringFraction: 0.12) { return QrStudioExportSticker(frames: [logo], period: 0) } // Fenixuz
+    if let logo = NovagramQrLogo.cgImage(pixelSide: pixelSide, ringFraction: 0.12) { return QrStudioExportSticker(frames: [logo], period: 0) } // Novagram
     guard pixelSide > 0, let data = NSDataAsset(name: "PlaneLogoPlain")?.data else {
         return nil
     }

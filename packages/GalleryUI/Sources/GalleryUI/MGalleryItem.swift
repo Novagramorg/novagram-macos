@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import InputTextView
 import Postbox
@@ -608,7 +608,7 @@ public class MGalleryItem: NSObject, Comparable, Identifiable {
         self.entry = entry
         self.context = context
         self._pagerSize = pagerSize
-        if let message = entry.message, message.text.isEmpty, let adAttribute = message.adAttribute { _ = NovagramAdsHooks.shared.recordVideoOpenIfOurs(adAttribute.opaqueId) } // Fenixuz
+        if let message = entry.message, message.text.isEmpty, let adAttribute = message.adAttribute { _ = NovagramAdsHooks.shared.recordVideoOpenIfOurs(adAttribute.opaqueId) } // Novagram
         if let message = entry.message, !message.text.isEmpty, !(message.anyMedia is TelegramMediaWebpage) {
             
             var text: String = message.text
@@ -625,7 +625,7 @@ public class MGalleryItem: NSObject, Comparable, Identifiable {
                 }
             }
             
-            if let adAttribute = message.adAttribute, !NovagramAdsHooks.shared.recordVideoOpenIfOurs(adAttribute.opaqueId) { // Fenixuz
+            if let adAttribute = message.adAttribute, !NovagramAdsHooks.shared.recordVideoOpenIfOurs(adAttribute.opaqueId) { // Novagram
                 context.engine.messages.markAdAction(opaqueId: adAttribute.opaqueId, media: true, fullscreen: false)
             }
             

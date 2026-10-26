@@ -11,7 +11,7 @@
 //    - the configuration (same environment as the ads code, per-account
 //      keychain key, app language and accent) and the separate "Ads Analytics" window
 //
-//  Telegram-owned hooks are in AccountViewController.swift (see FENIXUZ_HOOKS.md).
+//  Telegram-owned hooks are in AccountViewController.swift (see NOVAGRAM_HOOKS.md).
 //
 
 import Cocoa

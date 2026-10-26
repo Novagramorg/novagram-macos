@@ -22,25 +22,25 @@
 		FE50AD500000000000000033 /* NovagramAdsGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000032 /* NovagramAdsGate.swift */; };
 		FE50AD500000000000000035 /* NovagramAdsAdminAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000034 /* NovagramAdsAdminAuth.swift */; };
 		FE50AD500000000000000037 /* NovagramAdsHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000036 /* NovagramAdsHooksInstall.swift */; };
-		FE304E0B000000000000002D /* FenixuzBlockingPurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002C /* FenixuzBlockingPurchaseManager.swift */; };
+		FE304E0B000000000000002D /* NovagramBlockingPurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002C /* NovagramBlockingPurchaseManager.swift */; };
 		FE304E0B000000000000002B /* NovagramSettingsLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002A /* NovagramSettingsLinks.swift */; };
 		FE304E0B0000000000000029 /* NovagramSettingsHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */; };
-		FE304E0B0000000000000003 /* FenixuzSettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000002 /* FenixuzSettingsController.swift */; };
-		FE304E0B0000000000000005 /* FenixuzAboutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000004 /* FenixuzAboutController.swift */; };
-		FE304E0B0000000000000007 /* FenixuzTipsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000006 /* FenixuzTipsController.swift */; };
-		FE304E0B0000000000000009 /* FenixuzAutoTextController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000008 /* FenixuzAutoTextController.swift */; };
-		FE304E0B000000000000000B /* FenixuzAutoTranslateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000000A /* FenixuzAutoTranslateController.swift */; };
-		FE304E0B000000000000000D /* FenixuzTextStyleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000000C /* FenixuzTextStyleController.swift */; };
-		FE304E0B000000000000000F /* FenixuzTranslationLanguageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000000E /* FenixuzTranslationLanguageController.swift */; };
-		FE304E0B0000000000000011 /* FenixuzAnalyticsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000010 /* FenixuzAnalyticsController.swift */; };
+		FE304E0B0000000000000003 /* NovagramSettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000002 /* NovagramSettingsController.swift */; };
+		FE304E0B0000000000000005 /* NovagramAboutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000004 /* NovagramAboutController.swift */; };
+		FE304E0B0000000000000007 /* NovagramTipsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000006 /* NovagramTipsController.swift */; };
+		FE304E0B0000000000000009 /* NovagramAutoTextController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000008 /* NovagramAutoTextController.swift */; };
+		FE304E0B000000000000000B /* NovagramAutoTranslateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000000A /* NovagramAutoTranslateController.swift */; };
+		FE304E0B000000000000000D /* NovagramTextStyleController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000000C /* NovagramTextStyleController.swift */; };
+		FE304E0B000000000000000F /* NovagramTranslationLanguageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000000E /* NovagramTranslationLanguageController.swift */; };
+		FE304E0B0000000000000011 /* NovagramAnalyticsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000010 /* NovagramAnalyticsController.swift */; };
 		FE304E0B0000000000000013 /* NovagramBotsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000012 /* NovagramBotsController.swift */; };
-		FE304E0B0000000000000015 /* FenixAccountsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000014 /* FenixAccountsController.swift */; };
-		FE304E0B0000000000000017 /* FenixuzEditedHistoryController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000016 /* FenixuzEditedHistoryController.swift */; };
-		FE304E0B0000000000000019 /* FenixuzUnreadReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000018 /* FenixuzUnreadReminderManager.swift */; };
-		FE304E0B000000000000001B /* FenixuzSuggestedFolders.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000001A /* FenixuzSuggestedFolders.swift */; };
-		FE304E0B000000000000001D /* FenixuzAnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000001C /* FenixuzAnalyticsManager.swift */; };
-		FE304E0B000000000000001F /* FenixuzStatisticsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000001E /* FenixuzStatisticsClient.swift */; };
-		FE304E0B0000000000000021 /* FenixuzStatisticsConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000020 /* FenixuzStatisticsConfig.swift */; };
+		FE304E0B0000000000000015 /* NovagramAccountsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000014 /* NovagramAccountsController.swift */; };
+		FE304E0B0000000000000017 /* NovagramEditedHistoryController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000016 /* NovagramEditedHistoryController.swift */; };
+		FE304E0B0000000000000019 /* NovagramUnreadReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000018 /* NovagramUnreadReminderManager.swift */; };
+		FE304E0B000000000000001B /* NovagramSuggestedFolders.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000001A /* NovagramSuggestedFolders.swift */; };
+		FE304E0B000000000000001D /* NovagramAnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000001C /* NovagramAnalyticsManager.swift */; };
+		FE304E0B000000000000001F /* NovagramStatisticsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000001E /* NovagramStatisticsClient.swift */; };
+		FE304E0B0000000000000021 /* NovagramStatisticsConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000020 /* NovagramStatisticsConfig.swift */; };
 		FE304E0B0000000000000023 /* novagram_bots.json in Resources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000022 /* novagram_bots.json */; };
 		FE304E0B0000000000000025 /* russia_proxies.txt in Resources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000024 /* russia_proxies.txt */; };
 		FE304E0B0000000000000027 /* NovagramHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000026 /* NovagramHooksInstall.swift */; };
@@ -954,8 +954,8 @@
 		D48F2B4F431948C6A001328C /* InactiveChannelsUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3DB8EBB382994860A7329BE8 /* InactiveChannelsUI */; };
 		1ADD8BCCDC6049B68CE86BFE /* SimilarPeersHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4793112A0E44048B603D019 /* SimilarPeersHooksInstall.swift */; };
 		53C2655B791449A18A453BBD /* GroupsInCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = 8C849FFE3CF443CEAAFD9A65 /* GroupsInCommonUI */; };
-		FE10DEC04E14C190FEFE0003 /* FenixuzCore in Frameworks */ = {isa = PBXBuildFile; productRef = FE10DEC04E14C190FEFE0002 /* FenixuzCore */; };
-		FE10DEC04E14C190FEFE0004 /* FenixuzShare in Frameworks */ = {isa = PBXBuildFile; productRef = FE10DEC04E14C190FEFE0005 /* FenixuzShare */; };
+		FE10DEC04E14C190FEFE0003 /* NovagramCore in Frameworks */ = {isa = PBXBuildFile; productRef = FE10DEC04E14C190FEFE0002 /* NovagramCore */; };
+		FE10DEC04E14C190FEFE0004 /* NovagramShare in Frameworks */ = {isa = PBXBuildFile; productRef = FE10DEC04E14C190FEFE0005 /* NovagramShare */; };
 		5105D43394A54BCB8773E53C /* QrStudioUI in Frameworks */ = {isa = PBXBuildFile; productRef = 019B2BAFB79C48F1A4A5666E /* QrStudioUI */; };
 		7110771E0000000000000004 /* TLottie in Frameworks */ = {isa = PBXBuildFile; productRef = 7110771E0000000000000002 /* TLottie */; };
 		7110771E0000000000000005 /* TLottie in Frameworks */ = {isa = PBXBuildFile; productRef = 7110771E0000000000000003 /* TLottie */; };
@@ -1082,25 +1082,25 @@
 		FE50AD500000000000000032 /* NovagramAdsGate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdsGate.swift; sourceTree = "<group>"; };
 		FE50AD500000000000000034 /* NovagramAdsAdminAuth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdsAdminAuth.swift; sourceTree = "<group>"; };
 		FE50AD500000000000000036 /* NovagramAdsHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdsHooksInstall.swift; sourceTree = "<group>"; };
-		FE304E0B000000000000002C /* FenixuzBlockingPurchaseManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzBlockingPurchaseManager.swift; sourceTree = "<group>"; };
+		FE304E0B000000000000002C /* NovagramBlockingPurchaseManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramBlockingPurchaseManager.swift; sourceTree = "<group>"; };
 		FE304E0B000000000000002A /* NovagramSettingsLinks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsLinks.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsHooksInstall.swift; sourceTree = "<group>"; };
-		FE304E0B0000000000000002 /* FenixuzSettingsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzSettingsController.swift; sourceTree = "<group>"; };
-		FE304E0B0000000000000004 /* FenixuzAboutController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzAboutController.swift; sourceTree = "<group>"; };
-		FE304E0B0000000000000006 /* FenixuzTipsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzTipsController.swift; sourceTree = "<group>"; };
-		FE304E0B0000000000000008 /* FenixuzAutoTextController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzAutoTextController.swift; sourceTree = "<group>"; };
-		FE304E0B000000000000000A /* FenixuzAutoTranslateController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzAutoTranslateController.swift; sourceTree = "<group>"; };
-		FE304E0B000000000000000C /* FenixuzTextStyleController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzTextStyleController.swift; sourceTree = "<group>"; };
-		FE304E0B000000000000000E /* FenixuzTranslationLanguageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzTranslationLanguageController.swift; sourceTree = "<group>"; };
-		FE304E0B0000000000000010 /* FenixuzAnalyticsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzAnalyticsController.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000002 /* NovagramSettingsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsController.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000004 /* NovagramAboutController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAboutController.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000006 /* NovagramTipsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramTipsController.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000008 /* NovagramAutoTextController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAutoTextController.swift; sourceTree = "<group>"; };
+		FE304E0B000000000000000A /* NovagramAutoTranslateController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAutoTranslateController.swift; sourceTree = "<group>"; };
+		FE304E0B000000000000000C /* NovagramTextStyleController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramTextStyleController.swift; sourceTree = "<group>"; };
+		FE304E0B000000000000000E /* NovagramTranslationLanguageController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramTranslationLanguageController.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000010 /* NovagramAnalyticsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAnalyticsController.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000012 /* NovagramBotsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramBotsController.swift; sourceTree = "<group>"; };
-		FE304E0B0000000000000014 /* FenixAccountsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixAccountsController.swift; sourceTree = "<group>"; };
-		FE304E0B0000000000000016 /* FenixuzEditedHistoryController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzEditedHistoryController.swift; sourceTree = "<group>"; };
-		FE304E0B0000000000000018 /* FenixuzUnreadReminderManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzUnreadReminderManager.swift; sourceTree = "<group>"; };
-		FE304E0B000000000000001A /* FenixuzSuggestedFolders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzSuggestedFolders.swift; sourceTree = "<group>"; };
-		FE304E0B000000000000001C /* FenixuzAnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzAnalyticsManager.swift; sourceTree = "<group>"; };
-		FE304E0B000000000000001E /* FenixuzStatisticsClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzStatisticsClient.swift; sourceTree = "<group>"; };
-		FE304E0B0000000000000020 /* FenixuzStatisticsConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzStatisticsConfig.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000014 /* NovagramAccountsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAccountsController.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000016 /* NovagramEditedHistoryController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramEditedHistoryController.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000018 /* NovagramUnreadReminderManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramUnreadReminderManager.swift; sourceTree = "<group>"; };
+		FE304E0B000000000000001A /* NovagramSuggestedFolders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSuggestedFolders.swift; sourceTree = "<group>"; };
+		FE304E0B000000000000001C /* NovagramAnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAnalyticsManager.swift; sourceTree = "<group>"; };
+		FE304E0B000000000000001E /* NovagramStatisticsClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramStatisticsClient.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000020 /* NovagramStatisticsConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramStatisticsConfig.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000022 /* novagram_bots.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = novagram_bots.json; sourceTree = "<group>"; };
 		FE304E0B0000000000000024 /* russia_proxies.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = russia_proxies.txt; sourceTree = "<group>"; };
 		FE304E0B0000000000000026 /* NovagramHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramHooksInstall.swift; sourceTree = "<group>"; };
@@ -2024,7 +2024,7 @@
 		0F608853A24F468E98DBF2D8 /* InactiveChannelsUI */ = {isa = PBXFileReference; lastKnownFileType = folder; name = InactiveChannelsUI; path = packages/InactiveChannelsUI; sourceTree = "<group>"; };
 		C4793112A0E44048B603D019 /* SimilarPeersHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimilarPeersHooksInstall.swift; sourceTree = "<group>"; };
 		2382F66FCB03472CB031B1D7 /* GroupsInCommonUI */ = {isa = PBXFileReference; lastKnownFileType = folder; name = GroupsInCommonUI; path = packages/GroupsInCommonUI; sourceTree = "<group>"; };
-		FE10DEC04E14C190FEFE0001 /* FenixuzCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = FenixuzCore; path = packages/FenixuzCore; sourceTree = "<group>"; };
+		FE10DEC04E14C190FEFE0001 /* NovagramCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = NovagramCore; path = packages/NovagramCore; sourceTree = "<group>"; };
 		FE10DEC04E14C190FFFFFFF0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		3735CDD1DC42418CBDF358F5 /* QrStudioUI */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QrStudioUI; path = packages/QrStudioUI; sourceTree = "<group>"; };
 		7110771E0000000000000001 /* TLottie */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TLottie; path = packages/TLottie; sourceTree = "<group>"; };
@@ -2083,7 +2083,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FE10DEC04E14C190FEFE0004 /* FenixuzShare in Frameworks */,
+				FE10DEC04E14C190FEFE0004 /* NovagramShare in Frameworks */,
 				9AB6DAD8DF0C1248CC621AFB /* PasscodeCore in Frameworks */,
 				C20617830079F8F7D835E5CB /* ShortPeerRowShare in Frameworks */,
 				2037C058F06EC3DBD00E2F08 /* AvatarUIShare in Frameworks */,
@@ -2158,7 +2158,7 @@
 				07EDD2B662264351B2D102DE /* EditTagLabelUI in Frameworks */,
 				7BE4259A2C3D4D73BBBC2302 /* SelectCountryUI in Frameworks */,
 				53C2655B791449A18A453BBD /* GroupsInCommonUI in Frameworks */,
-				FE10DEC04E14C190FEFE0003 /* FenixuzCore in Frameworks */,
+				FE10DEC04E14C190FEFE0003 /* NovagramCore in Frameworks */,
 				FE50AD500000000000000012 /* NovagramAds in Frameworks */,
 				FE50AD500000000000000013 /* NovagramInsights in Frameworks */,
 				FE50AD500000000000000014 /* NovagramInsightsUI in Frameworks */,
@@ -2390,7 +2390,7 @@
 		FE304E0B0000000000000001 /* novagram */ = {
 			isa = PBXGroup;
 			children = (
-				FE304E0B000000000000002C /* FenixuzBlockingPurchaseManager.swift */,
+				FE304E0B000000000000002C /* NovagramBlockingPurchaseManager.swift */,
 				FE50AD500000000000000020 /* NovagramAdsCenter.swift */,
 				FE50AD500000000000000022 /* NovagramAdActions.swift */,
 				FE50AD500000000000000024 /* NovagramAdMenu.swift */,
@@ -2403,22 +2403,22 @@
 				FE50AD500000000000000032 /* NovagramAdsGate.swift */,
 				FE50AD500000000000000034 /* NovagramAdsAdminAuth.swift */,
 				FE304E0B000000000000002A /* NovagramSettingsLinks.swift */,
-				FE304E0B0000000000000002 /* FenixuzSettingsController.swift */,
-				FE304E0B0000000000000004 /* FenixuzAboutController.swift */,
-				FE304E0B0000000000000006 /* FenixuzTipsController.swift */,
-				FE304E0B0000000000000008 /* FenixuzAutoTextController.swift */,
-				FE304E0B000000000000000A /* FenixuzAutoTranslateController.swift */,
-				FE304E0B000000000000000C /* FenixuzTextStyleController.swift */,
-				FE304E0B000000000000000E /* FenixuzTranslationLanguageController.swift */,
-				FE304E0B0000000000000010 /* FenixuzAnalyticsController.swift */,
+				FE304E0B0000000000000002 /* NovagramSettingsController.swift */,
+				FE304E0B0000000000000004 /* NovagramAboutController.swift */,
+				FE304E0B0000000000000006 /* NovagramTipsController.swift */,
+				FE304E0B0000000000000008 /* NovagramAutoTextController.swift */,
+				FE304E0B000000000000000A /* NovagramAutoTranslateController.swift */,
+				FE304E0B000000000000000C /* NovagramTextStyleController.swift */,
+				FE304E0B000000000000000E /* NovagramTranslationLanguageController.swift */,
+				FE304E0B0000000000000010 /* NovagramAnalyticsController.swift */,
 				FE304E0B0000000000000012 /* NovagramBotsController.swift */,
-				FE304E0B0000000000000014 /* FenixAccountsController.swift */,
-				FE304E0B0000000000000016 /* FenixuzEditedHistoryController.swift */,
-				FE304E0B0000000000000018 /* FenixuzUnreadReminderManager.swift */,
-				FE304E0B000000000000001A /* FenixuzSuggestedFolders.swift */,
-				FE304E0B000000000000001C /* FenixuzAnalyticsManager.swift */,
-				FE304E0B000000000000001E /* FenixuzStatisticsClient.swift */,
-				FE304E0B0000000000000020 /* FenixuzStatisticsConfig.swift */,
+				FE304E0B0000000000000014 /* NovagramAccountsController.swift */,
+				FE304E0B0000000000000016 /* NovagramEditedHistoryController.swift */,
+				FE304E0B0000000000000018 /* NovagramUnreadReminderManager.swift */,
+				FE304E0B000000000000001A /* NovagramSuggestedFolders.swift */,
+				FE304E0B000000000000001C /* NovagramAnalyticsManager.swift */,
+				FE304E0B000000000000001E /* NovagramStatisticsClient.swift */,
+				FE304E0B0000000000000020 /* NovagramStatisticsConfig.swift */,
 				FE304E0B0000000000000022 /* novagram_bots.json */,
 				FE304E0B0000000000000024 /* russia_proxies.txt */,
 			);
@@ -2877,7 +2877,7 @@
 				F70986F290D0462F9CEF770F /* EditTagLabelUI */,
 				447E693028674930A9722A3F /* SelectCountryUI */,
 				2382F66FCB03472CB031B1D7 /* GroupsInCommonUI */,
-				FE10DEC04E14C190FEFE0001 /* FenixuzCore */,
+				FE10DEC04E14C190FEFE0001 /* NovagramCore */,
 				3735CDD1DC42418CBDF358F5 /* QrStudioUI */,
 				7110771E0000000000000001 /* TLottie */,
 				2314496AC5714CD1BDBAF6C8 /* CrashRecoveryUI */,
@@ -3754,7 +3754,7 @@
 			);
 			name = TelegramShare;
 			packageProductDependencies = (
-				FE10DEC04E14C190FEFE0005 /* FenixuzShare */,
+				FE10DEC04E14C190FEFE0005 /* NovagramShare */,
 				8108E8A15C9EE293636E539F /* PasscodeCore */,
 				14388EF519B427EE2034DD9C /* ShortPeerRowShare */,
 				2DBE492FD219DCD254A93957 /* AvatarUIShare */,
@@ -3834,7 +3834,7 @@
 				7C9B791DE6E3430FADA989DF /* EditTagLabelUI */,
 				857E4375FE0F41E9A737B925 /* SelectCountryUI */,
 				8C849FFE3CF443CEAAFD9A65 /* GroupsInCommonUI */,
-				FE10DEC04E14C190FEFE0002 /* FenixuzCore */,
+				FE10DEC04E14C190FEFE0002 /* NovagramCore */,
 				FE50AD500000000000000002 /* NovagramAds */,
 				FE50AD500000000000000003 /* NovagramInsights */,
 				FE50AD500000000000000004 /* NovagramInsightsUI */,
@@ -4765,7 +4765,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FE304E0B000000000000002D /* FenixuzBlockingPurchaseManager.swift in Sources */,
+				FE304E0B000000000000002D /* NovagramBlockingPurchaseManager.swift in Sources */,
 				FE50AD500000000000000021 /* NovagramAdsCenter.swift in Sources */,
 				FE50AD500000000000000023 /* NovagramAdActions.swift in Sources */,
 				FE50AD500000000000000025 /* NovagramAdMenu.swift in Sources */,
@@ -4780,22 +4780,22 @@
 				FE50AD500000000000000037 /* NovagramAdsHooksInstall.swift in Sources */,
 				FE304E0B000000000000002B /* NovagramSettingsLinks.swift in Sources */,
 				FE304E0B0000000000000029 /* NovagramSettingsHooksInstall.swift in Sources */,
-				FE304E0B0000000000000003 /* FenixuzSettingsController.swift in Sources */,
-				FE304E0B0000000000000005 /* FenixuzAboutController.swift in Sources */,
-				FE304E0B0000000000000007 /* FenixuzTipsController.swift in Sources */,
-				FE304E0B0000000000000009 /* FenixuzAutoTextController.swift in Sources */,
-				FE304E0B000000000000000B /* FenixuzAutoTranslateController.swift in Sources */,
-				FE304E0B000000000000000D /* FenixuzTextStyleController.swift in Sources */,
-				FE304E0B000000000000000F /* FenixuzTranslationLanguageController.swift in Sources */,
-				FE304E0B0000000000000011 /* FenixuzAnalyticsController.swift in Sources */,
+				FE304E0B0000000000000003 /* NovagramSettingsController.swift in Sources */,
+				FE304E0B0000000000000005 /* NovagramAboutController.swift in Sources */,
+				FE304E0B0000000000000007 /* NovagramTipsController.swift in Sources */,
+				FE304E0B0000000000000009 /* NovagramAutoTextController.swift in Sources */,
+				FE304E0B000000000000000B /* NovagramAutoTranslateController.swift in Sources */,
+				FE304E0B000000000000000D /* NovagramTextStyleController.swift in Sources */,
+				FE304E0B000000000000000F /* NovagramTranslationLanguageController.swift in Sources */,
+				FE304E0B0000000000000011 /* NovagramAnalyticsController.swift in Sources */,
 				FE304E0B0000000000000013 /* NovagramBotsController.swift in Sources */,
-				FE304E0B0000000000000015 /* FenixAccountsController.swift in Sources */,
-				FE304E0B0000000000000017 /* FenixuzEditedHistoryController.swift in Sources */,
-				FE304E0B0000000000000019 /* FenixuzUnreadReminderManager.swift in Sources */,
-				FE304E0B000000000000001B /* FenixuzSuggestedFolders.swift in Sources */,
-				FE304E0B000000000000001D /* FenixuzAnalyticsManager.swift in Sources */,
-				FE304E0B000000000000001F /* FenixuzStatisticsClient.swift in Sources */,
-				FE304E0B0000000000000021 /* FenixuzStatisticsConfig.swift in Sources */,
+				FE304E0B0000000000000015 /* NovagramAccountsController.swift in Sources */,
+				FE304E0B0000000000000017 /* NovagramEditedHistoryController.swift in Sources */,
+				FE304E0B0000000000000019 /* NovagramUnreadReminderManager.swift in Sources */,
+				FE304E0B000000000000001B /* NovagramSuggestedFolders.swift in Sources */,
+				FE304E0B000000000000001D /* NovagramAnalyticsManager.swift in Sources */,
+				FE304E0B000000000000001F /* NovagramStatisticsClient.swift in Sources */,
+				FE304E0B0000000000000021 /* NovagramStatisticsConfig.swift in Sources */,
 				FE304E0B0000000000000027 /* NovagramHooksInstall.swift in Sources */,
 				BE3536CA4246405D5520629A /* WalletUIHooksInstall.swift in Sources */,
 				4B9679F90FE2EF0F0FD21C7A /* PasscodeUIHooksInstall.swift in Sources */,
@@ -6146,13 +6146,13 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = GroupsInCommonUI;
 		};
-		FE10DEC04E14C190FEFE0002 /* FenixuzCore */ = {
+		FE10DEC04E14C190FEFE0002 /* NovagramCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = FenixuzCore;
+			productName = NovagramCore;
 		};
-		FE10DEC04E14C190FEFE0005 /* FenixuzShare */ = {
+		FE10DEC04E14C190FEFE0005 /* NovagramShare */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = FenixuzShare;
+			productName = NovagramShare;
 		};
 		019B2BAFB79C48F1A4A5666E /* QrStudioUI */ = {
 			isa = XCSwiftPackageProductDependency;

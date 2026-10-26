@@ -1,5 +1,5 @@
 import Foundation
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Postbox
 import SwiftSignalKit
 import TelegramCore
@@ -299,7 +299,7 @@ public final class ChatLiveTranslateContext {
             
             var translationState = translationState
             if let peer = peer {
-                if !peer.isPremium && !FenixuzPremiumUnlock.wholeChatTranslate { // Fenixuz
+                if !peer.isPremium && !NovagramPremiumUnlock.wholeChatTranslate { // Novagram
                     let showPaywall = settings.paywall?.show ?? true
                     translationState?.paywall = showPaywall
                     isHidden = isHidden || !showPaywall
@@ -315,9 +315,9 @@ public final class ChatLiveTranslateContext {
             }
             
             if !isHidden && translationState?.fromLang != translationState?.toLang  {
-                return (translationState, appearance, peer?.isPremium == true || FenixuzPremiumUnlock.wholeChatTranslate, autoTranslate) // Fenixuz
+                return (translationState, appearance, peer?.isPremium == true || NovagramPremiumUnlock.wholeChatTranslate, autoTranslate) // Novagram
             } else {
-                return (nil, appearance, peer?.isPremium == true || FenixuzPremiumUnlock.wholeChatTranslate, autoTranslate) // Fenixuz
+                return (nil, appearance, peer?.isPremium == true || NovagramPremiumUnlock.wholeChatTranslate, autoTranslate) // Novagram
             }
             
         } |> deliverOnPrepareQueue

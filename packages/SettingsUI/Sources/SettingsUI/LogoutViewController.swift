@@ -62,13 +62,13 @@ private func logoutEntries(state: LogoutControllerState, activeAccounts: [Accoun
     entries.append(.desc(sectionId: sectionId, index: index, text: .plain(strings().logoutOptionsAlternativeOptionsSection), data: InputDataGeneralTextData(viewType: .textTopItem)))
     index += 1
     
-    if activeAccounts.count < maximumNumberOfAccounts { // Fenixuz
+    if activeAccounts.count < maximumNumberOfAccounts { // Novagram
         entries.append(InputDataEntry.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_add_account, data: InputDataGeneralData(name: strings().logoutOptionsAddAccountTitle, color: theme.colors.text, icon: theme.icons.logoutOptionAddAccount, type: .next, viewType: .firstItem, description: strings().logoutOptionsAddAccountText, action: arguments.addAccount)))
         index += 1
     }
 
     
-    entries.append(InputDataEntry.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_set_a_passcode, data: InputDataGeneralData(name: strings().logoutOptionsSetPasscodeTitle, color: theme.colors.text, icon: theme.icons.logoutOptionSetPasscode, type: .next, viewType: activeAccounts.count < maximumNumberOfAccounts ? .innerItem : .firstItem, description: strings().logoutOptionsSetPasscodeText, action: arguments.setPasscode))) // Fenixuz
+    entries.append(InputDataEntry.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_set_a_passcode, data: InputDataGeneralData(name: strings().logoutOptionsSetPasscodeTitle, color: theme.colors.text, icon: theme.icons.logoutOptionSetPasscode, type: .next, viewType: activeAccounts.count < maximumNumberOfAccounts ? .innerItem : .firstItem, description: strings().logoutOptionsSetPasscodeText, action: arguments.setPasscode))) // Novagram
     index += 1
     
     entries.append(InputDataEntry.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_clear_cache, data: InputDataGeneralData(name: strings().logoutOptionsClearCacheTitle, color: theme.colors.text, icon: theme.icons.logoutOptionClearCache, type: .next, viewType: .innerItem, description: strings().logoutOptionsClearCacheText, action: arguments.clearCache)))

@@ -5,13 +5,13 @@
 //  Builds the sponsored `Message` Telegram's own ad UI renders (channel bubble, bot panel, video
 //  banner) in the same shape as TelegramCore's AdMessagesHistoryContext messages, so our ad goes
 //  through Telegram-Mac's sponsored-message UI unchanged.
-//  Port of iOS submodules/Fenixuz/NovagramAds/Sources/NovagramAdMessage.swift.
+//  Port of iOS submodules/Novagram/NovagramAds/Sources/NovagramAdMessage.swift.
 //
 
 import Foundation
 import Postbox
 import TelegramCore
-import FenixuzCore
+import NovagramCore
 import NovagramAds
 
 enum NovagramAdMessage {
@@ -85,7 +85,7 @@ enum NovagramAdMessage {
 
     /// The button under the channel bubble: the app translates button_type.
     static func buttonText(for ad: SDKSponsoredAd) -> String {
-        let strings = FenixuzL10n.current
+        let strings = NovagramL10n.current
         switch ad.buttonType {
         case .some(.bot):
             return strings.ads_openBot

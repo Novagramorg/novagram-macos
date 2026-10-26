@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -2588,7 +2588,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
     
     private let maxVisibleIncomingMessageIndex = ValuePromise<MessageIndex>(ignoreRepeated: true)
     private let readHistoryDisposable = MetaDisposable()
-    private let deletedMessagesDisposable = MetaDisposable() // Fenixuz
+    private let deletedMessagesDisposable = MetaDisposable() // Novagram
     
     private let chatLocationContextHolder: Atomic<ChatLocationContextHolder?>
 
@@ -3017,10 +3017,10 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         
     public override func viewDidLoad() {
         super.viewDidLoad()
-        deletedMessagesDisposable.set((context.account.stateManager.deletedMessages |> deliverOnMainQueue).start(next: { [weak self] ids in // Fenixuz
-            guard let self, FenixuzDeletedMessages.shared.recordDeleted(ids, peerId: self.chatInteraction.peerId), FenixuzDeletedMessages.shared.isEnabled, let location = self.locationValue else { return } // Fenixuz
-            self.setLocation(location.content) // Fenixuz
-        })) // Fenixuz
+        deletedMessagesDisposable.set((context.account.stateManager.deletedMessages |> deliverOnMainQueue).start(next: { [weak self] ids in // Novagram
+            guard let self, NovagramDeletedMessages.shared.recordDeleted(ids, peerId: self.chatInteraction.peerId), NovagramDeletedMessages.shared.isEnabled, let location = self.locationValue else { return } // Novagram
+            self.setLocation(location.content) // Novagram
+        })) // Novagram
         
         self.ableToNextController = { [weak self] controller, f in
             let proceed = { f(controller, true) }
@@ -3658,9 +3658,9 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         
         let adMessages:Signal<(fixed: Message?, opportunistic: [Message], version: Int), NoError>
         if let ad = self.adMessages {
-            adMessages = NovagramAdsHooks.shared.withInjectedAd(ad.allMessages, context, self.chatLocation.peerId) // Fenixuz
+            adMessages = NovagramAdsHooks.shared.withInjectedAd(ad.allMessages, context, self.chatLocation.peerId) // Novagram
         } else {
-            adMessages = NovagramAdsHooks.shared.withInjectedAd(.single((nil, [], 0)), context, self.chatLocation.peerId) // Fenixuz
+            adMessages = NovagramAdsHooks.shared.withInjectedAd(.single((nil, [], 0)), context, self.chatLocation.peerId) // Novagram
         }
         
         
@@ -4126,8 +4126,8 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                 if let peerView = peerView as? PeerView, let peer = peerView.peers[peerView.peerId], peer.isRestrictedChannel(context.contentSettings) {
                     proccesedView = ChatHistoryView(originalView: view, filteredEntries: [], theme: chatTheme)
                 } else {
-                    let msgEntries = FenixuzDeletedMessages.shared.process(view.entries, peerId: chatInteraction.peerId, hasEarlier: view.earlierId != nil, hasLater: view.laterId != nil) // Fenixuz
-                    FenixuzEditedHistoryManager.shared.processMessages(view.entries.map { $0.message }) // Fenixuz
+                    let msgEntries = NovagramDeletedMessages.shared.process(view.entries, peerId: chatInteraction.peerId, hasEarlier: view.earlierId != nil, hasLater: view.laterId != nil) // Novagram
+                    NovagramEditedHistoryManager.shared.processMessages(view.entries.map { $0.message }) // Novagram
                     
                     let topMessages: [Message]?
                     switch chatLocation {
@@ -4228,7 +4228,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                     }
                     if apply {
                         ChatUIHooks.shared.clearNotifies(chatLocation.peerId, messageIndex.id)
-                        if !FenixuzGhostMode.isActive { context.applyMaxReadIndex(for: chatLocation, contextHolder: chatLocationContextHolder, messageIndex: messageIndex) } // Fenixuz
+                        if !NovagramGhostMode.isActive { context.applyMaxReadIndex(for: chatLocation, contextHolder: chatLocationContextHolder, messageIndex: messageIndex) } // Novagram
                     }
                 }
         }
@@ -4284,7 +4284,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         }
         
         chatInteraction.removeAd = { [weak self] opaqueId in
-            if NovagramAdsHooks.shared.hideIfOurs(opaqueId) { return } // Fenixuz
+            if NovagramAdsHooks.shared.hideIfOurs(opaqueId) { return } // Novagram
             self?.adMessages?.remove(opaqueId: opaqueId)
         }
         
@@ -4754,7 +4754,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                 let peerId = strongSelf.chatInteraction.peerId
                 let currentSendAsPeerId = presentation.currentSendAsPeerId
                 if presentation.abilityToSend {
-                    if FenixuzGhostMode.isActive { _ = (strongSelf.maxVisibleIncomingMessageIndex.get() |> take(1) |> deliverOnMainQueue).start(next: { [weak strongSelf] index in if let strongSelf { strongSelf.context.applyMaxReadIndex(for: strongSelf.chatLocation, contextHolder: strongSelf.chatLocationContextHolder, messageIndex: index) } }) } // Fenixuz
+                    if NovagramGhostMode.isActive { _ = (strongSelf.maxVisibleIncomingMessageIndex.get() |> take(1) |> deliverOnMainQueue).start(next: { [weak strongSelf] index in if let strongSelf { strongSelf.context.applyMaxReadIndex(for: strongSelf.chatLocation, contextHolder: strongSelf.chatLocationContextHolder, messageIndex: index) } }) } // Novagram
                     func apply(_ controller: ChatController, atDate: Date?, repeatPeriod: Int32?) {
                         let confirmationAction = chatInteraction.captureDeferredSendAction()
                         let destinationPeerId = makePeerId()
@@ -5828,13 +5828,13 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         chatInteraction.clearMentions = { [weak self] in
             guard let `self` = self else {return}
             self.cancelMessageFocus()
-            if !FenixuzGhostMode.isActive { _ = clearPeerUnseenPersonalMessagesInteractively(account: context.account, peerId: self.chatInteraction.peerId, threadId: chatLocation().threadId).start() } // Fenixuz
+            if !NovagramGhostMode.isActive { _ = clearPeerUnseenPersonalMessagesInteractively(account: context.account, peerId: self.chatInteraction.peerId, threadId: chatLocation().threadId).start() } // Novagram
         }
         
         chatInteraction.clearReactions = { [weak self] in
             guard let `self` = self else {return}
             self.cancelMessageFocus()
-            if !FenixuzGhostMode.isActive { _ = clearPeerUnseenReactionsAndPollVotesInteractively(account: context.account, peerId: self.chatInteraction.peerId, threadId: chatLocation().threadId).start() } // Fenixuz
+            if !NovagramGhostMode.isActive { _ = clearPeerUnseenReactionsAndPollVotesInteractively(account: context.account, peerId: self.chatInteraction.peerId, threadId: chatLocation().threadId).start() } // Novagram
         }
         
         chatInteraction.reactionPressed = { [weak self] in
@@ -6510,7 +6510,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
             }).start()
         }
         
-        let fenixuzSendMedia: ([MediaSenderContainer]) -> Void = { [weak self] media in // Fenixuz
+        let novagramSendMedia: ([MediaSenderContainer]) -> Void = { [weak self] media in // Novagram
             if customChatContents != nil {
             }
             if media.isEmpty {
@@ -6547,7 +6547,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
             } else {
             }
         }
-        chatInteraction.sendMedia = { [weak self] media in fenixuzConfirmBeforeSend(voice: media.contains(where: { $0 is VoiceSenderContainer }), window: context.window, send: { fenixuzSendMedia(media) }, cancel: { self?.chatInteraction.voiceSendFlight?.cancel() }) } // Fenixuz
+        chatInteraction.sendMedia = { [weak self] media in novagramConfirmBeforeSend(voice: media.contains(where: { $0 is VoiceSenderContainer }), window: context.window, send: { novagramSendMedia(media) }, cancel: { self?.chatInteraction.voiceSendFlight?.cancel() }) } // Novagram
         
         chatInteraction.attachFile = { [weak self] asMedia in
             if let `self` = self, let window = self.window {
@@ -6709,7 +6709,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
             }
             if peer.canSendMessage(strongSelf.mode.isThreadMode, media: file, threadData: strongSelf.chatInteraction.presentation.threadInfo, cachedData: strongSelf.chatInteraction.presentation.cachedData) {
 
-                let fenixuzSendAppFile:()->Void = { [strongSelf] in // Fenixuz
+                let novagramSendAppFile:()->Void = { [strongSelf] in // Novagram
                     let hasFwd = !strongSelf.chatInteraction.presentation.interfaceState.forwardMessageIds.isEmpty
                     func apply(_ controller: ChatController, atDate: Date?, repeatPeriod: Int32?) {
                         let completed: () -> Void = {
@@ -6758,7 +6758,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                         apply(strongSelf, atDate: nil, repeatPeriod: nil)
                     }
                 }
-                let invoke: () -> Void = { fenixuzConfirmBeforeSend(sticker: file.isSticker, window: context.window, send: fenixuzSendAppFile) } // Fenixuz
+                let invoke: () -> Void = { novagramConfirmBeforeSend(sticker: file.isSticker, window: context.window, send: novagramSendAppFile) } // Novagram
                 
                 let chatInteraction = strongSelf.chatInteraction
                 let presentation = chatInteraction.presentation
@@ -6825,7 +6825,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                 
                 if canSend {
                     
-                    let fenixuzSendMedias:()->Void = { [strongSelf] in // Fenixuz
+                    let novagramSendMedias:()->Void = { [strongSelf] in // Novagram
                         func apply(_ controller: ChatController, atDate: Date?, repeatPeriod: Int32?) {
                             let destinationPeerId = makePeerId()
                             let _ = (Sender.enqueue(media: medias, caption: caption, context: context, peerId: destinationPeerId, replyId: takeReplyId(), threadId: threadId64(), isCollage: isCollage, additionText: additionText, silent: silent, atDate: atDate, repeatPeriod: repeatPeriod, isSpoiler: isSpoiler, customChatContents: customChatContents, messageEffect: messageEffect, leadingText: leadingText, sendPaidMessageStars: takePaidMessageStars(), suggestPost: presentation.interfaceState.suggestPost) |> deliverOnMainQueue).start(next: { ids in
@@ -6861,7 +6861,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                             break
                         }
                     }
-                    let invoke: () -> Void = { fenixuzConfirmBeforeSend(voice: medias.contains(where: { ($0 as? TelegramMediaFile)?.isVoice == true }), window: context.window, send: fenixuzSendMedias) } // Fenixuz
+                    let invoke: () -> Void = { novagramConfirmBeforeSend(voice: medias.contains(where: { ($0 as? TelegramMediaFile)?.isVoice == true }), window: context.window, send: novagramSendMedias) } // Novagram
                     invoke()
                 } else {
                 }
@@ -7381,7 +7381,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                             item.isEnabled = false
                         }
                         menu.addItem(item)
-                        if peer == nil { menu.addItem(ContextMenuItem(FenixuzL10n.current.phone_retry, handler: { [weak self] in self?.chatInteraction.openPhoneNumberContextMenu(phoneNumber) }, itemImage: MenuAnimation.menu_reload.value)) } // Fenixuz
+                        if peer == nil { menu.addItem(ContextMenuItem(NovagramL10n.current.phone_retry, handler: { [weak self] in self?.chatInteraction.openPhoneNumberContextMenu(phoneNumber) }, itemImage: MenuAnimation.menu_reload.value)) } // Novagram
                         
                         AppMenu.show(menu: menu, event: event, for: view)
                     }
@@ -7804,7 +7804,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         }
         
         chatInteraction.markAdAction = { [weak self] opaqueId, media in
-            if NovagramAdsHooks.shared.reportClickIfOurs(opaqueId, context) { return } // Fenixuz
+            if NovagramAdsHooks.shared.reportClickIfOurs(opaqueId, context) { return } // Novagram
             self?.adMessages?.markAction(opaqueId: opaqueId, media: media)
         }
         
@@ -7813,7 +7813,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         }
         
         chatInteraction.markAdAsSeen = { [weak self] opaqueId in
-            if NovagramAdsHooks.shared.recordViewIfOurs(opaqueId) { return } // Fenixuz
+            if NovagramAdsHooks.shared.recordViewIfOurs(opaqueId) { return } // Novagram
             self?.adMessages?.markAsSeen(opaqueId: opaqueId)
         }
         
@@ -9187,7 +9187,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
 
                 if !readAds.isEmpty {
                     for data in readAds {
-                        if NovagramAdsHooks.shared.recordViewIfOurs(data) { continue } // Fenixuz
+                        if NovagramAdsHooks.shared.recordViewIfOurs(data) { continue } // Novagram
                         strongSelf.adMessages?.markAsSeen(opaqueId: data)
                     }
                 }
@@ -9488,7 +9488,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
     }
 
     private func canInteractiveRead() -> Bool {
-        guard self.interactiveReadEnabled, !FenixuzGhostMode.isActive, !self.genericView.tableView.clipView.isAnimateScrolling else { return false } // Fenixuz
+        guard self.interactiveReadEnabled, !NovagramGhostMode.isActive, !self.genericView.tableView.clipView.isAnimateScrolling else { return false } // Novagram
         let scroll = genericView.scroll
         let hasEntries = self.previousView.with { $0?.filteredEntries.count ?? 0 } > 1
         let checkScroll = self.historyState.isDownOfHistory && scroll.rect.minY == genericView.tableView.frame.height && hasEntries
@@ -10030,7 +10030,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                         self?.chatInteraction.openInfo(peerId, false, nil, nil)
                     }, itemImage: MenuAnimation.menu_show_info.value))
                 }
-                if FenixuzSettingsKey.bool("show_view_first_message") { items.append(ContextMenuItem(FenixuzL10n.current.settings_chat_firstMessage_title, handler: { [weak self] in self?.chatInteraction.scrollToTheFirst() }, itemImage: MenuAnimation.menu_sort_up.value)) } // Fenixuz
+                if NovagramSettingsKey.bool("show_view_first_message") { items.append(ContextMenuItem(NovagramL10n.current.settings_chat_firstMessage_title, handler: { [weak self] in self?.chatInteraction.scrollToTheFirst() }, itemImage: MenuAnimation.menu_sort_up.value)) } // Novagram
 
 
                 if let notificationSettings = peerView.notificationSettings as? TelegramPeerNotificationSettings, !self.isAdChat {
@@ -10536,7 +10536,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         peerDisposable.dispose()
         updatedChannelParticipants.dispose()
         readHistoryDisposable.dispose()
-        deletedMessagesDisposable.dispose() // Fenixuz
+        deletedMessagesDisposable.dispose() // Novagram
         messageActionCallbackDisposable.dispose()
         sentMessageEventsDisposable.dispose()
         proccessingMessageEventsDisposable.dispose()
@@ -11280,7 +11280,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         
         _ = chatInteraction.inputOverlayHeight.swap(mode == .preview ? previewChatBottomInset : ChatHistoryBottomRowItem.minimumInputOverlayHeight)
                 
-        if chatLocation.peerId.namespace == Namespaces.Peer.CloudChannel || chatLocation.peerId.namespace == Namespaces.Peer.CloudUser, mode == .history, NovagramAdsHooks.shared.showAds() { // Fenixuz
+        if chatLocation.peerId.namespace == Namespaces.Peer.CloudChannel || chatLocation.peerId.namespace == Namespaces.Peer.CloudUser, mode == .history, NovagramAdsHooks.shared.showAds() { // Novagram
             self.adMessages = .init(context: context, height: sizeValue.get() |> map { $0 .height}, peerId: chatLocation.peerId)
         } else {
             self.adMessages = nil
@@ -11307,7 +11307,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
 
         
         self.messageProcessingManager.process = { messageIds in
-            if !FenixuzGhostMode.isActive { context.account.viewTracker.updateViewCountForMessageIds(messageIds: messageIds.filter({$0.namespace == Namespaces.Message.Cloud}), clientId: clientId) } // Fenixuz
+            if !NovagramGhostMode.isActive { context.account.viewTracker.updateViewCountForMessageIds(messageIds: messageIds.filter({$0.namespace == Namespaces.Message.Cloud}), clientId: clientId) } // Novagram
         }
         self.factCheckProcessingManager.process = { messageIds in
             _ = context.engine.messages.getMessagesFactCheck(messageIds: Array(messageIds)).startStandalone()
@@ -11324,7 +11324,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         self.messageMentionProcessingManager.process = { [weak self] messageIds in
             guard let self else { return }
             let messageIds = self.visibleMessageIdsForReading(messageIds)
-            if !messageIds.isEmpty, !FenixuzGhostMode.isActive { // Fenixuz
+            if !messageIds.isEmpty, !NovagramGhostMode.isActive { // Novagram
                 context.account.viewTracker.updateMarkMentionsSeenForMessageIds(messageIds: messageIds)
             }
         }
@@ -11333,7 +11333,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
             let messageIds = self.visibleMessageIdsForReading(messageIds)
             if !messageIds.isEmpty {
                 self.playUnseenReactions(messageIds, checkUnseen: true)
-                if !FenixuzGhostMode.isActive { context.account.viewTracker.updateMarkReactionsAndVotesSeenForMessageIds(messageIds: messageIds) } // Fenixuz
+                if !NovagramGhostMode.isActive { context.account.viewTracker.updateMarkReactionsAndVotesSeenForMessageIds(messageIds: messageIds) } // Novagram
             }
         }
         self.refreshStoriesProcessingManager.process = { [weak self] messageIds in
@@ -11343,7 +11343,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
             self?.context.account.viewTracker.refreshSecretMediaMediaForMessageIds(messageIds: messageIds)
         }
         self.seenLiveLocationProcessingManager.process = { [weak self] messageIds in
-            if !FenixuzGhostMode.isActive { self?.context.account.viewTracker.updateSeenLiveLocationForMessageIds(messageIds: messageIds) } // Fenixuz
+            if !NovagramGhostMode.isActive { self?.context.account.viewTracker.updateSeenLiveLocationForMessageIds(messageIds: messageIds) } // Novagram
         }
 
 
@@ -11674,7 +11674,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                         guard let `self` = self else {
                             return
                         }
-                        if self.chatInteraction.peerIsAccountPeer && !FenixuzGhostMode.isActive { // Fenixuz
+                        if self.chatInteraction.peerIsAccountPeer && !NovagramGhostMode.isActive { // Novagram
                             self.context.account.updateLocalInputActivity(peerId: .init(peerId: self.chatLocation.peerId, category: mode.activityCategory(value.chatLocation.threadId)), activity: activity, isPresent: true)
                         }
                     }))

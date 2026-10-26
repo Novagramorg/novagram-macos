@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -216,7 +216,7 @@ public class ChatMessageItem: ChatRowItem {
     /// `unsupported` is false for rich messages by design (ChatRowItem.unsupported), yet the card
     /// inside one offers the same update.
     public func invokeUpdateApp() {
-        #if APP_STORE || true // Fenixuz
+        #if APP_STORE || true // Novagram
         LinkHooks.shared.openExternalLink(itunesAppLink, false)
         #else
         ChatHistoryUIHooks.shared.checkForUpdates()
@@ -538,7 +538,7 @@ public class ChatMessageItem: ChatRowItem {
                         }
                     }
                 }
-                if NovagramAdsHooks.shared.openMediaIfOurs(message, message.media.first, context, self?.table, (self?.webpageLayout as? WPMediaLayout)?.parameters) { return } // Fenixuz
+                if NovagramAdsHooks.shared.openMediaIfOurs(message, message.media.first, context, self?.table, (self?.webpageLayout as? WPMediaLayout)?.parameters) { return } // Novagram
                 showChatGallery(context: context, message: message, self?.table, (self?.webpageLayout as? WPMediaLayout)?.parameters, type: .alone, chatMode: chatInteraction.mode, chatLocation: chatInteraction.chatLocation, cachedPeerData: chatInteraction.presentation.cachedData)
             }
             

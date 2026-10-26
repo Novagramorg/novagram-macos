@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import SwiftSignalKit
@@ -3050,9 +3050,9 @@ private final class ChatAdHeaderView : Control, ChatHeaderProtocol {
         self.set(handler: { [weak self] _ in
             if let interactions = self?.chatInteraction, let adAttribute = self?.state.botAd?.message.adAttribute {
                 let context = interactions.interactionContext
-                let fenixuzOurs = NovagramAdsHooks.shared.recordClickIfOurs(adAttribute.opaqueId) // Fenixuz
+                let novagramOurs = NovagramAdsHooks.shared.recordClickIfOurs(adAttribute.opaqueId) // Novagram
                 ChatUIHooks.shared.executeInAppLink(adAttribute.url.nsstring, context, chatInteraction.openInfo)
-                if !fenixuzOurs { interactions.markAdAction(adAttribute.opaqueId, adAttribute.hasContentMedia) } // Fenixuz
+                if !novagramOurs { interactions.markAdAction(adAttribute.opaqueId, adAttribute.hasContentMedia) } // Novagram
             }
         }, for: .Click)
         
@@ -3142,7 +3142,7 @@ private final class ChatAdHeaderView : Control, ChatHeaderProtocol {
             
             current.set(image: theme.icons.chat_header_story_close, for: .Normal)
             current.setSingle(handler: { [weak self] _ in
-                if let opaqueId = self?.botAd?.message.adAttribute?.opaqueId, NovagramAdsHooks.shared.hideIfOurs(opaqueId) { return } // Fenixuz
+                if let opaqueId = self?.botAd?.message.adAttribute?.opaqueId, NovagramAdsHooks.shared.hideIfOurs(opaqueId) { return } // Novagram
                 if let interactions = self?.chatInteraction {
                     let context = interactions.interactionContext
                     if context.isPremium, let opaqueId = self?.botAd?.message.adAttribute?.opaqueId {

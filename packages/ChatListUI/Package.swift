@@ -53,7 +53,7 @@ let package = Package(
         .library(name: "ChatListUI", targets: ["ChatListUI"]),
     ],
     dependencies: [
-        .package(name: "FenixuzCore", path: "../FenixuzCore"), // Fenixuz
+        .package(name: "NovagramCore", path: "../NovagramCore"), // Novagram
         .package(name: "SSignalKit", path: "../../submodules/telegram-ios/submodules/SSignalKit"),
         .package(name: "TelegramCore", path: "../../submodules/telegram-ios/submodules/TelegramCore"),
         .package(name: "Postbox", path: "../../submodules/telegram-ios/submodules/Postbox"),
@@ -67,7 +67,7 @@ let package = Package(
         .target(
             name: "ChatListUI",
             dependencies: [
-                .product(name: "FenixuzCore", package: "FenixuzCore", condition: nil), // Fenixuz
+                .product(name: "NovagramCore", package: "NovagramCore", condition: nil), // Novagram
                 .product(name: "SwiftSignalKit", package: "SSignalKit", condition: nil),
                 .product(name: "TelegramCore", package: "TelegramCore", condition: nil),
                 .product(name: "Postbox", package: "Postbox", condition: nil),

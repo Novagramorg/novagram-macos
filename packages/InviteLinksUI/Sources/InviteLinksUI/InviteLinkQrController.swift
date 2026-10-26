@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import SwiftSignalKit
@@ -56,7 +56,7 @@ private final class InviteLinkQrRowView: TableRowView {
     private let disposable = MetaDisposable()
     private let cardView = View(frame: NSMakeRect(0, 0, cardSize.width, cardSize.height))
     private let imageView = ImageView(frame: NSMakeRect(0, 0, codeSize.width, codeSize.height))
-    private let logoView = NSImageView(frame: NSMakeRect(0, 0, 40, 40)) // Fenixuz
+    private let logoView = NSImageView(frame: NSMakeRect(0, 0, 40, 40)) // Novagram
     private let textView = TextView()
 
     required init(frame frameRect: NSRect) {
@@ -94,7 +94,7 @@ private final class InviteLinkQrRowView: TableRowView {
     }
 
     private func updateLogo() {
-        self.logoView.image = FenixuzQrLogo.image(side: self.logoView.frame.width) // Fenixuz
+        self.logoView.image = NovagramQrLogo.image(side: self.logoView.frame.width) // Novagram
     }
 
     override func set(item: TableRowItem, animated: Bool = false) {
@@ -125,7 +125,7 @@ private final class InviteLinkQrRowView: TableRowView {
 
 private func inviteLinkQrImage(_ link: String) -> Signal<CGImage?, NoError> {
     let size = NSMakeSize(768, 768)
-    return qrCode(string: link, color: dayClassicPalette.text, backgroundColor: dayClassicPalette.background, icon: .custom(FenixuzQrLogo.cgImage(pixelSide: 256) ?? theme.icons.login_qr_cap)) // Fenixuz
+    return qrCode(string: link, color: dayClassicPalette.text, backgroundColor: dayClassicPalette.background, icon: .custom(NovagramQrLogo.cgImage(pixelSide: 256) ?? theme.icons.login_qr_cap)) // Novagram
     |> map { _, generate -> CGImage? in
         return generate(TransformImageArguments(corners: ImageCorners(), imageSize: size, boundingSize: size, intrinsicInsets: NSEdgeInsets(), scale: 1.0))?.generateImage()
     }

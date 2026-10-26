@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import ExternalVideoUtils
 import AlertsUI
@@ -382,12 +382,12 @@ public class GalleryViewer: NSResponder {
             self.close()
             closeAllModals(window: self.window)
             
-            let fenixuzOurs = NovagramAdsHooks.shared.recordClickIfOurs(adAttribute.opaqueId) // Fenixuz
+            let novagramOurs = NovagramAdsHooks.shared.recordClickIfOurs(adAttribute.opaqueId) // Novagram
             GalleryHooks.shared.openAdUrl(adAttribute.url, context, { [weak self] peerId, toChat, messageId, action in
                 self?.openInfo(peerId, toChat, messageId, action)
             })
             
-            if !fenixuzOurs { context.engine.messages.markAdAction(opaqueId: adAttribute.opaqueId, media: true, fullscreen: true) } // Fenixuz
+            if !novagramOurs { context.engine.messages.markAdAction(opaqueId: adAttribute.opaqueId, media: true, fullscreen: true) } // Novagram
         }
         interactions.openLink = { [weak self] url in
             guard let self else {
@@ -986,7 +986,7 @@ public class GalleryViewer: NSResponder {
                 self.controls.update(self.pager.selectedItem)
             }
 
-            if let message = entries[selectedIndex].message, message.containsSecretMedia, !FenixuzGhostMode.isActive { // Fenixuz
+            if let message = entries[selectedIndex].message, message.containsSecretMedia, !NovagramGhostMode.isActive { // Novagram
                 _ = (context.engine.messages.markMessageContentAsConsumedInteractively(messageId: message.id) |> delay(0.5, queue: Queue.concurrentDefaultQueue())).start()
             }
             if !isRestoring, let pagerIndex = currentIndex.modify({$0}) {

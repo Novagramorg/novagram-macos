@@ -6,12 +6,12 @@
 //  video banner). No Premium "Hide ad" item and no "Remove ads" upsell: Novagram ads are shown to every
 //  user and the server has no "hide" action. Report offers six reasons, hides the ad locally at once
 //  and thanks the user whatever the outcome.
-//  Port of iOS submodules/Fenixuz/NovagramAds/Sources/NovagramAdMenu.swift (AppKit menus here).
+//  Port of iOS submodules/Novagram/NovagramAds/Sources/NovagramAdMenu.swift (AppKit menus here).
 //
 
 import Cocoa
 import TGUIKit
-import FenixuzCore
+import NovagramCore
 import NovagramAds
 
 enum NovagramAdMenu {
@@ -25,7 +25,7 @@ enum NovagramAdMenu {
 
     /// About + Report (with its six reasons as a submenu) for the ad with this random_id.
     static func items(token: String, window: Window) -> [ContextMenuItem] {
-        let strings = FenixuzL10n.current
+        let strings = NovagramL10n.current
 
         let about = ContextMenuItem(strings.ads_about, handler: {
             self.presentAbout(token: token, window: window)
@@ -70,7 +70,7 @@ enum NovagramAdMenu {
     }
 
     private static func presentAbout(token: String, window: Window) {
-        let strings = FenixuzL10n.current
+        let strings = NovagramL10n.current
         var text = strings.ads_aboutText
         if let otherInfo = NovagramAdsCenter.registry.served(token: token)?.ad.ad.otherInfo.trimmingCharacters(in: .whitespacesAndNewlines), !otherInfo.isEmpty {
             text += "\n\n" + otherInfo
@@ -78,7 +78,7 @@ enum NovagramAdMenu {
         alert(for: window, header: strings.ads_aboutTitle, info: text)
     }
 
-    private static func title(_ reason: SDKAdReportReason, strings: FenixuzL10n) -> String {
+    private static func title(_ reason: SDKAdReportReason, strings: NovagramL10n) -> String {
         switch reason {
         case .spam:
             return strings.ads_reason_spam

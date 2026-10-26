@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import SwiftSignalKit
@@ -86,7 +86,7 @@ public class ChatMessageView: ChatRowView, ModalPreviewRowViewProtocol {
             super.layout()
             close.setFrameOrigin(.zero)
             separator.frame = NSMakeRect(6, close.frame.maxY + 3, frame.width - 12, .borderSize)
-            more?.setFrameOrigin(NSMakePoint(0, close.isHidden ? 0 : close.frame.maxY + 6)) // Fenixuz
+            more?.setFrameOrigin(NSMakePoint(0, close.isHidden ? 0 : close.frame.maxY + 6)) // Novagram
 
         }
         
@@ -99,7 +99,7 @@ public class ChatMessageView: ChatRowView, ModalPreviewRowViewProtocol {
             close.set(image: TelegramThemeHooks.shared.image(.iconAdHide).precomposed(theme.colors.grayIcon), for: .Normal)
             close.sizeToFit(.zero, NSMakeSize(30, 30), thatFit: true)
             separator.isHidden = !item.isFragmentAd
-            NovagramAdsHooks.hideCloseIfOurs(item.message, close: close, separator: separator) // Fenixuz
+            NovagramAdsHooks.hideCloseIfOurs(item.message, close: close, separator: separator) // Novagram
             
             
             if item.isFragmentAd {

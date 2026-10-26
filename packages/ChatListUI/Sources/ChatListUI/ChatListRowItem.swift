@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import Postbox
@@ -918,7 +918,7 @@ public class ChatListRowItem: TableRowItem {
                 if let peer = peer, peer.isMonoForum {
                     text = renderedPeer.chatOrMonoforumMainPeer?._asPeer().displayTitle
                 } else {
-                    text = peer.map { FenixuzMutualContact.title($0.displayTitle, for: $0) } // Fenixuz
+                    text = peer.map { NovagramMutualContact.title($0.displayTitle, for: $0) } // Novagram
                 }
             }
             let _ = titleText.append(string: text, color: renderedPeer.peers[renderedPeer.peerId]?._asPeer() is TelegramSecretChat ? theme.chatList.secretChatTextColor : theme.chatList.textColor, font: .medium(.title))
@@ -1718,7 +1718,7 @@ public class ChatListRowItem: TableRowItem {
 
     public static func markAsRead(context: any AccountContextProtocol, peerId: PeerId) {
         _ = context.engine.messages.togglePeersUnreadMarkInteractively(peerIds: [peerId], setToValue: false).start()
-        if !FenixuzGhostMode.isActive { _ = clearPeerUnseenPersonalMessagesInteractively(account: context.account, peerId: peerId, threadId: nil).start() } // Fenixuz
+        if !NovagramGhostMode.isActive { _ = clearPeerUnseenPersonalMessagesInteractively(account: context.account, peerId: peerId, threadId: nil).start() } // Novagram
     }
 
     public static func markTopicAsRead(context: any AccountContextProtocol, peerId: PeerId, threadId: Int64) {
@@ -2374,7 +2374,7 @@ public class ChatListRowItem: TableRowItem {
                 }, itemImage: MenuAnimation.menu_unarchive.value))
             }
             
-            thirdGroup.append(contentsOf: fenixuzChatListMenuItems(peerId: peerId, accountPeerId: context.peerId, savedMessages: mode.savedMessages, window: context.window)) // Fenixuz
+            thirdGroup.append(contentsOf: novagramChatListMenuItems(peerId: peerId, accountPeerId: context.peerId, savedMessages: mode.savedMessages, window: context.window)) // Novagram
             let blocks:[[ContextMenuItem]] = [headGroup, zeroGroup, firstGroup,
                                               secondGroup,
                                               thirdGroup].filter { !$0.isEmpty }

@@ -405,11 +405,11 @@ public class FastSettings {
 
     public static var canViewPeerId: Bool {
         get {
-            return UserDefaults(suiteName: "pro_messager")?.object(forKey: "show_peer_id") as? Bool ?? UserDefaults.standard.object(forKey: "kCanViewPeerId") as? Bool ?? true // Fenixuz
+            return UserDefaults(suiteName: "pro_messager")?.object(forKey: "show_peer_id") as? Bool ?? UserDefaults.standard.object(forKey: "kCanViewPeerId") as? Bool ?? true // Novagram
         }
         set {
             UserDefaults.standard.set(newValue, forKey: "kCanViewPeerId")
-            UserDefaults(suiteName: "pro_messager")?.set(newValue, forKey: "show_peer_id") // Fenixuz
+            UserDefaults(suiteName: "pro_messager")?.set(newValue, forKey: "show_peer_id") // Novagram
         }
     }
     

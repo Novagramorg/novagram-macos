@@ -1,7 +1,7 @@
 import Cocoa
 import ApiCredentials
 import CrashRecoveryUI
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 
 @_silgen_name("OPENSSL_init_crypto")
 private func OPENSSL_init_crypto(_ opts: UInt64, _ settings: OpaquePointer?) -> Int32
@@ -14,11 +14,11 @@ if let groupURL = ApiEnvironment.legacyContainerURL {
     armCrashMarker(folder: groupURL.appendingPathComponent(ApiEnvironment.prefix).path)
 }
 
-installFenixuzHooks() // Fenixuz
-#if !APP_STORE // Fenixuz
-FenixuzLoginFeatures.botToken = true // Fenixuz
-#endif // Fenixuz
-installNovagramHooks() // Fenixuz
+installNovagramCoreHooks() // Novagram
+#if !APP_STORE // Novagram
+NovagramLoginFeatures.botToken = true // Novagram
+#endif // Novagram
+installNovagramHooks() // Novagram
 installTelegramThemeHooks()
 installGeneralRowsHooks()
 installInputDataUIHooks()

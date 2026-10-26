@@ -6,7 +6,7 @@
 //  pressed Start in the promoted BOT. Detected by watching engine data here — no hooks in Telegram
 //  files. Sent once, with the same random_id as the click, only within 55 minutes of the serve, and
 //  never when the user was already a member at click time.
-//  Port of iOS submodules/Fenixuz/NovagramAds/Sources/NovagramAdActions.swift.
+//  Port of iOS submodules/Novagram/NovagramAds/Sources/NovagramAdActions.swift.
 //
 
 import Foundation

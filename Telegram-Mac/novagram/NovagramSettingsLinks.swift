@@ -31,25 +31,25 @@ struct NovagramSettingsLink {
 
 func openNovagramSettings(context: AccountContext, feature: String?) {
     let navigation = context.bindings.rootNavigation()
-    navigation.push(FenixuzSettingsController(context))
+    navigation.push(NovagramSettingsController(context))
     guard let feature = feature else {
         return
     }
     switch feature {
     case "about":
-        navigation.push(FenixuzAboutController(context))
+        navigation.push(NovagramAboutController(context))
     case "bots":
         navigation.push(NovagramBotsController(context))
     case "tips":
-        navigation.push(FenixuzTipsController(context))
+        navigation.push(NovagramTipsController(context))
     case "text_style":
-        navigation.push(FenixuzTextStyleController(context))
+        navigation.push(NovagramTextStyleController(context))
     case "auto_text":
-        navigation.push(FenixuzAutoTextController(context))
+        navigation.push(NovagramAutoTextController(context))
     case "auto_translate":
-        navigation.push(FenixuzAutoTranslateController(context))
+        navigation.push(NovagramAutoTranslateController(context))
     case "translate_language", "translation_language", "language":
-        navigation.push(FenixuzTranslationLanguageController(context))
+        navigation.push(NovagramTranslationLanguageController(context))
     default:
         break
     }

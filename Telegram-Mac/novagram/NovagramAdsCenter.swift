@@ -3,7 +3,7 @@
 //  Telegram-Mac
 //
 //  Novagram ads, serving v2 (NovagramAds SDK 3.0, binary) — the shared core.
-//  Port of iOS submodules/Fenixuz/NovagramAds/Sources/NovagramAdsCenter.swift.
+//  Port of iOS submodules/Novagram/NovagramAds/Sources/NovagramAdsCenter.swift.
 //
 //  One SDKClient for the app, one SDKAdsSession and one SDKBannerFeed per Telegram account, all kept
 //  for the app's lifetime (ad tokens are only valid for the account they were served to). The build only
@@ -24,7 +24,7 @@ import Postbox
 import TelegramCore
 import Localization
 import NovagramAds
-import FenixuzCore
+import NovagramCore
 import PhoneNumberUtils
 
 enum NovagramAdsCenter {

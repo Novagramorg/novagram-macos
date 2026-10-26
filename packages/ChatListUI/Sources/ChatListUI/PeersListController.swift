@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import Postbox
@@ -319,7 +319,7 @@ public struct PeerListState : Equatable {
     public var hashtag: Hashtag?
     
     public var hasStories: Bool {
-        if !FenixuzChatListFilter.showStories { return false } // Fenixuz
+        if !NovagramChatListFilter.showStories { return false } // Novagram
         if let stories = self.stories, !isContacts, !mode.isForumLike {
             if self.splitState == .minimisize {
                 return false
@@ -1071,7 +1071,7 @@ public class PeerListContainerView : Control {
     private var downloads: DownloadsControl?
     private var removalUndo: ChatRemovalUndoView?
     private var proxy: ProxyView?
-    private var ghost: ImageButton? // Fenixuz
+    private var ghost: ImageButton? // Novagram
     private var compose:ImageButton?
     private var backButton: ImageButton?
     private var glassContainer: NSView?
@@ -1342,7 +1342,7 @@ public class PeerListContainerView : Control {
             performSubviewRemoval(view, animated: animated)
             self.proxy = nil
         }
-        self.ghost = fenixuzUpdateGhostButton(self.ghost, in: statusContainer, allowed: hasControls && !state.isContacts, animated: animated) // Fenixuz
+        self.ghost = novagramUpdateGhostButton(self.ghost, in: statusContainer, allowed: hasControls && !state.isContacts, animated: animated) // Novagram
 
         glassContainer?.removeFromSuperview()
         glassContainer = nil
@@ -1635,7 +1635,7 @@ public class PeerListContainerView : Control {
         if let proxy = self.proxy {
             maxTitleWidth -= proxy.frame.width
         }
-        if let ghost = self.ghost { maxTitleWidth -= ghost.frame.width } // Fenixuz
+        if let ghost = self.ghost { maxTitleWidth -= ghost.frame.width } // Novagram
         
         self.titleView.updateState(state, arguments: arguments, communityTitle: self.communityTitle, maxWidth: maxTitleWidth, animated: transition.isAnimated)
         
@@ -1722,7 +1722,7 @@ public class PeerListContainerView : Control {
             transition.updateFrame(view: view, frame: CGRect(origin: controlPoint, size: componentSize))
             transition.updateAlpha(view: view, alpha: progress)
         }
-        if let view = ghost { controlPoint.x -= componentSize.width; transition.updateFrame(view: view, frame: CGRect(origin: controlPoint, size: componentSize)); transition.updateAlpha(view: view, alpha: progress) } // Fenixuz
+        if let view = ghost { controlPoint.x -= componentSize.width; transition.updateFrame(view: view, frame: CGRect(origin: controlPoint, size: componentSize)); transition.updateAlpha(view: view, alpha: progress) } // Novagram
 
         if let glassContainer = glassContainer {
             var glassFrame: NSRect = .zero
@@ -3430,7 +3430,7 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
     }
     
     open func open(with entryId: UIChatListEntryId, messageId:MessageId? = nil, initialAction: ChatInitialAction? = nil, close:Bool = true, addition: Bool = false, forceAnimated: Bool = false, threadId: Int64? = nil, openAsTopics: Bool = false, fullWidthTopics: Bool = false) ->Void {
-        if case let .chatId(_, lockedPeerId, _) = entryId, FenixuzChatPincode.requiresUnlock(peerId: lockedPeerId, window: context.window, reopen: { [weak self] in self?.open(with: entryId, messageId: messageId, initialAction: initialAction, close: close, addition: addition, forceAnimated: forceAnimated, threadId: threadId, openAsTopics: openAsTopics, fullWidthTopics: fullWidthTopics) }) { return } // Fenixuz
+        if case let .chatId(_, lockedPeerId, _) = entryId, NovagramChatPincode.requiresUnlock(peerId: lockedPeerId, window: context.window, reopen: { [weak self] in self?.open(with: entryId, messageId: messageId, initialAction: initialAction, close: close, addition: addition, forceAnimated: forceAnimated, threadId: threadId, openAsTopics: openAsTopics, fullWidthTopics: fullWidthTopics) }) { return } // Novagram
         
         let navigation = context.bindings.rootNavigation()
 

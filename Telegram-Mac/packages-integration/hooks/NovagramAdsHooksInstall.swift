@@ -4,7 +4,7 @@ import Postbox
 import TelegramCore
 import SwiftSignalKit
 import ChatUI
-import FenixuzCore
+import NovagramCore
 
 // Novagram ads v2: the SDK (packages/NovagramAdsBinary) is linked to the app only, so the app installs the
 // closures that ChatUI, GalleryUI and ChatListUI call through NovagramAdsHooks.

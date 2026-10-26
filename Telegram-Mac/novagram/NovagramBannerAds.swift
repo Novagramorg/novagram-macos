@@ -5,10 +5,10 @@
 //  System banners above the chat list (SDKBannerFeed). Telegram-Mac already draws server notices there
 //  (`UICustomLinkAction`, fed by ServerProvidedSuggestion.link), so OUR banner goes into the same slot as
 //  a `.link` suggestion placed first. Telegram's own notices show unchanged when we have no banner.
-//  Port of iOS submodules/Fenixuz/NovagramAds/Sources/NovagramBannerAds.swift.
+//  Port of iOS submodules/Novagram/NovagramAds/Sources/NovagramBannerAds.swift.
 //
 //  Hooks: ChatListController.swift — the `suggestions` source and UICustomLinkAction
-//  (action / dismiss / canDismiss / isEqual). See FENIXUZ_HOOKS.md "Novagram ads v2".
+//  (action / dismiss / canDismiss / isEqual). See NOVAGRAM_HOOKS.md "Novagram ads v2".
 //
 
 import Cocoa
@@ -21,7 +21,7 @@ enum NovagramBannerAds {
     /// `novagram-banner:<uuid>` (closable) or `novagram-banner-fixed:<uuid>` (no "X").
     static let closablePrefix = "novagram-banner:"
     static let fixedPrefix = "novagram-banner-fixed:"
-    static let changedNotification = Notification.Name("FenixNovagramBannerChanged")
+    static let changedNotification = Notification.Name("NovagramBannerChanged")
     static let store = NovagramBannerStore()
 
     /// Telegram's server suggestions with OUR live banner (if any) in front, so it takes the chat-list

@@ -374,7 +374,7 @@ func installSettingsUIHooks() {
         #if APP_STORE
             appUpdateState = .single(nil)
         #else
-        appUpdateState = .single(nil) // Fenixuz
+        appUpdateState = .single(nil) // Novagram
         #endif
         return appUpdateState
     }, pushAppUpdate: { navigation in

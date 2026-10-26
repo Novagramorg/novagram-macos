@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import SwiftSignalKit
@@ -553,7 +553,7 @@ private class AdMessageView : Control {
                 guard let window = self?.window as? Window, let arguments else {
                     return ContextMenu()
                 }
-                if let menu = NovagramAdsHooks.shared.menu(adAttribute.opaqueId, window, .current(darkPalette)) { return menu } // Fenixuz
+                if let menu = NovagramAdsHooks.shared.menu(adAttribute.opaqueId, window, .current(darkPalette)) { return menu } // Novagram
                 
                 let menu = ContextMenu(presentation: .current(darkPalette))
                 

@@ -13,7 +13,7 @@
 //  Trigger: 10 quick clicks (≤ 0.7 s apart) on the version row at the bottom of Settings
 //  (AccountViewController). Revealing the toggle then asks for the admin login + password
 //  (NovagramAdsAdminAuth) and opens Novagram Settings, where the toggle shows in its own section
-//  while revealed (FenixuzSettingsController); hiding it again needs no password. No deep link reaches it.
+//  while revealed (NovagramSettingsController); hiding it again needs no password. No deep link reaches it.
 //
 //  Consumers: every Novagram ad source gates on `enabledSignal` live (NovagramAdsCenter.gated), and
 //  ChatController skips Telegram's ChatAdData when `showAds` is false at chat open.
@@ -22,7 +22,7 @@
 import Cocoa
 import TGUIKit
 import SwiftSignalKit
-import FenixuzCore
+import NovagramCore
 
 final class NovagramAdsGate {
     struct UIState: Equatable {
@@ -67,11 +67,11 @@ final class NovagramAdsGate {
 
     /// The hidden row's title and tip ("Remove all ads"; the switch is ON when `showAds` is false).
     static var toggleTitle: String {
-        return FenixuzL10n.current.ads_removeAll_title
+        return NovagramL10n.current.ads_removeAll_title
     }
 
     static var toggleTip: String {
-        return FenixuzL10n.current.ads_removeAll_tip
+        return NovagramL10n.current.ads_removeAll_tip
     }
 
     static func setShowAds(_ value: Bool) {
@@ -123,7 +123,7 @@ final class NovagramAdsGate {
         memoRevealed = revealed
         defaults?.set(revealed, forKey: revealedKey)
         uiState.set(currentState())
-        let strings = FenixuzL10n.current
+        let strings = NovagramL10n.current
         alert(for: window, info: revealed ? strings.ads_section_shown : strings.ads_section_hidden)
     }
 }

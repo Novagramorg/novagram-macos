@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import Postbox
@@ -2957,7 +2957,7 @@ public final class StoryModalController<Context: AccountContextProtocol> : Modal
                 }
                 
                 if presentaion.mediaCall == nil {
-                    if context.isPremium || FenixuzPremiumUnlock.storiesSaveAndHD { // Fenixuz
+                    if context.isPremium || NovagramPremiumUnlock.storiesSaveAndHD { // Novagram
                         
                         let hq = self?.genericView.storyContext?.stateValue?.slice?.additionalPeerData.preferHighQualityStories ?? false
                         
@@ -3002,7 +3002,7 @@ public final class StoryModalController<Context: AccountContextProtocol> : Modal
                     
                     if let resource = resource {
                         menu.addItem(ContextMenuItem(strings().storyMyInputSaveMedia, handler: {
-                            if context.isPremium || FenixuzPremiumUnlock.storiesSaveAndHD { // Fenixuz
+                            if context.isPremium || NovagramPremiumUnlock.storiesSaveAndHD { // Novagram
                                 saveAs(resource, account: context.account)
                             } else {
                                 saveGalleryPremium()

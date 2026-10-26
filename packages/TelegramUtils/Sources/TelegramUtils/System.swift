@@ -14,7 +14,7 @@ import TelegramTheme
 #endif
 
 
-public let appName = "Novagram" // Fenixuz
+public let appName = "Novagram" // Novagram
 public let kMediaImageExt = "jpg";
 public let kMediaGifExt = "mov";
 public let kMediaVideoExt = "mp4";

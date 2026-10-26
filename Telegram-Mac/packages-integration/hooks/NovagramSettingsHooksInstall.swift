@@ -2,7 +2,7 @@ import Cocoa
 import TGUIKit
 import SwiftSignalKit
 import SettingsUI
-import FenixuzCore
+import NovagramCore
 
 // Stable ids for the Novagram rows in Settings (900...998, see NovagramSettingsHooks).
 private enum NovagramSettingsRowId {
@@ -15,8 +15,8 @@ private enum NovagramSettingsRowId {
 
 private let novagramGold = NSColor(rgb: 0xD4AF37)
 
-private func novagramRow(_ id: Int, _ title: String, _ symbol: String, _ color: FenixuzIconColor, titleColor: NSColor? = nil, make: @escaping (AccountContext) -> ViewController) -> NovagramSettingsRow {
-    return NovagramSettingsRow(id: id, title: title, icon: fenixuzSettingsIcon(systemName: symbol, color: color), titleColor: titleColor, action: { context, present in
+private func novagramRow(_ id: Int, _ title: String, _ symbol: String, _ color: NovagramIconColor, titleColor: NSColor? = nil, make: @escaping (AccountContext) -> ViewController) -> NovagramSettingsRow {
+    return NovagramSettingsRow(id: id, title: title, icon: novagramSettingsIcon(systemName: symbol, color: color), titleColor: titleColor, action: { context, present in
         guard let context = context as? AccountContext else {
             return
         }
@@ -32,16 +32,16 @@ func installNovagramSettingsHooks() {
         switch placement {
         case .accounts:
             return [
-                novagramRow(NovagramSettingsRowId.accounts, "Accounts", "person.2.fill", .blue, make: { FenixAccountsController(context: $0) })
+                novagramRow(NovagramSettingsRowId.accounts, "Accounts", "person.2.fill", .blue, make: { NovagramAccountsController(context: $0) })
             ]
         case .top:
             var rows = [
                 novagramRow(NovagramSettingsRowId.settings, "Novagram Settings", "n.square.fill", .gold, titleColor: novagramGold, make: { context in
                     NovagramInsightsEntry.registerSettingsRowClick(window: context.window)
-                    return FenixuzSettingsController(context)
+                    return NovagramSettingsController(context)
                 }),
                 novagramRow(NovagramSettingsRowId.bots, "Novagram Bots", "bolt.fill", .green, make: { NovagramBotsController($0) }),
-                novagramRow(NovagramSettingsRowId.analytics, "Analytics", "chart.bar.fill", .green, make: { FenixuzAnalyticsController($0) })
+                novagramRow(NovagramSettingsRowId.analytics, "Analytics", "chart.bar.fill", .green, make: { NovagramAnalyticsController($0) })
             ]
             if NovagramInsightsEntry.isVisible {
                 rows.append(adsAnalyticsRow())
@@ -51,11 +51,11 @@ func installNovagramSettingsHooks() {
     }
     hooks.selectedRowId = { controller in
         switch controller {
-        case is FenixuzSettingsController:
+        case is NovagramSettingsController:
             return NovagramSettingsRowId.settings
         case is NovagramBotsController:
             return NovagramSettingsRowId.bots
-        case is FenixuzAnalyticsController:
+        case is NovagramAnalyticsController:
             return NovagramSettingsRowId.analytics
         default:
             return nil
@@ -69,14 +69,14 @@ func installNovagramSettingsHooks() {
             return false
         }
         return NovagramAdsGate.handleVersionClick(window: context.window, onUnlocked: {
-            context.bindings.rootNavigation().push(FenixuzSettingsController(context))
+            context.bindings.rootNavigation().push(NovagramSettingsController(context))
         })
     }
     NovagramSettingsHooks.install(hooks)
 }
 
 private func adsAnalyticsRow() -> NovagramSettingsRow {
-    return NovagramSettingsRow(id: NovagramSettingsRowId.adsAnalytics, title: FenixuzL10n.current.ads_analytics_title, icon: fenixuzSettingsIcon(systemName: "chart.xyaxis.line", color: .orange), action: { context, _ in
+    return NovagramSettingsRow(id: NovagramSettingsRowId.adsAnalytics, title: NovagramL10n.current.ads_analytics_title, icon: novagramSettingsIcon(systemName: "chart.xyaxis.line", color: .orange), action: { context, _ in
         guard let context = context as? AccountContext else {
             return
         }

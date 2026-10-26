@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import Postbox
@@ -494,9 +494,9 @@ public class WPLayout: Equatable {
             ChatNavigationHooks.shared.applyExternalProxy(proxyConfig, context.sharedContext.accountManager)
         } else if let adAttribute = parent.adAttribute {
             let link: ChatHistoryInAppLinkValue = ChatHistoryLink.inApp(for: adAttribute.url.nsstring, context: context, openInfo: chatInteraction.openInfo)
-            let fenixuzOurs = NovagramAdsHooks.shared.recordClickIfOurs(adAttribute.opaqueId) // Fenixuz
+            let novagramOurs = NovagramAdsHooks.shared.recordClickIfOurs(adAttribute.opaqueId) // Novagram
             ChatHistoryLink.execute(inapp: link)
-            if !fenixuzOurs { chatInteraction.markAdAction(adAttribute.opaqueId, adAttribute.hasContentMedia) } // Fenixuz
+            if !novagramOurs { chatInteraction.markAdAction(adAttribute.opaqueId, adAttribute.hasContentMedia) } // Novagram
         } else {
             let link = ChatHistoryLink.inApp(for: self.content.url.nsstring, context: context, messageId: parent.id, openInfo: chatInteraction.openInfo)
             ChatHistoryLink.execute(inapp: link)

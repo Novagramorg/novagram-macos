@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -386,7 +386,7 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
             guard let window = self?.window else {
                 return
             }
-            if NovagramAdsHooks.isOurs(message: current) { if !intime { makeNext?(current, true) }; return } // Fenixuz
+            if NovagramAdsHooks.isOurs(message: current) { if !intime { makeNext?(current, true) }; return } // Novagram
             if !intime {
                 makeNext?(current, true)
             } else {
@@ -404,12 +404,12 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
             makeNext?(current, true)
         }, markAsSeen: { [weak self] current in
             if let adAttribute = current.adAttribute {
-                if NovagramAdsHooks.shared.recordViewIfOurs(adAttribute.opaqueId) { return } // Fenixuz
+                if NovagramAdsHooks.shared.recordViewIfOurs(adAttribute.opaqueId) { return } // Novagram
                 self?.adContext?.markAsSeen(opaqueId: adAttribute.opaqueId)
             }
         }, invoke: { [weak self] current in
             if let adAttribute = current.adAttribute {
-                if !NovagramAdsHooks.shared.recordClickIfOurs(adAttribute.opaqueId) { self?.adContext?.markAction(opaqueId: adAttribute.opaqueId, media: true, fullscreen: true) } // Fenixuz
+                if !NovagramAdsHooks.shared.recordClickIfOurs(adAttribute.opaqueId) { self?.adContext?.markAction(opaqueId: adAttribute.opaqueId, media: true, fullscreen: true) } // Novagram
                 GalleryHooks.shared.openAdUrl(adAttribute.url, context, { peerId, toChat, messageId, initialAction in
                     getGalleryViewer()?.openInfo(peerId, toChat, messageId, initialAction)
                 })
@@ -471,19 +471,19 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
             self.adContext = adContext
             
             var invoked: Bool = false
-            var shownOurs: Message? // Fenixuz
+            var shownOurs: Message? // Novagram
             
-            adStateDisposable.set(combineLatest(queue:.mainQueue(), NovagramAdsHooks.shared.videoAdState(context, message, adContext.state), status).startStrict(next: { [weak self] values in // Fenixuz
+            adStateDisposable.set(combineLatest(queue:.mainQueue(), NovagramAdsHooks.shared.videoAdState(context, message, adContext.state), status).startStrict(next: { [weak self] values in // Novagram
                
                 let ( _, messages, startDelay, betweenDelay) = values.0
                 let status = values.1
-                if let ours = shownOurs, !messages.contains(where: { $0 == ours }) { shownOurs = nil; self?.genericView.set(adMessage: nil, arguments: nil, animated: true) } // Fenixuz
+                if let ours = shownOurs, !messages.contains(where: { $0 == ours }) { shownOurs = nil; self?.genericView.set(adMessage: nil, arguments: nil, animated: true) } // Novagram
                 
                 if !messages.isEmpty, let startDelay, !invoked {
                     if Int32(status.timestamp) >= startDelay {
                         self?.runAdMessages(messages, startDelay, betweenDelay)
                         invoked = true
-                        shownOurs = messages.first(where: { NovagramAdsHooks.isOurs(message: $0) }) // Fenixuz
+                        shownOurs = messages.first(where: { NovagramAdsHooks.isOurs(message: $0) }) // Novagram
                     }
                 }
             }))

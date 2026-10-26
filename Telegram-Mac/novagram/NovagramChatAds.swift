@@ -8,9 +8,9 @@
 //  (ChatHeaderController `BotAdMessage`). `withInjectedAd` wraps that source by the product rule:
 //  OUR ad first, Telegram's only when we have none and never for Premium, nothing while
 //  "Remove all ads" is on.
-//  Ports of iOS FenixNovagramChannelAds.swift and FenixNovagramBotAds.swift.
+//  Ports of iOS NovagramChannelAds.swift and NovagramBotAds.swift.
 //
-//  Hooks (ChatController.swift, see FENIXUZ_HOOKS.md "Novagram ads v2"):
+//  Hooks (ChatController.swift, see NOVAGRAM_HOOKS.md "Novagram ads v2"):
 //   - `adMessages` source: `NovagramChatAds.withInjectedAd(baseAdMessages, context:peerId:)`.
 //   - `markAdAction`: `NovagramChatAds.reportClickIfOurs(opaqueId:context:)`.
 //   - `markAdAsSeen`, the readAds loop and `removeAd`: `NovagramAdsCenter.recordViewIfOurs` / `hideIfOurs`.
@@ -24,7 +24,7 @@ import TelegramCore
 import NovagramAds
 import ChatUI
 import GalleryUI
-import FenixuzCore
+import NovagramCore
 
 enum NovagramChatAds {
     typealias AdState = (fixed: Message?, opportunistic: [Message], version: Int)

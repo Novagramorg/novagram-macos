@@ -1,12 +1,12 @@
 // Bot-token login (Novagram): log in as a bot with a BotFather token. Structural clone of
-// Auth_PasswordEntry (single field + Next). Shown only when FenixuzLoginFeatures.botToken is on.
+// Auth_PasswordEntry (single field + Next). Shown only when NovagramLoginFeatures.botToken is on.
 
 import Foundation
 import TGUIKit
 import AppKit
 import TelegramCore
 import TelegramMedia
-import FenixuzCore
+import NovagramCore
 import LocalAnimations
 import Localization
 import TelegramTheme
@@ -41,11 +41,11 @@ private final class Auth_BotTokenHeaderView: View {
             self.playerView.set(LottieAnimation(compressed: data, key: .init(key: .bundle("business_chatbot"), size: Auth_Insets.logoSize, backingScale: Int(System.backingScale), fitzModifier: nil, colors: []), playPolicy: .loop))
         }
 
-        let layout = TextViewLayout(.initialize(string: FenixuzL10n.current.botlogin_title, color: theme.colors.text, font: Auth_Insets.headerFont))
+        let layout = TextViewLayout(.initialize(string: NovagramL10n.current.botlogin_title, color: theme.colors.text, font: Auth_Insets.headerFont))
         layout.measure(width: frame.width)
         self.header.update(layout)
 
-        let descAttr: NSAttributedString = .initialize(string: FenixuzL10n.current.botlogin_info, color: theme.colors.grayText, font: Auth_Insets.infoFont)
+        let descAttr: NSAttributedString = .initialize(string: NovagramL10n.current.botlogin_info, color: theme.colors.grayText, font: Auth_Insets.infoFont)
 
         let descLayout = TextViewLayout(descAttr, alignment: .center)
         // Wider wrap than the password screen: this caveat runs three lines, not one.
@@ -125,7 +125,7 @@ private final class Auth_BotTokenInputView: View, NSTextFieldDelegate {
         tokenField.usesSingleLineMode = true
         tokenField.delegate = self
 
-        tokenField.placeholderAttributedString = .initialize(string: FenixuzL10n.current.botlogin_placeholder, color: theme.colors.grayText, font: .code(.text))
+        tokenField.placeholderAttributedString = .initialize(string: NovagramL10n.current.botlogin_placeholder, color: theme.colors.grayText, font: .code(.text))
 
         updateBorder()
     }
@@ -245,7 +245,7 @@ final class Auth_BotTokenView: View {
         super.updateLocalizationAndTheme(theme: theme)
         nextView.updateLocalizationAndTheme(theme: theme)
 
-        let hintLayout = TextViewLayout(.initialize(string: FenixuzL10n.current.botlogin_hint, color: theme.colors.grayText, font: Auth_Insets.infoFont), alignment: .center)
+        let hintLayout = TextViewLayout(.initialize(string: NovagramL10n.current.botlogin_hint, color: theme.colors.grayText, font: Auth_Insets.infoFont), alignment: .center)
         hintLayout.measure(width: frame.width - 40)
         hint.update(hintLayout)
 
@@ -253,7 +253,7 @@ final class Auth_BotTokenView: View {
             button.set(font: Auth_Insets.infoFont, for: .Normal)
             button.set(color: theme.colors.accent, for: .Normal)
         }
-        help.set(text: FenixuzL10n.current.botlogin_help, for: .Normal)
+        help.set(text: NovagramL10n.current.botlogin_help, for: .Normal)
         cancel.set(text: strings().navigationCancel, for: .Normal)
         _ = help.sizeToFit()
         _ = cancel.sizeToFit()
@@ -307,11 +307,11 @@ final class Auth_BotTokenView: View {
             let text: String
             switch error {
             case .invalidToken:
-                text = FenixuzL10n.current.botlogin_error_invalid
+                text = NovagramL10n.current.botlogin_error_invalid
             case .limitExceeded:
                 text = strings().loginFloodWait
             case .generic:
-                text = FenixuzL10n.current.botlogin_error_generic
+                text = NovagramL10n.current.botlogin_error_generic
             }
             self.error.state.set(.error(text))
             self.hint.isHidden = true

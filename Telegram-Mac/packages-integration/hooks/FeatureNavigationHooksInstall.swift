@@ -35,7 +35,7 @@ import ChannelAdminUI
 import TelegramCallsCore
 import PreviewSenderUI
 import ChatUI
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 
 private extension PremiumBoardingSource {
     var logSource: PremiumLogEventsSource {
@@ -237,7 +237,7 @@ func installFeatureNavigationHooks() {
         return SelectCountries(context: context, selected: selected, complete: complete)
     }
     hooks.makePaymentsCheckoutController = { context, source, invoice, completion in
-        if FenixuzAppStoreIAP.shouldBlock(invoice: invoice, source: source) { FenixuzAppStoreIAP.presentBlockedAlert(on: context.window); completion?(.cancelled); return nil } // Fenixuz
+        if NovagramAppStoreIAP.shouldBlock(invoice: invoice, source: source) { NovagramAppStoreIAP.presentBlockedAlert(on: context.window); completion?(.cancelled); return nil } // Novagram
         return PaymentsCheckoutController(context: context, source: source, invoice: invoice, completion: completion.map { completion in
             return { status in
                 switch status {
@@ -249,7 +249,7 @@ func installFeatureNavigationHooks() {
         })
     }
     hooks.makePaymentsCheckoutControllerWithContext = { context, source, invoice, completion in
-        if FenixuzAppStoreIAP.shouldBlock(invoice: invoice, source: source) { FenixuzAppStoreIAP.presentBlockedAlert(on: context.window); completion?(.cancelled); return nil } // Fenixuz
+        if NovagramAppStoreIAP.shouldBlock(invoice: invoice, source: source) { NovagramAppStoreIAP.presentBlockedAlert(on: context.window); completion?(.cancelled); return nil } // Novagram
         return PaymentsCheckoutController(context: context, source: source, invoice: invoice, completion: completion.map { completion in
             return { status in
                 switch status {

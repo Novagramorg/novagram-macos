@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TelegramCore
 import ObjcUtils
@@ -166,7 +166,7 @@ public class Sender: NSObject {
         return enqueue(input: input, context: context, peerId: peerId, replyId: replyId, threadId: threadId, replyStoryId: replyStoryId, disablePreview: disablePreview, linkBelowMessage: linkBelowMessage, largeMedia: largeMedia, silent: silent, atDate: atDate, repeatPeriod: repeatPeriod, sendAsPeerId: sendAsPeerId, mediaPreview: mediaPreview, emptyHandler: emptyHandler, customChatContents: customChatContents, messageEffect: messageEffect, sendPaidMessageStars: sendPaidMessageStars, suggestPost: suggestPost, ephemeralBotPeerId: ephemeralBotPeerId, observedResult: nil)
     }
 
-    public static func enqueue(input:ChatTextInputState, context: any AccountContextProtocol, peerId:PeerId, replyId:EngineMessageReplySubject?, threadId: Int64?, replyStoryId: StoryId? = nil, disablePreview:Bool = false, linkBelowMessage: Bool = false, largeMedia: Bool? = nil, silent: Bool = false, atDate:Date? = nil, repeatPeriod: Int32? = nil, sendAsPeerId: PeerId? = nil, mediaPreview: TelegramMediaWebpage? = nil, emptyHandler:(()->Void)? = nil, customChatContents: ChatCustomContentsProtocol? = nil, messageEffect: AvailableMessageEffects.MessageEffect? = nil, sendPaidMessageStars: StarsAmount? = nil, suggestPost: ChatInterfaceState.ChannelSuggestPost? = nil, ephemeralBotPeerId: PeerId? = nil, observedResult: ((Int, [MessageId?]) -> Void)?, skipAutoTranslate: Bool = false) -> Signal<[MessageId?],NoError> { // Fenixuz
+    public static func enqueue(input:ChatTextInputState, context: any AccountContextProtocol, peerId:PeerId, replyId:EngineMessageReplySubject?, threadId: Int64?, replyStoryId: StoryId? = nil, disablePreview:Bool = false, linkBelowMessage: Bool = false, largeMedia: Bool? = nil, silent: Bool = false, atDate:Date? = nil, repeatPeriod: Int32? = nil, sendAsPeerId: PeerId? = nil, mediaPreview: TelegramMediaWebpage? = nil, emptyHandler:(()->Void)? = nil, customChatContents: ChatCustomContentsProtocol? = nil, messageEffect: AvailableMessageEffects.MessageEffect? = nil, sendPaidMessageStars: StarsAmount? = nil, suggestPost: ChatInterfaceState.ChannelSuggestPost? = nil, ephemeralBotPeerId: PeerId? = nil, observedResult: ((Int, [MessageId?]) -> Void)?, skipAutoTranslate: Bool = false) -> Signal<[MessageId?],NoError> { // Novagram
         
         var inset:Int = 0
         let dynamicEmojiOrder = context.stickerSettings.dynamicPackOrder
@@ -198,14 +198,14 @@ public class Sender: NSObject {
         if let media = mediaPreview, !disablePreview {
             mediaReference = AnyMediaReference.standalone(media: media)
         }
-        if mediaReference == nil, let text = FenixuzOutgoing.withAutoText(input.inputText) { input = ChatTextInputState(inputText: text, selectionRange: input.selectionRange, attributes: input.attributes) } // Fenixuz
-        if !skipAutoTranslate, mediaReference == nil, customChatContents == nil, !input.inputText.isEmpty, let lang = FenixuzOutgoing.autoTranslateLanguage { // Fenixuz
-            let original = input // Fenixuz
-            return context.engine.messages.translate(text: original.inputText, toLang: lang) |> `catch` { _ in .single(nil) } |> mapToSignal { result -> Signal<[MessageId?], NoError> in // Fenixuz
-                let translated = result.map { ChatTextInputState(inputText: $0.0, selectionRange: 0 ..< $0.0.length, attributes: []) } ?? original // Fenixuz
-                return enqueue(input: translated, context: context, peerId: peerId, replyId: replyId, threadId: threadId, replyStoryId: replyStoryId, disablePreview: disablePreview, linkBelowMessage: linkBelowMessage, largeMedia: largeMedia, silent: silent, atDate: atDate, repeatPeriod: repeatPeriod, sendAsPeerId: sendAsPeerId, mediaPreview: mediaPreview, emptyHandler: emptyHandler, customChatContents: customChatContents, messageEffect: messageEffect, sendPaidMessageStars: sendPaidMessageStars, suggestPost: suggestPost, ephemeralBotPeerId: ephemeralBotPeerId, observedResult: observedResult, skipAutoTranslate: true) // Fenixuz
-            } // Fenixuz
-        } // Fenixuz
+        if mediaReference == nil, let text = NovagramOutgoing.withAutoText(input.inputText) { input = ChatTextInputState(inputText: text, selectionRange: input.selectionRange, attributes: input.attributes) } // Novagram
+        if !skipAutoTranslate, mediaReference == nil, customChatContents == nil, !input.inputText.isEmpty, let lang = NovagramOutgoing.autoTranslateLanguage { // Novagram
+            let original = input // Novagram
+            return context.engine.messages.translate(text: original.inputText, toLang: lang) |> `catch` { _ in .single(nil) } |> mapToSignal { result -> Signal<[MessageId?], NoError> in // Novagram
+                let translated = result.map { ChatTextInputState(inputText: $0.0, selectionRange: 0 ..< $0.0.length, attributes: []) } ?? original // Novagram
+                return enqueue(input: translated, context: context, peerId: peerId, replyId: replyId, threadId: threadId, replyStoryId: replyStoryId, disablePreview: disablePreview, linkBelowMessage: linkBelowMessage, largeMedia: largeMedia, silent: silent, atDate: atDate, repeatPeriod: repeatPeriod, sendAsPeerId: sendAsPeerId, mediaPreview: mediaPreview, emptyHandler: emptyHandler, customChatContents: customChatContents, messageEffect: messageEffect, sendPaidMessageStars: sendPaidMessageStars, suggestPost: suggestPost, ephemeralBotPeerId: ephemeralBotPeerId, observedResult: observedResult, skipAutoTranslate: true) // Novagram
+            } // Novagram
+        } // Novagram
         
         
         
@@ -224,7 +224,7 @@ public class Sender: NSObject {
             inset += message.length
             
 
-            var attributes:[MessageAttribute] = [TextEntitiesMessageAttribute(entities: subState.messageTextEntities(parsingUrlType, extractDates: peerId.namespace == Namespaces.Peer.CloudUser) + FenixuzOutgoing.styleEntities(length: subState.inputText.length))] // Fenixuz
+            var attributes:[MessageAttribute] = [TextEntitiesMessageAttribute(entities: subState.messageTextEntities(parsingUrlType, extractDates: peerId.namespace == Namespaces.Peer.CloudUser) + NovagramOutgoing.styleEntities(length: subState.inputText.length))] // Novagram
             if let date = atDate {
                 attributes.append(OutgoingScheduleInfoMessageAttribute(scheduleTime: Int32(date.timeIntervalSince1970), repeatPeriod: repeatPeriod))
             }
@@ -240,8 +240,8 @@ public class Sender: NSObject {
             if let sendAsPeerId = sendAsPeerId {
                 attributes.append(SendAsMessageAttribute(peerId: sendAsPeerId))
             }
-            if let effectId = FenixuzOutgoing.effectId(messageEffect?.id) { // Fenixuz
-                attributes.append(EffectMessageAttribute(id: effectId)) // Fenixuz
+            if let effectId = NovagramOutgoing.effectId(messageEffect?.id) { // Novagram
+                attributes.append(EffectMessageAttribute(id: effectId)) // Novagram
             }
             if let sendPaidMessageStars {
                 attributes.append(PaidStarsMessageAttribute(stars: sendPaidMessageStars, postponeSending: false))
@@ -298,7 +298,7 @@ public class Sender: NSObject {
                         }
                     }
                     return .single(value)
-                } |> mapToSignal { value in FenixuzOutgoing.sendAutoSticker(after: value, account: context.account, peerId: peerId, threadId: threadId, replyId: replyId, replyStoryId: replyStoryId) } |> deliverOnMainQueue) // Fenixuz
+                } |> mapToSignal { value in NovagramOutgoing.sendAutoSticker(after: value, account: context.account, peerId: peerId, threadId: threadId, replyId: replyId, replyStoryId: replyStoryId) } |> deliverOnMainQueue) // Novagram
             } else {
                 DispatchQueue.main.async {
                     emptyHandler?()
@@ -542,7 +542,7 @@ public class Sender: NSObject {
             let getname:(String)->String = { path in
                 var result: String = path.nsstring.lastPathComponent
                 if result.contains("tg_temp_archive_") {
-                    result = "Novagram Archive" // Fenixuz
+                    result = "Novagram Archive" // Novagram
                 }
                 if path.isDirectory {
                     result += ".zip"
@@ -707,10 +707,10 @@ public class Sender: NSObject {
         if isSpoiler {
             attributes.append(MediaSpoilerMessageAttribute())
         }
-        if let effectId = FenixuzOutgoing.effectId(messageEffect?.id) { // Fenixuz
-            attributes.append(EffectMessageAttribute(id: effectId)) // Fenixuz
+        if let effectId = NovagramOutgoing.effectId(messageEffect?.id) { // Novagram
+            attributes.append(EffectMessageAttribute(id: effectId)) // Novagram
         }
-        FenixuzOutgoing.recordSent(media) // Fenixuz
+        NovagramOutgoing.recordSent(media) // Novagram
         if let attr = suggestPost?.attribute {
             attributes.append(attr)
         }

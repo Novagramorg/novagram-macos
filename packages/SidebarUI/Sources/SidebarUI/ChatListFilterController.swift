@@ -1,5 +1,5 @@
 import Cocoa
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import LocalAnimations
 import TelegramContext
 import TelegramTheme
@@ -1349,7 +1349,7 @@ public func ChatListFilterController(context: any AccountContextProtocol, enviro
 
         })
     }, toggleColor: { color in
-        if let _ = color, !context.isPremium, !FenixuzPremiumUnlock.folderTags { // Fenixuz
+        if let _ = color, !context.isPremium, !NovagramPremiumUnlock.folderTags { // Novagram
             showModalText(for: context.window, text: strings().chatListFolderPremiumAlert, button: strings().alertLearnMore, callback: { _ in
                 environment.showFolderTagsPremium()
             })

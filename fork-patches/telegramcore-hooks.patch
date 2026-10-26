@@ -6,7 +6,7 @@ index 3d99e59..49a1b24 100644
      }
      
      var peerIdsWithAddedSecretMessages = Set<PeerId>()
-+    let fenixuzBotSession = fenixuzIsBotSession(transaction: transaction, accountPeerId: accountPeerId) // Fenixuz
++    let novagramBotSession = novagramIsBotSession(transaction: transaction, accountPeerId: accountPeerId) // Novagram
      
      var updatedTypingActivities: [PeerActivitySpace: [PeerId: PeerInputActivity?]] = [:]
      var updatedIncomingThreadReadStates: [PeerAndBoundThreadId: MessageId.Id] = [:]
@@ -14,9 +14,9 @@ index 3d99e59..49a1b24 100644
                      }
                  }
              
-+                fenixuzInitializeBotDMReadState(isBotSession: fenixuzBotSession, transaction: transaction, messages: messages, location: location) // Fenixuz
++                novagramInitializeBotDMReadState(isBotSession: novagramBotSession, transaction: transaction, messages: messages, location: location) // Novagram
                  let _ = transaction.addMessages(messages, location: location)
-+                fenixuzForceBotChatInclusion(isBotSession: fenixuzBotSession, transaction: transaction, messages: messages, location: location) // Fenixuz
++                novagramForceBotChatInclusion(isBotSession: novagramBotSession, transaction: transaction, messages: messages, location: location) // Novagram
                  if case .UpperHistoryBlock = location {
                      for message in messages {
                          let chatPeerId = message.id.peerId
@@ -29,7 +29,7 @@ index a7249d6..f467906 100644
              
              for (entry, disposable) in added {
 -                disposable.set(fetchChatListHole(postbox: postbox, network: network, accountPeerId: accountPeerId, groupId: entry.groupId, hole: entry.hole).start())
-+                disposable.set(fenixuzManagedChatListHole(postbox: postbox, network: network, accountPeerId: accountPeerId, groupId: entry.groupId, hole: entry.hole).start()) // Fenixuz
++                disposable.set(novagramManagedChatListHole(postbox: postbox, network: network, accountPeerId: accountPeerId, groupId: entry.groupId, hole: entry.hole).start()) // Novagram
              }
          })
          
@@ -42,13 +42,13 @@ index efe3ecc..d5281d4 100644
              switch pendingEntry.entry.hole {
              case let .peer(hole):
 -                pendingEntry.disposable.set((fetchMessageHistoryHole(
-+                pendingEntry.disposable.set((fenixuzManagedMessageHistoryHole( // Fenixuz
++                pendingEntry.disposable.set((novagramManagedMessageHistoryHole( // Novagram
                      accountPeerId: self.accountPeerId,
 -                    source: .network(self.network),
-+                    network: self.network, // Fenixuz
++                    network: self.network, // Novagram
                      postbox: self.postbox,
 -                    peerInput: .direct(peerId: hole.peerId, threadId: hole.threadId), namespace: hole.namespace, direction: pendingEntry.entry.direction, space: pendingEntry.entry.space, count: pendingEntry.entry.count)
-+                    hole: hole, direction: pendingEntry.entry.direction, space: pendingEntry.entry.space, count: pendingEntry.entry.count) // Fenixuz
++                    hole: hole, direction: pendingEntry.entry.direction, space: pendingEntry.entry.space, count: pendingEntry.entry.count) // Novagram
                  |> deliverOn(self.queue)).start(completed: { [weak self] in
                      guard let self = self else {
                          return
@@ -60,7 +60,7 @@ index 214c08f..9b6e831 100644
                          }
                      }
                  } else {
-+                    fenixuzCommitPendingSettingsIfBot(transaction: transaction, peerId: notificationPeerId, settings: settings) // Fenixuz
++                    novagramCommitPendingSettingsIfBot(transaction: transaction, peerId: notificationPeerId, settings: settings) // Novagram
                      if let pending = transaction.getPendingPeerNotificationSettings(peerId), pending.isEqual(to: settings) {
                          transaction.updatePendingPeerNotificationSettings(peerId: peerId, settings: nil)
                      }
@@ -68,7 +68,7 @@ index 214c08f..9b6e831 100644
                  }
              }
          } else {
-+            fenixuzCommitPendingSettingsIfBot(transaction: transaction, peerId: peerId, settings: settings) // Fenixuz
++            novagramCommitPendingSettingsIfBot(transaction: transaction, peerId: peerId, settings: settings) // Novagram
              if let pending = transaction.getPendingPeerNotificationSettings(peerId), pending.isEqual(to: settings) {
                  transaction.updatePendingPeerNotificationSettings(peerId: peerId, settings: nil)
              }
@@ -81,8 +81,8 @@ index f8aacb5..9d0ce2f 100644
          transaction.updatePreferencesEntry(key: PreferencesKeys.chatListFilters, { entry in
              var state = entry?.get(ChatListFiltersState.self) ?? ChatListFiltersState.default
 -            let updatedFilters = f(state.filters)
-+            var updatedFilters = f(state.filters) // Fenixuz
-+            fenixuzEnsureAllChatsForBotFilters(transaction: transaction, filters: &updatedFilters) // Fenixuz
++            var updatedFilters = f(state.filters) // Novagram
++            novagramEnsureAllChatsForBotFilters(transaction: transaction, filters: &updatedFilters) // Novagram
              if updatedFilters != state.filters {
                  state.filters = updatedFilters
                  hasUpdates = true

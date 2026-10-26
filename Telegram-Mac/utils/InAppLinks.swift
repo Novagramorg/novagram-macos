@@ -12,7 +12,7 @@ import InputView
 import TelegramMedia
 import InAppSettings
 import WalletContext
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 
 
 
@@ -818,7 +818,7 @@ private func executeInvoiceLink(slug: String, context: AccountContext, window: W
             if invoice.currency == XTR {
                 showModal(with: Star_PurschaseInApp(context: context, invoice: invoice, source: .slug(slug), type: invoice.subscriptionPeriod != nil ? .botSubscription(invoice) : .bot), for: window)
             } else {
-                if FenixuzAppStoreIAP.shouldBlock(invoice: invoice, source: .slug(slug)) { FenixuzAppStoreIAP.presentBlockedAlert(on: window) } else { showModal(with: PaymentsCheckoutController(context: context, source: .slug(slug), invoice: invoice), for: window) } // Fenixuz
+                if NovagramAppStoreIAP.shouldBlock(invoice: invoice, source: .slug(slug)) { NovagramAppStoreIAP.presentBlockedAlert(on: window) } else { showModal(with: PaymentsCheckoutController(context: context, source: .slug(slug), invoice: invoice), for: window) } // Novagram
             }
         }, error: { error in
             let text: String
@@ -1533,7 +1533,7 @@ func execute(inapp:inAppLink, window: Window? = nil, isExternal: Bool = false, a
         afterComplete(true)
     case .instantView:
         afterComplete(true)
-    case let .novagramSettings(_, context, feature): openNovagramSettings(context: context, feature: feature); afterComplete(true) // Fenixuz
+    case let .novagramSettings(_, context, feature): openNovagramSettings(context: context, feature: feature); afterComplete(true) // Novagram
     case let .settings(_, context, section):
         let controller: ViewController
         switch section {
@@ -2229,7 +2229,7 @@ enum inAppLink {
     case sendGrams(link: String, context: AccountContext, data: ParsedSendGramsLink)
     case instantView(link: String, webpage: TelegramMediaWebpage, anchor: String?)
     case settings(link: String, context: AccountContext, section: InAppSettingsSection)
-    case novagramSettings(link: String, context: AccountContext, feature: String?) // Fenixuz
+    case novagramSettings(link: String, context: AccountContext, feature: String?) // Novagram
     case joinGroupCall(link: String, context: AccountContext, peerId: PeerId, call: CachedChannelData.ActiveCall)
     case invoice(link: String, context: AccountContext, slug: String)
     case premiumOffer(link: String, ref: String?, context: AccountContext)
@@ -2297,7 +2297,7 @@ enum inAppLink {
             return link
         case let .instantView(link, _, _):
             return link
-        case let .novagramSettings(link, _, _): return link // Fenixuz
+        case let .novagramSettings(link, _, _): return link // Novagram
         case let .settings(link, _, _):
             return link
         case let .joinGroupCall(link, _, _, _):
@@ -2362,7 +2362,7 @@ func inApp(for url:NSString, context: AccountContext? = nil, peerId:PeerId? = ni
         return .callback(source, { walletContext.processTonConnectUrl($0) })
     }
 
-    if let context, let link = NovagramSettingsLink.parse(url as String) { return .novagramSettings(link: url as String, context: context, feature: link.feature) } // Fenixuz
+    if let context, let link = NovagramSettingsLink.parse(url as String) { return .novagramSettings(link: url as String, context: context, feature: link.feature) } // Novagram
     let options = InAppLinkParsingOptions(
         peerId: peerId,
         messageId: messageId,

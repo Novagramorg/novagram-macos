@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Foundation
 import TGUIKit
 import TelegramCore
@@ -74,7 +74,7 @@ public final class Auth_TokenView : View {
     private var progressView: InfiniteProgressView?
     fileprivate let imageView: ImageView = ImageView(frame: Auth_Insets.qrSize.bounds)
     private let animation: LottiePlayerView = LottiePlayerView(frame: Auth_Insets.qrAnimSize.bounds)
-    fileprivate let logoView = NSImageView(frame: NSMakeRect(0, 0, 40, 40)) // Fenixuz
+    fileprivate let logoView = NSImageView(frame: NSMakeRect(0, 0, 40, 40)) // Novagram
     private let containerView = View()
     private let titleView = TextView()
     fileprivate let cancelButton = TextButton()
@@ -89,8 +89,8 @@ public final class Auth_TokenView : View {
 
     fileprivate var cancel:(()->Void)?
     fileprivate var loginWithPasskey:(()->Void)?
-    fileprivate let botTokenButton = TextButton() // Fenixuz
-    fileprivate var takeBotToken: (() -> Void)? // Fenixuz
+    fileprivate let botTokenButton = TextButton() // Novagram
+    fileprivate var takeBotToken: (() -> Void)? // Novagram
 
     public required init(frame frameRect: NSRect) {
         firstHelp = ExportTokenOptionView(frame: NSMakeRect(0, 0, frameRect.width, 0))
@@ -131,7 +131,7 @@ public final class Auth_TokenView : View {
         }, for: .Click)
 
         passkeyButton.isHidden = true
-        if FenixuzLoginFeatures.botToken { containerView.addSubview(botTokenButton); botTokenButton.set(handler: { [weak self] _ in self?.takeBotToken?() }, for: .Click) } // Fenixuz
+        if NovagramLoginFeatures.botToken { containerView.addSubview(botTokenButton); botTokenButton.set(handler: { [weak self] _ in self?.takeBotToken?() }, for: .Click) } // Novagram
     }
     
     private func measure() {
@@ -155,7 +155,7 @@ public final class Auth_TokenView : View {
         passkeyButton.set(color: theme.colors.accent, for: .Normal)
         passkeyButton.set(text: strings().authLoginWithPasskey, for: .Normal)
         _ = passkeyButton.sizeToFit()
-        fenixuzStyleBotTokenLink(botTokenButton) // Fenixuz
+        novagramStyleBotTokenLink(botTokenButton) // Novagram
     }
 
     public func updatePasskeyAvailable(_ available: Bool) {
@@ -184,8 +184,8 @@ public final class Auth_TokenView : View {
     }
     
     private func updateLottie() {
-        self.logoView.image = FenixuzQrLogo.image(side: self.logoView.frame.width) // Fenixuz
-        self.logoView.imageScaling = .scaleProportionallyUpOrDown // Fenixuz
+        self.logoView.image = NovagramQrLogo.image(side: self.logoView.frame.width) // Novagram
+        self.logoView.imageScaling = .scaleProportionallyUpOrDown // Novagram
         
     }
     public override func viewDidMoveToWindow() {
@@ -253,7 +253,7 @@ public final class Auth_TokenView : View {
 
         var totalHeight = imageView.frame.height + Auth_Insets.betweenHeader + self.titleView.frame.height + Auth_Insets.betweenHeader + helpView.frame.height + Auth_Insets.betweenHeader + cancelButton.frame.height
         totalHeight += 10 + passkeyButton.frame.height
-        totalHeight += fenixuzBotTokenLinkHeight(botTokenButton) // Fenixuz
+        totalHeight += novagramBotTokenLinkHeight(botTokenButton) // Novagram
 
 
         containerView.setFrameSize(NSMakeSize(frame.width, totalHeight))
@@ -277,7 +277,7 @@ public final class Auth_TokenView : View {
         if !passkeyButton.isHidden {
             passkeyButton.centerX(y: cancelButton.frame.maxY + 10)
         }
-        botTokenButton.centerX(y: (passkeyButton.isHidden ? cancelButton.frame.maxY : passkeyButton.frame.maxY) + 10) // Fenixuz
+        botTokenButton.centerX(y: (passkeyButton.isHidden ? cancelButton.frame.maxY : passkeyButton.frame.maxY) + 10) // Novagram
     }
 }
 
@@ -323,7 +323,7 @@ public final class Auth_TokenController : GenericViewController<Auth_TokenView> 
     public func updatePasskeyAvailable(_ available: Bool) {
         genericView.updatePasskeyAvailable(available)
     }
-    func fenixuzSetTakeBotToken(_ f: @escaping () -> Void) { genericView.takeBotToken = f } // Fenixuz
+    func novagramSetTakeBotToken(_ f: @escaping () -> Void) { genericView.takeBotToken = f } // Novagram
     
     public override func updateLocalizationAndTheme(theme: PresentationTheme) {
         super.updateLocalizationAndTheme(theme: theme)

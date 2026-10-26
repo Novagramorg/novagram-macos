@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import Foundation
 import TGUIKit
@@ -1771,7 +1771,7 @@ public class APChatVoiceController : APChatController {
         let disposable = MetaDisposable()
         self.markAsConsumedDisposable.set(disposable)
         guard self.playbackGeneration == generation, self.song === item else { return }
-        if !FenixuzGhostMode.isActive { disposable.set(context.engine.messages.markMessageContentAsConsumedInteractively(messageId: item.entry.index.id).start()) } // Fenixuz
+        if !NovagramGhostMode.isActive { disposable.set(context.engine.messages.markMessageContentAsConsumedInteractively(messageId: item.entry.index.id).start()) } // Novagram
     }
 
     deinit {

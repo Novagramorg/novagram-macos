@@ -1,6 +1,6 @@
 import Cocoa
 import TGUIKit
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 
 func installTelegramLinksHooks() {
     LinkHooks.install(LinkHooks(callbackLink: { text, handler in
@@ -8,7 +8,7 @@ func installTelegramLinksHooks() {
     }, globalLinkExecutor: {
         return globalLinkExecutor
     }, openExternalLink: { link, confirm in
-        if FenixuzAppStoreIAP.shouldBlockExternalPurchase(link: link) || link == strings().fragmentTonAddFundsLink { FenixuzAppStoreIAP.presentBlockedAlert(on: appDelegate?.currentContext?.window ?? mainWindow); return } // Fenixuz
+        if NovagramAppStoreIAP.shouldBlockExternalPurchase(link: link) || link == strings().fragmentTonAddFundsLink { NovagramAppStoreIAP.presentBlockedAlert(on: appDelegate?.currentContext?.window ?? mainWindow); return } // Novagram
         execute(inapp: .external(link: link, confirm))
     }, markdownLink: { contents in
         return inApp(for: contents.nsstring, context: appDelegate?.currentContext, openInfo: { peerId, _, _, _ in

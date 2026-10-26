@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import SwiftSignalKit
@@ -204,19 +204,19 @@ public struct UICustomLinkAction : UIChatListTextAction {
     
     public func action() {
         let context = self.context
-        if NovagramAdsHooks.shared.bannerOpenIfOurs(self.id, context) { return } // Fenixuz
+        if NovagramAdsHooks.shared.bannerOpenIfOurs(self.id, context) { return } // Novagram
         ChatUIHooks.shared.executeInAppLink(self.url.nsstring, context, { peerId, _, messageId, action in
             context.bindings.rootNavigation().push(ChatListUIHooks.shared.makeChatAdditionControllerWithFocus(context, .peer(peerId), .init(messageId: messageId), action))
         })
     }
     
     public func dismiss() {
-        if NovagramAdsHooks.shared.bannerDismissIfOurs(self.id, context) { return } // Fenixuz
+        if NovagramAdsHooks.shared.bannerDismissIfOurs(self.id, context) { return } // Novagram
         _ = context.engine.notices.dismissServerProvidedSuggestion(suggestion: self.id).start()
     }
     
     public func isEqual(_ rhs: UIChatListTextAction) -> Bool {
-        if let rhs = rhs as? UICustomLinkAction, NovagramAdsHooks.shared.bannerIsOurs(self.id) || NovagramAdsHooks.shared.bannerIsOurs(rhs.id) { return self.id == rhs.id } // Fenixuz
+        if let rhs = rhs as? UICustomLinkAction, NovagramAdsHooks.shared.bannerIsOurs(self.id) || NovagramAdsHooks.shared.bannerIsOurs(rhs.id) { return self.id == rhs.id } // Novagram
         if let _ = rhs as? UICustomLinkAction {
             return true
         } else {
@@ -228,7 +228,7 @@ public struct UICustomLinkAction : UIChatListTextAction {
     private let id: String
     private let url: String
     public var canDismiss: Bool {
-        return NovagramAdsHooks.shared.bannerCanDismiss(self.id) // Fenixuz
+        return NovagramAdsHooks.shared.bannerCanDismiss(self.id) // Novagram
     }
     
     public init(context: any AccountContextProtocol, id: String, url: String, title: ServerSuggestionInfo.Item.Text, subtitle: ServerSuggestionInfo.Item.Text) {
@@ -766,9 +766,9 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
 
     
     private let filterDisposable = MetaDisposable()
-    private let fenixPageRetry = FenixuzChatListPageRetry() // Fenixuz
-    private var fenixLastFolderTabs: [ChatListFilter] = [] // Fenixuz
-    private var fenixSettingsObserver: NSObjectProtocol? // Fenixuz
+    private let novagramPageRetry = NovagramChatListPageRetry() // Novagram
+    private var novagramLastFolderTabs: [ChatListFilter] = [] // Novagram
+    private var novagramSettingsObserver: NSObjectProtocol? // Novagram
     
 
     
@@ -779,13 +779,13 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        FenixuzHiddenChatsShortcut.install() // Fenixuz
-        fenixSettingsObserver = NotificationCenter.default.addObserver(forName: FenixuzChatListFilter.settingsChanged, object: nil, queue: .main, using: { [weak self] _ in // Fenixuz
-            guard let self else { return } // Fenixuz
-            if case .filter = self.mode {} else { self.updateFilter { $0.withUpdatedTabs(FenixuzChatListFilter.hideFolders ? [] : self.fenixLastFolderTabs) } } // Fenixuz
-            if !FenixuzChatListFilter.showStories { self.completeUndefiedStates(animated: true) } // Fenixuz
-            self.updateState { $0 } // Fenixuz
-        }) // Fenixuz
+        NovagramHiddenChatsShortcut.install() // Novagram
+        novagramSettingsObserver = NotificationCenter.default.addObserver(forName: NovagramChatListFilter.settingsChanged, object: nil, queue: .main, using: { [weak self] _ in // Novagram
+            guard let self else { return } // Novagram
+            if case .filter = self.mode {} else { self.updateFilter { $0.withUpdatedTabs(NovagramChatListFilter.hideFolders ? [] : self.novagramLastFolderTabs) } } // Novagram
+            if !NovagramChatListFilter.showStories { self.completeUndefiedStates(animated: true) } // Novagram
+            self.updateState { $0 } // Novagram
+        }) // Novagram
         
         let initialSize = self.atomicSize
         let context = self.context
@@ -956,7 +956,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
         let previousLayout: Atomic<SplitViewState> = Atomic(value: context.layout)
                 
         
-        let suggestions = combineLatest(NovagramAdsHooks.shared.bannerSuggestions(context, context.engine.notices.getServerProvidedSuggestions()), ChatListUIHooks.shared.crashReportCard(context)) // Fenixuz
+        let suggestions = combineLatest(NovagramAdsHooks.shared.bannerSuggestions(context, context.engine.notices.getServerProvidedSuggestions()), ChatListUIHooks.shared.crashReportCard(context)) // Novagram
         let birthdays: Signal<[UIChatListBirthday], NoError> = combineLatest(context.engine.notices.getServerDismissedSuggestions(), context.account.stateManager.contactBirthdays) |> map { dismissed, list in
             return (list.filter {
                 $0.value.isToday
@@ -1033,8 +1033,8 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
                     return false
                 })
             }
-            let fenixMyPhone = (context.myPeer as? TelegramUser)?.phone // Fenixuz
-            prepare.removeAll(where: { FenixuzChatListFilter.isFiltered(peerId: $0.0.renderedPeer.peerId, mainPeer: $0.0.renderedPeer.chatMainPeer?._asPeer(), myPhone: fenixMyPhone) }) // Fenixuz
+            let novagramMyPhone = (context.myPeer as? TelegramUser)?.phone // Novagram
+            prepare.removeAll(where: { NovagramChatListFilter.isFiltered(peerId: $0.0.renderedPeer.peerId, mainPeer: $0.0.renderedPeer.chatMainPeer?._asPeer(), myPhone: novagramMyPhone) }) // Novagram
             var mapped: [UIChatListEntry] = prepare.map { item in
                 let space: PeerActivitySpace
                 var generalStatus: ItemHideStatus? = nil
@@ -1057,7 +1057,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
                         mapped.append(.group(i, group, animateGroupNextTransition.swap(nil) == group.id, hideStatus, state.controllerAppear, state.appear == .short, storyState))
                     }
                     if state.mode == .plain, state.filterData.filter == .allChats, !update.list.hasLater {
-                        if FenixuzChatListFilter.showStories, update.list.groupItems.isEmpty, let storyState = storyState, !storyState.items.isEmpty { // Fenixuz
+                        if NovagramChatListFilter.showStories, update.list.groupItems.isEmpty, let storyState = storyState, !storyState.items.isEmpty { // Novagram
                             mapped.append(.group(0, .init(id: .archive, topMessage: nil, items: [], unreadCount: 0), animateGroupNextTransition.swap(nil) == .archive, hideStatus, state.controllerAppear, state.appear == .short, storyState))
                         }
                     }
@@ -1242,7 +1242,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
             return !items.contains(where: { !($0 is ChatListEmptyRowItem) })
         }
 
-        let pageScrollHandler: (ScrollPosition) -> Void = { [weak self] scroll in // Fenixuz
+        let pageScrollHandler: (ScrollPosition) -> Void = { [weak self] scroll in // Novagram
             
             let view = previousChatList.modify({$0})
             self?.removeRevealStateIfNeeded(nil)
@@ -1274,7 +1274,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
                     _ = animated.swap(false)
                     if let timestamp = strongSelf.state?.filterData.requestTimestamp {
                         if timestamp + 0.5 > CACurrentMediaTime() {
-                            strongSelf.fenixPageRetry.schedule(scroll, after: timestamp + 0.5 - CACurrentMediaTime(), tableView: strongSelf.genericView.tableView) // Fenixuz
+                            strongSelf.novagramPageRetry.schedule(scroll, after: timestamp + 0.5 - CACurrentMediaTime(), tableView: strongSelf.genericView.tableView) // Novagram
                             return
                         }
                     }
@@ -1288,9 +1288,9 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
                 }
             }
             
-        } // Fenixuz
-        fenixPageRetry.handler = pageScrollHandler // Fenixuz
-        genericView.tableView.setScrollHandler(pageScrollHandler) // Fenixuz
+        } // Novagram
+        novagramPageRetry.handler = pageScrollHandler // Novagram
+        genericView.tableView.setScrollHandler(pageScrollHandler) // Novagram
         
         let filterView = chatListFilterPreferences(engine: context.engine) |> deliverOnMainQueue |> distinctUntilChanged
         let filterBadges = chatListFilterItems(engine: context.engine, accountManager: context.sharedContext.accountManager) |> deliverOnMainQueue |> distinctUntilChanged
@@ -1317,10 +1317,10 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
             }))
         case .folder:
             filterDisposable.set(filterView.start(next: { [weak self] filters in
-                self?.fenixLastFolderTabs = filters.list // Fenixuz
+                self?.novagramLastFolderTabs = filters.list // Novagram
                 self?.updateFilter( { current in
                     var current = current
-                    current = current.withUpdatedTabs(FenixuzChatListFilter.hideFolders ? [] : filters.list) // Fenixuz
+                    current = current.withUpdatedTabs(NovagramChatListFilter.hideFolders ? [] : filters.list) // Novagram
                         .withUpdatedSidebar(filters.sidebar)
                         .withUpdatedShowTags(filters.showTags)
                     return current
@@ -1329,10 +1329,10 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
         default:
             var first: Bool = true
             filterDisposable.set(combineLatest(filterView, filterBadges).start(next: { [weak self] filters, badges in
-                self?.fenixLastFolderTabs = filters.list // Fenixuz
+                self?.novagramLastFolderTabs = filters.list // Novagram
                 self?.updateFilter( { current in
                     var current = current
-                    current = current.withUpdatedTabs(FenixuzChatListFilter.hideFolders ? [] : filters.list) // Fenixuz
+                    current = current.withUpdatedTabs(NovagramChatListFilter.hideFolders ? [] : filters.list) // Novagram
                         .withUpdatedSidebar(filters.sidebar)
                         .withUpdatedShowTags(filters.showTags)
                     if !first, let updated = filters.list.first(where: { ChatListUIHooks.shared.chatListFilterId($0) == ChatListUIHooks.shared.chatListFilterId(current.filter) }) {
@@ -1968,7 +1968,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
     
     
     deinit {
-        if let fenixSettingsObserver { NotificationCenter.default.removeObserver(fenixSettingsObserver) } // Fenixuz
+        if let novagramSettingsObserver { NotificationCenter.default.removeObserver(novagramSettingsObserver) } // Novagram
         removePeerIdGroupDisposable.dispose()
         disposable.dispose()
         reorderDisposable.dispose()

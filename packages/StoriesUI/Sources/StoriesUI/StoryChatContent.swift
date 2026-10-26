@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Foundation
 import TelegramCore
 import SwiftSignalKit
@@ -426,7 +426,7 @@ public final class StoryContentContextImpl: StoryContentContext {
             )
             |> map { setting, peer -> Bool in
                 let isPremium = peer?.isPremium ?? false
-                return setting && (isPremium || FenixuzPremiumUnlock.storiesSaveAndHD) // Fenixuz
+                return setting && (isPremium || NovagramPremiumUnlock.storiesSaveAndHD) // Novagram
             }
             |> distinctUntilChanged
 
@@ -1401,7 +1401,7 @@ public final class StoryContentContextImpl: StoryContentContext {
     }
     
     public func markAsSeen(id: StoryId) {
-        if FenixuzGhostMode.isActive { return } // Fenixuz
+        if NovagramGhostMode.isActive { return } // Novagram
         let _ = self.context.engine.messages.markStoryAsSeen(peerId: id.peerId, id: id.id, asPinned: false).startStandalone()
     }
 }
@@ -1704,7 +1704,7 @@ public final class SingleStoryContentContextImpl: StoryContentContext {
     }
     
     public func markAsSeen(id: StoryId) {
-        if FenixuzGhostMode.isActive { return } // Fenixuz
+        if NovagramGhostMode.isActive { return } // Novagram
         if self.readGlobally {
             let _ = self.context.engine.messages.markStoryAsSeen(peerId: id.peerId, id: id.id, asPinned: false).startStandalone()
 
@@ -2001,7 +2001,7 @@ public final class PeerStoryListContentContextImpl: StoryContentContext {
     }
     
     public func markAsSeen(id: StoryId) {
-        if FenixuzGhostMode.isActive { return } // Fenixuz
+        if NovagramGhostMode.isActive { return } // Novagram
         let _ = self.context.engine.messages.markStoryAsSeen(peerId: id.peerId, id: id.id, asPinned: true).startStandalone()
     }
 }

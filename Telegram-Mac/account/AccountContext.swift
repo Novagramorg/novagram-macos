@@ -228,7 +228,7 @@ final class AccountContext {
     let inlinePacksContext: InlineStickersContext
     let cachedGroupCallContexts: AccountGroupCallContextCacheImpl
     let networkStatusManager: NetworkStatusManager
-    lazy var inAppPurchaseManager: any InAppPurchaseManagerProtocol = FenixuzBlockingPurchaseManager(base: InAppPurchaseManager(engine: self.engine), window: { [weak self] in self?.window }) // Fenixuz
+    lazy var inAppPurchaseManager: any InAppPurchaseManagerProtocol = NovagramBlockingPurchaseManager(base: InAppPurchaseManager(engine: self.engine), window: { [weak self] in self?.window }) // Novagram
     let starsContext: StarsContext
     let tonContext: StarsContext
     private let walletContextStorage: Any?
@@ -966,7 +966,7 @@ final class AccountContext {
             self?.contentConfig = settings
         }))
 
-        // actionsDisposable.add(requestApplicationIcons(engine: engine).start()) // Fenixuz
+        // actionsDisposable.add(requestApplicationIcons(engine: engine).start()) // Novagram
     }
     #endif
 

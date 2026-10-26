@@ -6,7 +6,7 @@
 //  is shown, `click` when it is opened (queued before the peer opens). Telegram's own sponsored peers
 //  are a fallback for when our backend has no ad for the query, never for Premium users, and nothing
 //  shows while "Remove all ads" is on.
-//  Port of iOS submodules/Fenixuz/NovagramAds/Sources/NovagramSearchAds.swift.
+//  Port of iOS submodules/Novagram/NovagramAds/Sources/NovagramSearchAds.swift.
 //
 //  Hooks: SearchController.swift (`.novagramAdPeer` entry, Telegram `adPeers` fallback, click) and
 //  RecentPeerRowItem.swift (the row's "Ad" pill: view + About / Report menu).
@@ -16,7 +16,7 @@ import Foundation
 import SwiftSignalKit
 import Postbox
 import TelegramCore
-import FenixuzCore
+import NovagramCore
 import NovagramAds
 
 /// A promoted channel or bot resolved for the current search query.
@@ -41,7 +41,7 @@ enum NovagramSearchAds {
 
     /// The search row's pill text (uz "Reklama", ru "Реклама", en "Ad").
     static var adLabel: String {
-        return FenixuzL10n.current.ads_label
+        return NovagramL10n.current.ads_label
     }
 
     /// The row was shown.

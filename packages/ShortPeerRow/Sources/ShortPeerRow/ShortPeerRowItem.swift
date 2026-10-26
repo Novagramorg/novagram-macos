@@ -1,4 +1,4 @@
-import FenixuzShare // Fenixuz
+import NovagramShare // Novagram
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -439,7 +439,7 @@ open class ShortPeerRowItem: GeneralRowItem {
         if let monoforumPeer, peer.isMonoForum {
             let _ = tAttr.append(string: monoforumPeer.displayTitle, color: enabled ? titleStyle.foregroundColor : customTheme?.grayTextColor ?? theme.colors.grayText, font: self.titleStyle.font)
         } else {
-            let _ = tAttr.append(string: FenixuzMutualContact.title(isLookSavedMessage && account.peerId == peer.id ? strings().peerSavedMessages : (compactText ? peer.compactDisplayTitle + (account.testingEnvironment ? " [🤖]" : "") : peer.displayTitle), for: peer), color: enabled ? titleStyle.foregroundColor : customTheme?.grayTextColor ?? theme.colors.grayText, font: self.titleStyle.font) // Fenixuz
+            let _ = tAttr.append(string: NovagramMutualContact.title(isLookSavedMessage && account.peerId == peer.id ? strings().peerSavedMessages : (compactText ? peer.compactDisplayTitle + (account.testingEnvironment ? " [🤖]" : "") : peer.displayTitle), for: peer), color: enabled ? titleStyle.foregroundColor : customTheme?.grayTextColor ?? theme.colors.grayText, font: self.titleStyle.font) // Novagram
         }
         
         

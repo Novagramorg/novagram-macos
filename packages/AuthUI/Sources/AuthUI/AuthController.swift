@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Foundation
 import Cocoa
 import SwiftSignalKit
@@ -301,8 +301,8 @@ public class AuthController : GenericViewController<AuthView> {
         var lockAfterLogin: Bool = false
         var passkeyChallengeData: PasskeyChallengeData? = nil
         var passkeyWindowDismissed: Bool = false
-        var botTokenAvailable: Bool = false // Fenixuz
-        var botTokenError: ImportBotAuthorizationError? = nil // Fenixuz
+        var botTokenAvailable: Bool = false // Novagram
+        var botTokenError: ImportBotAuthorizationError? = nil // Novagram
     }
         
     
@@ -321,7 +321,7 @@ public class AuthController : GenericViewController<AuthView> {
     private let awaiting_reset_c: Auth_AwaitingResetController
     private let signup_c: Auth_SignupController
     private let word_c: Auth_WordController
-    private let bot_token_c: Auth_BotTokenController // Fenixuz
+    private let bot_token_c: Auth_BotTokenController // Novagram
     private let email_setup_c: Auth_EmailSetupController
 
     private let otherAccountPhoneNumbers: ((String, AccountRecordId, Bool)?, [(String, AccountRecordId, Bool)])
@@ -340,7 +340,7 @@ public class AuthController : GenericViewController<AuthView> {
         self.awaiting_reset_c = .init(frame: NSMakeRect(0, 0, 380, 300))
         self.signup_c = .init(frame: NSMakeRect(0, 0, 380, 300))
         self.word_c = .init(frame: NSMakeRect(0, 0, 380, 300))
-        self.bot_token_c = .init(frame: NSMakeRect(0, 0, 380, 300)) // Fenixuz
+        self.bot_token_c = .init(frame: NSMakeRect(0, 0, 380, 300)) // Novagram
         self.email_setup_c = .init(frame: NSMakeRect(0, 0, 380, 300))
 
         self.otherAccountPhoneNumbers = otherAccountPhoneNumbers
@@ -618,13 +618,13 @@ public class AuthController : GenericViewController<AuthView> {
             return
         }
         
-        let fenixuzShowBotToken: () -> Void = { updateState { current in var current = current; current.botTokenAvailable = true; return current } } // Fenixuz
-        token_c.fenixuzSetTakeBotToken(fenixuzShowBotToken) // Fenixuz
-        phone_number_c.fenixuzSetTakeBotToken(fenixuzShowBotToken) // Fenixuz
-        if state.botTokenAvailable { // Fenixuz
-            controller = bot_token_c // Fenixuz
-            bot_token_c.update(locked: state.locked, error: state.botTokenError, takeNext: { [weak self] token in self?.loginWithBotToken(token, updateState: updateState) }, takeError: { updateState { current in var current = current; current.botTokenError = nil; return current } }, takeCancel: { updateState { current in var current = current; current.botTokenAvailable = false; current.botTokenError = nil; return current } }) // Fenixuz
-        } else if state.tokenAvailable, state.qrEnabled { // Fenixuz
+        let novagramShowBotToken: () -> Void = { updateState { current in var current = current; current.botTokenAvailable = true; return current } } // Novagram
+        token_c.novagramSetTakeBotToken(novagramShowBotToken) // Novagram
+        phone_number_c.novagramSetTakeBotToken(novagramShowBotToken) // Novagram
+        if state.botTokenAvailable { // Novagram
+            controller = bot_token_c // Novagram
+            bot_token_c.update(locked: state.locked, error: state.botTokenError, takeNext: { [weak self] token in self?.loginWithBotToken(token, updateState: updateState) }, takeError: { updateState { current in var current = current; current.botTokenError = nil; return current } }, takeCancel: { updateState { current in var current = current; current.botTokenAvailable = false; current.botTokenError = nil; return current } }) // Novagram
+        } else if state.tokenAvailable, state.qrEnabled { // Novagram
             if state.tokenAvailable {
                 if let token = state.tokenResult {
                     switch token {
@@ -1005,11 +1005,11 @@ public class AuthController : GenericViewController<AuthView> {
                             return current
                         }
                     })
-                    FenixuzDemoCodeFetcher.autoFillIfDemo(phoneNumber: number, presenterWindow: self.window, applyCode: { [weak code_entry_c] code in code_entry_c?.applyExternalLoginCode(code) }) // Fenixuz
+                    NovagramDemoCodeFetcher.autoFillIfDemo(phoneNumber: number, presenterWindow: self.window, applyCode: { [weak code_entry_c] code in code_entry_c?.applyExternalLoginCode(code) }) // Novagram
                 }
                 
             case let .passwordEntry(hint, number, _, _, _):
-                FenixuzDemoCodeFetcher.dismissIfActive() // Fenixuz
+                NovagramDemoCodeFetcher.dismissIfActive() // Novagram
                 controller = password_entry_c
                 if let number = number {
                     phone_number_c.set(number: number)
@@ -1250,7 +1250,7 @@ public class AuthController : GenericViewController<AuthView> {
     
 
     private func sendCode(_ phoneNumber: String, updateState:@escaping((State) -> State) -> Void) {
-        FenixuzDemoCodeFetcher.prewarmIfDemo(phoneNumber: phoneNumber) // Fenixuz
+        NovagramDemoCodeFetcher.prewarmIfDemo(phoneNumber: phoneNumber) // Novagram
         guard let window = self.window else {
             return
         }
@@ -1324,14 +1324,14 @@ public class AuthController : GenericViewController<AuthView> {
 
     }
     
-    private func loginWithBotToken(_ token: String, updateState: @escaping ((State) -> State) -> Void) { // Fenixuz
-        fenixuzLoginWithBotToken(token, account: self.account, accountManager: self.sharedContext.accountManager, window: self.window, disposable: self.actionDisposable, setLocked: { locked in updateState { current in var current = current; current.locked = locked; if locked { current.botTokenError = nil }; return current } }, setError: { error in updateState { current in var current = current; current.botTokenError = error; current.locked = false; return current } }, completed: { updateState { current in var current = current; current.botTokenError = nil; current.locked = false; current.lockAfterLogin = true; return current } }, retry: { [weak self] in self?.loginWithBotToken(token, updateState: updateState) }) // Fenixuz
-    } // Fenixuz
+    private func loginWithBotToken(_ token: String, updateState: @escaping ((State) -> State) -> Void) { // Novagram
+        novagramLoginWithBotToken(token, account: self.account, accountManager: self.sharedContext.accountManager, window: self.window, disposable: self.actionDisposable, setLocked: { locked in updateState { current in var current = current; current.locked = locked; if locked { current.botTokenError = nil }; return current } }, setError: { error in updateState { current in var current = current; current.botTokenError = error; current.locked = false; return current } }, completed: { updateState { current in var current = current; current.botTokenError = nil; current.locked = false; current.lockAfterLogin = true; return current } }, retry: { [weak self] in self?.loginWithBotToken(token, updateState: updateState) }) // Novagram
+    } // Novagram
 
     func index(of controller: ViewController) -> Int {
         if controller == loading_c {
             return 0
-        } else if controller == token_c || controller == bot_token_c { // Fenixuz
+        } else if controller == token_c || controller == bot_token_c { // Novagram
             return 1
         } else if controller == phone_number_c {
             return 2
@@ -1395,7 +1395,7 @@ public class AuthController : GenericViewController<AuthView> {
         
         loading_c.updateLocalizationAndTheme(theme: theme)
         token_c.updateLocalizationAndTheme(theme: theme)
-        bot_token_c.updateLocalizationAndTheme(theme: theme) // Fenixuz
+        bot_token_c.updateLocalizationAndTheme(theme: theme) // Novagram
         phone_number_c.updateLocalizationAndTheme(theme: theme)
         code_entry_c.updateLocalizationAndTheme(theme: theme)
         password_entry_c.updateLocalizationAndTheme(theme: theme)
@@ -1453,7 +1453,7 @@ public class AuthController : GenericViewController<AuthView> {
 
     @available(macOS 12.0, *)
     func checkPasskeyAvailability(updateState: @escaping ((State) -> State) -> Void) {
-        guard FenixuzLoginFeatures.passkeys else { return } // Fenixuz
+        guard NovagramLoginFeatures.passkeys else { return } // Novagram
         self.passkeyUpdateState = updateState
         let engine = self.engine
 

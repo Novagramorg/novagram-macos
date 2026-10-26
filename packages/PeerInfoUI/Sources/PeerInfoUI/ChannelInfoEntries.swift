@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import Postbox
 import TelegramCore
@@ -1159,8 +1159,8 @@ enum ChannelInfoEntry<Context: AccountContextProtocol>: PeerInfoEntry {
                 arguments.openQrStudio(from: control)
             })
         case let .peerId(_, value, viewType):
-            let copyId: () -> Void = { copyToClipboard(value); showModalText(for: arguments.context.window, text: FenixuzL10n.current.peerInfo_idCopied) } // Fenixuz
-            return  TextAndLabelItem(initialSize, stableId: stableId.hashValue, label: FenixuzL10n.current.peerInfo_idLabel, copyMenuText: FenixuzL10n.current.peerInfo_copyId, text: value, context: arguments.context, viewType: viewType, callback: copyId, canCopy: true, _copyToClipboard: copyId) // Fenixuz
+            let copyId: () -> Void = { copyToClipboard(value); showModalText(for: arguments.context.window, text: NovagramL10n.current.peerInfo_idCopied) } // Novagram
+            return  TextAndLabelItem(initialSize, stableId: stableId.hashValue, label: NovagramL10n.current.peerInfo_idLabel, copyMenuText: NovagramL10n.current.peerInfo_copyId, text: value, context: arguments.context, viewType: viewType, callback: copyId, canCopy: true, _copyToClipboard: copyId) // Novagram
         case let .report(_, viewType):
             return GeneralInteractedRowItem(initialSize, stableId: stableId.hashValue, name: strings().peerInfoReport, type: .none, viewType: viewType, action: { () in
                 arguments.report()
@@ -1378,7 +1378,7 @@ func channelInfoEntries<Context: AccountContextProtocol>(view: PeerView, argumen
                 aboutBlock.append(.userName(sectionId: .desc, value: usernames, viewType: .singleItem))
             }
             if FastSettings.canViewPeerId {
-                aboutBlock.append(.peerId(sectionId: .desc, value: "-100\(channel.id.id._internalGetInt64Value())", viewType: .singleItem)) // Fenixuz
+                aboutBlock.append(.peerId(sectionId: .desc, value: "-100\(channel.id.id._internalGetInt64Value())", viewType: .singleItem)) // Novagram
             }
             applyBlock(aboutBlock)
             

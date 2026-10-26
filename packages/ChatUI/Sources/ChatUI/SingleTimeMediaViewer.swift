@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Foundation
 import TGUIKit
 import TelegramCore
@@ -491,7 +491,7 @@ public final class SingleTimeMediaViewer : ModalViewController {
             self?.genericView.stopAndClose()
         }, for: .Click)
         
-        if !FenixuzGhostMode.isActive { _ = context.engine.messages.markMessageContentAsConsumedInteractively(messageId: message.id).start() } // Fenixuz
+        if !NovagramGhostMode.isActive { _ = context.engine.messages.markMessageContentAsConsumedInteractively(messageId: message.id).start() } // Novagram
 
         readyOnce()
     }

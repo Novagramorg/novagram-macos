@@ -16,7 +16,7 @@ import PrivateCallScreen
 import DetectSpeech
 import WalletContext
 import AppKit
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 
 
 /// Opens a community — a container peer, not a conversation — as its chat list in the left controller.
@@ -511,7 +511,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
         closeAllPopovers(for: context.window)
         closeAllModals(window: context.window)
         AppMenu.closeAll()
-        FenixuzUnreadReminderManager.shared.start(with: context) // Fenixuz
+        NovagramUnreadReminderManager.shared.start(with: context) // Novagram
 
         if #available(macOS 10.15, *), let walletContext = context.walletContext {
             tonConnectPresentationDisposable.set((walletContext.tonConnectState
@@ -854,7 +854,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
                 
         clearReadNotifiesDisposable.set(context.account.stateManager.appliedIncomingReadMessages.start(next: { msgIds in
             UNUserNotifications.current?.clearNotifies(by: msgIds)
-            msgIds.forEach { FenixuzUnreadReminderManager.clearDeliveredNotifications(for: $0.peerId) } // Fenixuz
+            msgIds.forEach { NovagramUnreadReminderManager.clearDeliveredNotifications(for: $0.peerId) } // Novagram
         }))
         
 
@@ -948,21 +948,21 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
         self.updateFoldersDisposable.set(combineLatest(queue: .mainQueue(), chatListFilterPreferences(engine: context.engine), context.layoutValue).start(next: { [weak self] value, layout in
             self?.updateLeftSidebar(with: value, layout: layout, animated: true)
         }))
-        NotificationCenter.default.addObserver(self, selector: #selector(fenixHideFoldersRailChanged), name: FenixuzChatListFilter.settingsChanged, object: nil) // Fenixuz
+        NotificationCenter.default.addObserver(self, selector: #selector(novagramHideFoldersRailChanged), name: NovagramChatListFilter.settingsChanged, object: nil) // Novagram
         
        // _ready.set(.single(true))
     }
     
     private var folders: ChatListFolders?
-    private var fenixEffectiveSidebarShown: Bool? // Fenixuz
-    private func fenixEffectiveSidebar(_ folders: ChatListFolders?) -> Bool { return !FenixuzChatListFilter.hideFolders && !(folders?.isEmpty ?? true) && (folders?.sidebar ?? false) } // Fenixuz
-    @objc private func fenixHideFoldersRailChanged() { if let folders = self.folders, let layout = self.previousLayout { self.updateLeftSidebar(with: folders, layout: layout, animated: true) } } // Fenixuz
+    private var novagramEffectiveSidebarShown: Bool? // Novagram
+    private func novagramEffectiveSidebar(_ folders: ChatListFolders?) -> Bool { return !NovagramChatListFilter.hideFolders && !(folders?.isEmpty ?? true) && (folders?.sidebar ?? false) } // Novagram
+    @objc private func novagramHideFoldersRailChanged() { if let folders = self.folders, let layout = self.previousLayout { self.updateLeftSidebar(with: folders, layout: layout, animated: true) } } // Novagram
     private var previousLayout: SplitViewState?
     private let foldersReadyDisposable = MetaDisposable()
     private func updateLeftSidebar(with folders: ChatListFolders, layout: SplitViewState, animated: Bool) -> Void {
         
         if self.window is AppWindow {
-            if fenixEffectiveSidebar(folders) || layout == .minimisize { // Fenixuz
+            if novagramEffectiveSidebar(folders) || layout == .minimisize { // Novagram
                 self.context.bindings.rootNavigation().navigationBarLeftPosition = 0
             } else {
                 self.context.bindings.rootNavigation().navigationBarLeftPosition = layout == .single ? Window.controlsInset : 0
@@ -970,8 +970,8 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
         }
 
                 
-        let currentSidebar = fenixEffectiveSidebar(folders) // Fenixuz
-        let previousSidebar = self.fenixEffectiveSidebarShown // Fenixuz
+        let currentSidebar = novagramEffectiveSidebar(folders) // Novagram
+        let previousSidebar = self.novagramEffectiveSidebarShown // Novagram
 
         let readySignal: Signal<Bool, NoError>
         
@@ -1021,7 +1021,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
         }
         let sidebarChanged = currentSidebar != previousSidebar
         self.folders = folders
-        self.fenixEffectiveSidebarShown = currentSidebar // Fenixuz
+        self.novagramEffectiveSidebarShown = currentSidebar // Novagram
         self.previousLayout = layout
         if sidebarChanged {
             applyWindowChrome(forState: self.view.splitView.state)
@@ -1172,7 +1172,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
 
         switch state {
         case .single:
-            let hasLeftSidebar = fenixEffectiveSidebar(folders) // Fenixuz
+            let hasLeftSidebar = novagramEffectiveSidebar(folders) // Novagram
             leftController.insets = hasLeftSidebar
                 ? NSEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
                 : NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -1405,7 +1405,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
         globalPeerDisposable.dispose()
         tonConnectPresentationDisposable.dispose()
         tonConnectDismiss?()
-        FenixuzUnreadReminderManager.shared.stop() // Fenixuz
+        NovagramUnreadReminderManager.shared.stop() // Novagram
         context.cleanup()
         NotificationCenter.default.removeObserver(self)
     }
@@ -1427,7 +1427,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
             pendingApplyWindowChrome = true
             return
         }
-        let hasLeftSidebar = fenixEffectiveSidebar(folders) // Fenixuz
+        let hasLeftSidebar = novagramEffectiveSidebar(folders) // Novagram
         let mode: Window.ChromeMode = (state == .single && !hasLeftSidebar) ? .compact : .standard
         if appliedChromeMode == mode {
             return

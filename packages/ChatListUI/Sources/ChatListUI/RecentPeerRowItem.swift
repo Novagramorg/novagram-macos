@@ -20,19 +20,19 @@ public class RecentPeerRowItem: ShortPeerRowItem {
     fileprivate let badge: BadgeNode?
     fileprivate let canAddAsTag: Bool
     public let adPeer: AdPeer?
-    let novagramAdToken: String? // Fenixuz
+    let novagramAdToken: String? // Novagram
     fileprivate let removeAd:((AdPeer, Bool)->Void)?
     public let isRecentApp: Bool
     fileprivate let unreadCount: Int32?
     
-    public init(_ initialSize:NSSize, peer: Peer, account: Account, context: any AccountContextProtocol, stableId:AnyHashable? = nil, enabled: Bool = true, height:CGFloat = 50, photoSize:NSSize = NSMakeSize(36, 36), titleStyle:ControlStyle = ControlStyle(font:.medium(.title), foregroundColor: theme.colors.text, highlightColor: .white), titleAddition:String? = nil, leftImage:CGImage? = nil, statusStyle:ControlStyle = ControlStyle(font:.normal(.text), foregroundColor: theme.colors.grayText, highlightColor:.white), status:String? = nil, borderType:BorderType = [], drawCustomSeparator:Bool = true, isLookSavedMessage: Bool = false, deleteInset:CGFloat? = nil, drawLastSeparator:Bool = false, inset:NSEdgeInsets = NSEdgeInsets(left:10.0), drawSeparatorIgnoringInset: Bool = false, interactionType:ShortPeerItemInteractionType = .plain, generalType:GeneralInteractedType = .none, action:@escaping ()->Void = {}, canRemoveFromRecent: Bool = false, controlAction:@escaping()->Void = {}, contextMenuItems:@escaping()->Signal<[ContextMenuItem], NoError> = { .single([]) }, unreadBadge: UnreadSearchBadge = .none, canAddAsTag: Bool = false, storyStats: PeerStoryStats? = nil, openStory: @escaping(StoryInitialIndex?)->Void = { _ in }, customAction: ShortPeerRowItem.CustomAction? = nil, isGrossingApp: Bool = false, isRecentApp: Bool = false, adPeer: AdPeer? = nil, removeAd:((AdPeer, Bool)->Void)? = nil, monoforumPeer: Peer? = nil, customTheme: GeneralRowItem.Theme? = nil, novagramAdToken: String? = nil) { // Fenixuz
+    public init(_ initialSize:NSSize, peer: Peer, account: Account, context: any AccountContextProtocol, stableId:AnyHashable? = nil, enabled: Bool = true, height:CGFloat = 50, photoSize:NSSize = NSMakeSize(36, 36), titleStyle:ControlStyle = ControlStyle(font:.medium(.title), foregroundColor: theme.colors.text, highlightColor: .white), titleAddition:String? = nil, leftImage:CGImage? = nil, statusStyle:ControlStyle = ControlStyle(font:.normal(.text), foregroundColor: theme.colors.grayText, highlightColor:.white), status:String? = nil, borderType:BorderType = [], drawCustomSeparator:Bool = true, isLookSavedMessage: Bool = false, deleteInset:CGFloat? = nil, drawLastSeparator:Bool = false, inset:NSEdgeInsets = NSEdgeInsets(left:10.0), drawSeparatorIgnoringInset: Bool = false, interactionType:ShortPeerItemInteractionType = .plain, generalType:GeneralInteractedType = .none, action:@escaping ()->Void = {}, canRemoveFromRecent: Bool = false, controlAction:@escaping()->Void = {}, contextMenuItems:@escaping()->Signal<[ContextMenuItem], NoError> = { .single([]) }, unreadBadge: UnreadSearchBadge = .none, canAddAsTag: Bool = false, storyStats: PeerStoryStats? = nil, openStory: @escaping(StoryInitialIndex?)->Void = { _ in }, customAction: ShortPeerRowItem.CustomAction? = nil, isGrossingApp: Bool = false, isRecentApp: Bool = false, adPeer: AdPeer? = nil, removeAd:((AdPeer, Bool)->Void)? = nil, monoforumPeer: Peer? = nil, customTheme: GeneralRowItem.Theme? = nil, novagramAdToken: String? = nil) { // Novagram
         self.canRemoveFromRecent = canRemoveFromRecent
         self.controlAction = controlAction
         self.canAddAsTag = canAddAsTag
         self.isRecentApp = isRecentApp
         self.removeAd = removeAd
         self.adPeer = adPeer
-        self.novagramAdToken = novagramAdToken // Fenixuz
+        self.novagramAdToken = novagramAdToken // Novagram
         switch unreadBadge {
         case let .muted(count), let .unmuted(count):
             self.unreadCount = count
@@ -58,7 +58,7 @@ public class RecentPeerRowItem: ShortPeerRowItem {
     }
     
     public override var textAdditionInset:CGFloat {
-        return (self.canRemoveFromRecent || self.canAddAsTag ? 5 : 0) + (highlightVerified ? 25 : 0) + (adPeer != nil ? 30 : 0) + (novagramAdToken != nil ? 110 : 0) // Fenixuz
+        return (self.canRemoveFromRecent || self.canAddAsTag ? 5 : 0) + (highlightVerified ? 25 : 0) + (adPeer != nil ? 30 : 0) + (novagramAdToken != nil ? 110 : 0) // Novagram
     }
     
     public override var accessibilityLabel: String? {
@@ -336,7 +336,7 @@ public class RecentPeerRowView : ShortPeerRowView {
                     return menu
                 }
                 
-            } else if let token = item.novagramAdToken, let window = item.context?.window { let current = self.adView ?? AdView(frame: .zero); if current.superview == nil { addSubview(current) }; self.adView = current; fenixuzConfigureSearchAd(current, token: token, window: window) // Fenixuz
+            } else if let token = item.novagramAdToken, let window = item.context?.window { let current = self.adView ?? AdView(frame: .zero); if current.superview == nil { addSubview(current) }; self.adView = current; novagramConfigureSearchAd(current, token: token, window: window) // Novagram
             } else if let view = adView {
                 performSubviewRemoval(view, animated: animated)
                 self.adView = nil

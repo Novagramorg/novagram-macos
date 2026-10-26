@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import CoreMedia
 import SwiftSignalKit
@@ -299,7 +299,7 @@ public class ChatMediaContentView: Control, NSDraggingSource, NSPasteboardItemDa
             }
         }
         
-        if !acceptDragging, !NovagramAdsHooks.shared.openMediaIfOurs(parent, media, context, table, parameters) { // Fenixuz
+        if !acceptDragging, !NovagramAdsHooks.shared.openMediaIfOurs(parent, media, context, table, parameters) { // Novagram
             super.superview?.mouseDown(with: event)
         }
     }

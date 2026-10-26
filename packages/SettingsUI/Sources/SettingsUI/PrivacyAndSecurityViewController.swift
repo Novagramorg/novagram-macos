@@ -1,4 +1,4 @@
-import FenixuzCore // Fenixuz
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -610,7 +610,7 @@ private func entries(state: PrivacyAndSecurityControllerState, contentConfigurat
     }
     entries.append(.twoStepVerification(sectionId: sectionId, configuration: configuration, viewType: .firstItem))
     
-    let displayPasskeys = displayPasskeys && context.appConfiguration.getBoolValue("settings_display_passkeys", orElse: false) && FenixuzLoginFeatures.passkeys // Fenixuz
+    let displayPasskeys = displayPasskeys && context.appConfiguration.getBoolValue("settings_display_passkeys", orElse: false) && NovagramLoginFeatures.passkeys // Novagram
     
     if displayPasskeys {
         let passkeys: [TelegramPasskey] = passkeysDataValue ?? []

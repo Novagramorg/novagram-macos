@@ -5,7 +5,7 @@ import Postbox
 import TelegramCore
 import InAppSettings
 
-public let maximumNumberOfAccounts = 999 // Fenixuz
+public let maximumNumberOfAccounts = 999 // Novagram
 
 
 public func activeAccountsAndPeers(context: any AccountContextProtocol, includePrimary: Bool = false) -> Signal<((Account, Peer)?, [(Account, Peer, Int32)]), NoError> {

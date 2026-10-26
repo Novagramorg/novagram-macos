@@ -1,3 +1,3 @@
 import Foundation
 
-public let normalAccountsLimit: Int = 999 // Fenixuz
+public let normalAccountsLimit: Int = 999 // Novagram
