@@ -14,7 +14,7 @@ import TelegramUtils
 import PhoneInputUI
 
 public final class Auth_LoginHeader : View {
-    private let logo:LottiePlayerView = LottiePlayerView(frame: Auth_Insets.logoSize.bounds)
+    private let logo: NSImageView = NSImageView(frame: Auth_Insets.logoSize.bounds) // Fenixuz
     private let header: TextView = TextView()
     private let desc: TextView = TextView()
     private var descAttr: NSAttributedString?
@@ -52,14 +52,8 @@ public final class Auth_LoginHeader : View {
     }
     
     private func updateLottie() {
-        if window != nil {
-            if let data = LocalAnimatedSticker.login_airplane.data {
-                let colors:[LottieColor] = []
-                self.logo.set(LottieAnimation(compressed: data, key: .init(key: .bundle("login_airplane"), size: Auth_Insets.logoSize, backingScale: Int(System.backingScale), fitzModifier: nil), playPolicy: .loop, colors: colors))
-            }
-        } else {
-            self.logo.set(nil)
-        }
+        self.logo.image = NSApp.applicationIconImage // Fenixuz
+        self.logo.imageScaling = .scaleProportionallyUpOrDown // Fenixuz
         
     }
     

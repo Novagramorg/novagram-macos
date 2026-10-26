@@ -9,6 +9,7 @@ let package = Package(
         .library(name: "AuthUI", targets: ["AuthUI"]),
     ],
     dependencies: [
+        .package(name: "FenixuzCore", path: "../FenixuzCore"), // Fenixuz
         .package(name: "InputView", path: "../InputView"),
         .package(name: "FoundationUtils", path: "../FoundationUtils"),
         .package(name: "ColorPalette", path: "../ColorPalette"),
@@ -43,6 +44,7 @@ let package = Package(
         .target(
             name: "AuthUI",
             dependencies: [
+                .product(name: "FenixuzCore", package: "FenixuzCore", condition: nil), // Fenixuz
                 .product(name: "InputView", package: "InputView", condition: nil),
                 .product(name: "FoundationUtils", package: "FoundationUtils", condition: nil),
                 .product(name: "ColorPalette", package: "ColorPalette", condition: nil),

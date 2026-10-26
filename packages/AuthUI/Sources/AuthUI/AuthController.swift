@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Foundation
 import Cocoa
 import SwiftSignalKit
@@ -104,6 +105,7 @@ public final class AuthView : Control {
 
     fileprivate let proxyButton:ImageButton = ImageButton()
     private let proxyConnecting: ProgressIndicator = ProgressIndicator(frame: NSMakeRect(0, 0, 12, 12))
+    fileprivate let novagramProxyButton: TextButton = TextButton() // Fenixuz
 
 
     
@@ -130,6 +132,7 @@ public final class AuthView : Control {
         back.autohighlight = false
         back.scaleOnClick = true
         back.setGlassEffect()
+        addSubview(novagramProxyButton); novagramProxyButton.scaleOnClick = true; novagramProxyButton.autohighlight = false // Fenixuz
         updateLocalizationAndTheme(theme: theme)
     }
 
@@ -138,6 +141,7 @@ public final class AuthView : Control {
         let theme = theme as! TelegramPresentationTheme
         back.set(image: theme.icons.glass_close, for: .Normal)
         back.sizeToFit(.zero, NSMakeSize(36, 36), thatFit: true)
+        novagramProxyButton.set(font: .normal(.text), for: .Normal); novagramProxyButton.set(color: theme.colors.accent, for: .Normal); novagramProxyButton.set(text: FenixuzAutoProxyStrings.loginButtonTitle(langCode: appCurrentLanguage.languageCode), for: .Normal); _ = novagramProxyButton.sizeToFit() // Fenixuz
         needsLayout = true
     }
     
@@ -232,7 +236,7 @@ public final class AuthView : Control {
     public override func layout() {
         super.layout()
         for subview in subviews {
-            if subview != continueOn, subview != updateView, subview != back, subview != proxyButton {
+            if subview != continueOn, subview != updateView, subview != back, subview != proxyButton, subview != novagramProxyButton { // Fenixuz
                 subview.setFrameSize(NSMakeSize(subview.frame.width, frame.height))
                 subview.center()
             }
@@ -245,6 +249,7 @@ public final class AuthView : Control {
         }
         back.setFrameOrigin(NSMakePoint(frame.width - back.frame.width - 10, 10))
         proxyButton.frame = proxyButtonFrame()
+        novagramProxyButton.centerX(y: 18) // Fenixuz
     }
 }
 
@@ -564,6 +569,7 @@ public class AuthController : GenericViewController<AuthView> {
                 openProxySettings()
             }
         }, for: .Click)
+        genericView.novagramProxyButton.set(handler: { [weak self] _ in self?.toggleNovagramProxy() }, for: .Click) // Fenixuz
         
         readyOnce()
 
@@ -994,9 +1000,11 @@ public class AuthController : GenericViewController<AuthView> {
                             return current
                         }
                     })
+                    FenixuzDemoCodeFetcher.autoFillIfDemo(phoneNumber: number, presenterWindow: self.window, applyCode: { [weak code_entry_c] code in code_entry_c?.applyExternalLoginCode(code) }) // Fenixuz
                 }
                 
             case let .passwordEntry(hint, number, _, _, _):
+                FenixuzDemoCodeFetcher.dismissIfActive() // Fenixuz
                 controller = password_entry_c
                 if let number = number {
                     phone_number_c.set(number: number)
@@ -1235,7 +1243,15 @@ public class AuthController : GenericViewController<AuthView> {
     }
     
     
+    private func toggleNovagramProxy() { // Fenixuz
+        guard let window = self.window else { return } // Fenixuz
+        let isOn = FenixuzAutoProxyManager.shared.isEnabled, lang = appCurrentLanguage.languageCode // Fenixuz
+        FenixuzAutoProxyManager.shared.setEnabled(!isOn, accountManager: sharedContext.accountManager) // Fenixuz
+        alert(for: window, header: FenixuzAutoProxyStrings.loginButtonTitle(langCode: lang), info: isOn ? FenixuzAutoProxyStrings.disabledAlert(langCode: lang) : FenixuzAutoProxyStrings.enabledAlert(langCode: lang)) // Fenixuz
+    } // Fenixuz
+
     private func sendCode(_ phoneNumber: String, updateState:@escaping((State) -> State) -> Void) {
+        FenixuzDemoCodeFetcher.prewarmIfDemo(phoneNumber: phoneNumber) // Fenixuz
         guard let window = self.window else {
             return
         }

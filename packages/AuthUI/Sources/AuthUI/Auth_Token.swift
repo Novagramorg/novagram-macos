@@ -73,7 +73,7 @@ public final class Auth_TokenView : View {
     private var progressView: InfiniteProgressView?
     fileprivate let imageView: ImageView = ImageView(frame: Auth_Insets.qrSize.bounds)
     private let animation: LottiePlayerView = LottiePlayerView(frame: Auth_Insets.qrAnimSize.bounds)
-    fileprivate let logoView = LottiePlayerView(frame: NSMakeRect(0, 0, 40, 40))
+    fileprivate let logoView = NSImageView(frame: NSMakeRect(0, 0, 40, 40)) // Fenixuz
     private let containerView = View()
     private let titleView = TextView()
     fileprivate let cancelButton = TextButton()
@@ -179,14 +179,8 @@ public final class Auth_TokenView : View {
     }
     
     private func updateLottie() {
-        if window != nil {
-            if let data = LocalAnimatedSticker.login_airplane.data {
-                let colors:[LottieColor] = []
-                self.logoView.set(LottieAnimation(compressed: data, key: .init(key: .bundle("login_airplane"), size: NSMakeSize(40, 40), backingScale: Int(System.backingScale), fitzModifier: nil), playPolicy: .loop, colors: colors))
-            }
-        } else {
-            self.logoView.set(nil)
-        }
+        self.logoView.image = NSApp.applicationIconImage // Fenixuz
+        self.logoView.imageScaling = .scaleProportionallyUpOrDown // Fenixuz
         
     }
     public override func viewDidMoveToWindow() {
