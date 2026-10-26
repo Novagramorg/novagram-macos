@@ -1401,6 +1401,7 @@ public final class StoryContentContextImpl: StoryContentContext {
     }
     
     public func markAsSeen(id: StoryId) {
+        if FenixuzGhostMode.isActive { return } // Fenixuz
         let _ = self.context.engine.messages.markStoryAsSeen(peerId: id.peerId, id: id.id, asPinned: false).startStandalone()
     }
 }
@@ -1703,6 +1704,7 @@ public final class SingleStoryContentContextImpl: StoryContentContext {
     }
     
     public func markAsSeen(id: StoryId) {
+        if FenixuzGhostMode.isActive { return } // Fenixuz
         if self.readGlobally {
             let _ = self.context.engine.messages.markStoryAsSeen(peerId: id.peerId, id: id.id, asPinned: false).startStandalone()
 
@@ -1999,6 +2001,7 @@ public final class PeerStoryListContentContextImpl: StoryContentContext {
     }
     
     public func markAsSeen(id: StoryId) {
+        if FenixuzGhostMode.isActive { return } // Fenixuz
         let _ = self.context.engine.messages.markStoryAsSeen(peerId: id.peerId, id: id.id, asPinned: true).startStandalone()
     }
 }

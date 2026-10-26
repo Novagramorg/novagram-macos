@@ -48,3 +48,10 @@ public enum FenixuzSettingsKey {
         return UserDefaults(suiteName: suite)?.object(forKey: key) as? Bool ?? value
     }
 }
+
+public extension FenixuzL10n {
+    var askSend_sticker: String { pick(en: "Send this sticker?", uz: "Ushbu stickerni yuborishni tasdiqlaysizmi?", ru: "Отправить этот стикер?") }
+    var askSend_voice: String { pick(en: "Send this voice message?", uz: "Ovozli xabarni yuborishni tasdiqlaysizmi?", ru: "Отправить голосовое сообщение?") }
+    var askSend_send: String { pick(en: "Send", uz: "Yuborish", ru: "Отправить") }
+    var askSend_cancel: String { pick(en: "Cancel", uz: "Bekor qilish", ru: "Отмена") }
+}

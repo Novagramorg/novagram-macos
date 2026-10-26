@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import Foundation
 import TGUIKit
@@ -1770,7 +1771,7 @@ public class APChatVoiceController : APChatController {
         let disposable = MetaDisposable()
         self.markAsConsumedDisposable.set(disposable)
         guard self.playbackGeneration == generation, self.song === item else { return }
-        disposable.set(context.engine.messages.markMessageContentAsConsumedInteractively(messageId: item.entry.index.id).start())
+        if !FenixuzGhostMode.isActive { disposable.set(context.engine.messages.markMessageContentAsConsumedInteractively(messageId: item.entry.index.id).start()) } // Fenixuz
     }
 
     deinit {

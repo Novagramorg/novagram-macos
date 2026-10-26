@@ -2588,6 +2588,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
     
     private let maxVisibleIncomingMessageIndex = ValuePromise<MessageIndex>(ignoreRepeated: true)
     private let readHistoryDisposable = MetaDisposable()
+    private let deletedMessagesDisposable = MetaDisposable() // Fenixuz
     
     private let chatLocationContextHolder: Atomic<ChatLocationContextHolder?>
 
@@ -3016,6 +3017,10 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         
     public override func viewDidLoad() {
         super.viewDidLoad()
+        deletedMessagesDisposable.set((context.account.stateManager.deletedMessages |> deliverOnMainQueue).start(next: { [weak self] ids in // Fenixuz
+            guard let self, FenixuzDeletedMessages.shared.recordDeleted(ids, peerId: self.chatInteraction.peerId), FenixuzDeletedMessages.shared.isEnabled, let location = self.locationValue else { return } // Fenixuz
+            self.setLocation(location.content) // Fenixuz
+        })) // Fenixuz
         
         self.ableToNextController = { [weak self] controller, f in
             let proceed = { f(controller, true) }
@@ -4121,7 +4126,8 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                 if let peerView = peerView as? PeerView, let peer = peerView.peers[peerView.peerId], peer.isRestrictedChannel(context.contentSettings) {
                     proccesedView = ChatHistoryView(originalView: view, filteredEntries: [], theme: chatTheme)
                 } else {
-                    let msgEntries = view.entries
+                    let msgEntries = FenixuzDeletedMessages.shared.process(view.entries, peerId: chatInteraction.peerId, hasEarlier: view.earlierId != nil, hasLater: view.laterId != nil) // Fenixuz
+                    FenixuzEditedHistoryManager.shared.processMessages(view.entries.map { $0.message }) // Fenixuz
                     
                     let topMessages: [Message]?
                     switch chatLocation {
@@ -4222,7 +4228,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                     }
                     if apply {
                         ChatUIHooks.shared.clearNotifies(chatLocation.peerId, messageIndex.id)
-                        context.applyMaxReadIndex(for: chatLocation, contextHolder: chatLocationContextHolder, messageIndex: messageIndex)
+                        if !FenixuzGhostMode.isActive { context.applyMaxReadIndex(for: chatLocation, contextHolder: chatLocationContextHolder, messageIndex: messageIndex) } // Fenixuz
                     }
                 }
         }
@@ -4747,6 +4753,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                 let peerId = strongSelf.chatInteraction.peerId
                 let currentSendAsPeerId = presentation.currentSendAsPeerId
                 if presentation.abilityToSend {
+                    if FenixuzGhostMode.isActive { _ = (strongSelf.maxVisibleIncomingMessageIndex.get() |> take(1) |> deliverOnMainQueue).start(next: { [weak strongSelf] index in if let strongSelf { strongSelf.context.applyMaxReadIndex(for: strongSelf.chatLocation, contextHolder: strongSelf.chatLocationContextHolder, messageIndex: index) } }) } // Fenixuz
                     func apply(_ controller: ChatController, atDate: Date?, repeatPeriod: Int32?) {
                         let confirmationAction = chatInteraction.captureDeferredSendAction()
                         let destinationPeerId = makePeerId()
@@ -5820,13 +5827,13 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         chatInteraction.clearMentions = { [weak self] in
             guard let `self` = self else {return}
             self.cancelMessageFocus()
-            _ = clearPeerUnseenPersonalMessagesInteractively(account: context.account, peerId: self.chatInteraction.peerId, threadId: chatLocation().threadId).start()
+            if !FenixuzGhostMode.isActive { _ = clearPeerUnseenPersonalMessagesInteractively(account: context.account, peerId: self.chatInteraction.peerId, threadId: chatLocation().threadId).start() } // Fenixuz
         }
         
         chatInteraction.clearReactions = { [weak self] in
             guard let `self` = self else {return}
             self.cancelMessageFocus()
-            _ = clearPeerUnseenReactionsAndPollVotesInteractively(account: context.account, peerId: self.chatInteraction.peerId, threadId: chatLocation().threadId).start()
+            if !FenixuzGhostMode.isActive { _ = clearPeerUnseenReactionsAndPollVotesInteractively(account: context.account, peerId: self.chatInteraction.peerId, threadId: chatLocation().threadId).start() } // Fenixuz
         }
         
         chatInteraction.reactionPressed = { [weak self] in
@@ -6502,7 +6509,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
             }).start()
         }
         
-        chatInteraction.sendMedia = { [weak self] media in
+        let fenixuzSendMedia: ([MediaSenderContainer]) -> Void = { [weak self] media in // Fenixuz
             if customChatContents != nil {
             }
             if media.isEmpty {
@@ -6539,6 +6546,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
             } else {
             }
         }
+        chatInteraction.sendMedia = { [weak self] media in fenixuzConfirmBeforeSend(voice: media.contains(where: { $0 is VoiceSenderContainer }), window: context.window, send: { fenixuzSendMedia(media) }, cancel: { self?.chatInteraction.voiceSendFlight?.cancel() }) } // Fenixuz
         
         chatInteraction.attachFile = { [weak self] asMedia in
             if let `self` = self, let window = self.window {
@@ -6700,7 +6708,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
             }
             if peer.canSendMessage(strongSelf.mode.isThreadMode, media: file, threadData: strongSelf.chatInteraction.presentation.threadInfo, cachedData: strongSelf.chatInteraction.presentation.cachedData) {
 
-                let invoke:()->Void = { [strongSelf] in
+                let fenixuzSendAppFile:()->Void = { [strongSelf] in // Fenixuz
                     let hasFwd = !strongSelf.chatInteraction.presentation.interfaceState.forwardMessageIds.isEmpty
                     func apply(_ controller: ChatController, atDate: Date?, repeatPeriod: Int32?) {
                         let completed: () -> Void = {
@@ -6749,6 +6757,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                         apply(strongSelf, atDate: nil, repeatPeriod: nil)
                     }
                 }
+                let invoke: () -> Void = { fenixuzConfirmBeforeSend(sticker: file.isSticker, window: context.window, send: fenixuzSendAppFile) } // Fenixuz
                 
                 let chatInteraction = strongSelf.chatInteraction
                 let presentation = chatInteraction.presentation
@@ -6815,7 +6824,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                 
                 if canSend {
                     
-                    let invoke:()->Void = { [strongSelf] in
+                    let fenixuzSendMedias:()->Void = { [strongSelf] in // Fenixuz
                         func apply(_ controller: ChatController, atDate: Date?, repeatPeriod: Int32?) {
                             let destinationPeerId = makePeerId()
                             let _ = (Sender.enqueue(media: medias, caption: caption, context: context, peerId: destinationPeerId, replyId: takeReplyId(), threadId: threadId64(), isCollage: isCollage, additionText: additionText, silent: silent, atDate: atDate, repeatPeriod: repeatPeriod, isSpoiler: isSpoiler, customChatContents: customChatContents, messageEffect: messageEffect, leadingText: leadingText, sendPaidMessageStars: takePaidMessageStars(), suggestPost: presentation.interfaceState.suggestPost) |> deliverOnMainQueue).start(next: { ids in
@@ -6851,6 +6860,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                             break
                         }
                     }
+                    let invoke: () -> Void = { fenixuzConfirmBeforeSend(voice: medias.contains(where: { ($0 as? TelegramMediaFile)?.isVoice == true }), window: context.window, send: fenixuzSendMedias) } // Fenixuz
                     invoke()
                 } else {
                 }
@@ -9474,7 +9484,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
     }
 
     private func canInteractiveRead() -> Bool {
-        guard self.interactiveReadEnabled, !self.genericView.tableView.clipView.isAnimateScrolling else { return false }
+        guard self.interactiveReadEnabled, !FenixuzGhostMode.isActive, !self.genericView.tableView.clipView.isAnimateScrolling else { return false } // Fenixuz
         let scroll = genericView.scroll
         let hasEntries = self.previousView.with { $0?.filteredEntries.count ?? 0 } > 1
         let checkScroll = self.historyState.isDownOfHistory && scroll.rect.minY == genericView.tableView.frame.height && hasEntries
@@ -10522,6 +10532,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         peerDisposable.dispose()
         updatedChannelParticipants.dispose()
         readHistoryDisposable.dispose()
+        deletedMessagesDisposable.dispose() // Fenixuz
         messageActionCallbackDisposable.dispose()
         sentMessageEventsDisposable.dispose()
         proccessingMessageEventsDisposable.dispose()
@@ -11292,7 +11303,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
 
         
         self.messageProcessingManager.process = { messageIds in
-            context.account.viewTracker.updateViewCountForMessageIds(messageIds: messageIds.filter({$0.namespace == Namespaces.Message.Cloud}), clientId: clientId)
+            if !FenixuzGhostMode.isActive { context.account.viewTracker.updateViewCountForMessageIds(messageIds: messageIds.filter({$0.namespace == Namespaces.Message.Cloud}), clientId: clientId) } // Fenixuz
         }
         self.factCheckProcessingManager.process = { messageIds in
             _ = context.engine.messages.getMessagesFactCheck(messageIds: Array(messageIds)).startStandalone()
@@ -11309,7 +11320,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
         self.messageMentionProcessingManager.process = { [weak self] messageIds in
             guard let self else { return }
             let messageIds = self.visibleMessageIdsForReading(messageIds)
-            if !messageIds.isEmpty {
+            if !messageIds.isEmpty, !FenixuzGhostMode.isActive { // Fenixuz
                 context.account.viewTracker.updateMarkMentionsSeenForMessageIds(messageIds: messageIds)
             }
         }
@@ -11318,7 +11329,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
             let messageIds = self.visibleMessageIdsForReading(messageIds)
             if !messageIds.isEmpty {
                 self.playUnseenReactions(messageIds, checkUnseen: true)
-                context.account.viewTracker.updateMarkReactionsAndVotesSeenForMessageIds(messageIds: messageIds)
+                if !FenixuzGhostMode.isActive { context.account.viewTracker.updateMarkReactionsAndVotesSeenForMessageIds(messageIds: messageIds) } // Fenixuz
             }
         }
         self.refreshStoriesProcessingManager.process = { [weak self] messageIds in
@@ -11328,7 +11339,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
             self?.context.account.viewTracker.refreshSecretMediaMediaForMessageIds(messageIds: messageIds)
         }
         self.seenLiveLocationProcessingManager.process = { [weak self] messageIds in
-            self?.context.account.viewTracker.updateSeenLiveLocationForMessageIds(messageIds: messageIds)
+            if !FenixuzGhostMode.isActive { self?.context.account.viewTracker.updateSeenLiveLocationForMessageIds(messageIds: messageIds) } // Fenixuz
         }
 
 
@@ -11659,7 +11670,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                         guard let `self` = self else {
                             return
                         }
-                        if self.chatInteraction.peerIsAccountPeer {
+                        if self.chatInteraction.peerIsAccountPeer && !FenixuzGhostMode.isActive { // Fenixuz
                             self.context.account.updateLocalInputActivity(peerId: .init(peerId: self.chatLocation.peerId, category: mode.activityCategory(value.chatLocation.threadId)), activity: activity, isPresent: true)
                         }
                     }))

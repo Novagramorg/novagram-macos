@@ -47,6 +47,7 @@ let package = Package(
         .library(name: "GalleryUI", targets: ["GalleryUI"]),
     ],
     dependencies: [
+        .package(name: "FenixuzCore", path: "../FenixuzCore"), // Fenixuz
         .package(name: "SSignalKit", path: "../../submodules/telegram-ios/submodules/SSignalKit"),
         .package(name: "TelegramCore", path: "../../submodules/telegram-ios/submodules/TelegramCore"),
         .package(name: "Postbox", path: "../../submodules/telegram-ios/submodules/Postbox"),
@@ -55,6 +56,7 @@ let package = Package(
         .target(
             name: "GalleryUI",
             dependencies: [
+                .product(name: "FenixuzCore", package: "FenixuzCore", condition: nil), // Fenixuz
                 .product(name: "SwiftSignalKit", package: "SSignalKit", condition: nil),
                 .product(name: "TelegramCore", package: "TelegramCore", condition: nil),
                 .product(name: "Postbox", package: "Postbox", condition: nil),

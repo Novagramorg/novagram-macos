@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Foundation
 import Cocoa
 import TGUIKit
@@ -1804,7 +1805,7 @@ public class ChatInputView: View, Notifable {
         if chatInteraction.interactionContext.peerId != chatInteraction.peerId, let peer = chatInteraction.presentation.peer, !peer.isChannel && !markNextTextChangeToFalseActivity {
             sendActivityDisposable.set((Signal<Bool, NoError>.single(!state.effectiveInput.inputText.isEmpty) |> then(Signal<Bool, NoError>.single(false) |> delay(4.0, queue: Queue.mainQueue()))).start(next: { [weak self] isPresent in
                 if let chatInteraction = self?.chatInteraction, let peer = chatInteraction.presentation.peer, !peer.isChannel && chatInteraction.presentation.state != .editing {
-                    if self?.chatInteraction.peerIsAccountPeer == true {
+                    if self?.chatInteraction.peerIsAccountPeer == true, !FenixuzGhostMode.isActive || !isPresent { // Fenixuz
                         chatInteraction.interactionContext.account.updateLocalInputActivity(peerId: .init(peerId: peer.id, category: chatInteraction.mode.activityCategory(chatInteraction.chatLocation.threadId)), activity: .typingText, isPresent: isPresent)
                     }
                 }

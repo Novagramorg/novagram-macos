@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Foundation
 import TGUIKit
 import TelegramCore
@@ -490,7 +491,7 @@ public final class SingleTimeMediaViewer : ModalViewController {
             self?.genericView.stopAndClose()
         }, for: .Click)
         
-        _ = context.engine.messages.markMessageContentAsConsumedInteractively(messageId: message.id).start()
+        if !FenixuzGhostMode.isActive { _ = context.engine.messages.markMessageContentAsConsumedInteractively(messageId: message.id).start() } // Fenixuz
 
         readyOnce()
     }

@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import ExternalVideoUtils
 import AlertsUI
@@ -984,7 +985,7 @@ public class GalleryViewer: NSResponder {
                 self.controls.update(self.pager.selectedItem)
             }
 
-            if let message = entries[selectedIndex].message, message.containsSecretMedia {
+            if let message = entries[selectedIndex].message, message.containsSecretMedia, !FenixuzGhostMode.isActive { // Fenixuz
                 _ = (context.engine.messages.markMessageContentAsConsumedInteractively(messageId: message.id) |> delay(0.5, queue: Queue.concurrentDefaultQueue())).start()
             }
             if !isRestoring, let pagerIndex = currentIndex.modify({$0}) {
