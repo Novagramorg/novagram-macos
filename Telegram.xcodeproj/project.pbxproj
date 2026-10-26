@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FE304E0B000000000000002D /* FenixuzBlockingPurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002C /* FenixuzBlockingPurchaseManager.swift */; };
 		FE304E0B000000000000002B /* NovagramSettingsLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002A /* NovagramSettingsLinks.swift */; };
 		FE304E0B0000000000000029 /* NovagramSettingsHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */; };
 		FE304E0B0000000000000003 /* FenixuzSettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000002 /* FenixuzSettingsController.swift */; };
@@ -1054,6 +1055,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FE304E0B000000000000002C /* FenixuzBlockingPurchaseManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzBlockingPurchaseManager.swift; sourceTree = "<group>"; };
 		FE304E0B000000000000002A /* NovagramSettingsLinks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsLinks.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsHooksInstall.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000002 /* FenixuzSettingsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FenixuzSettingsController.swift; sourceTree = "<group>"; };
@@ -2358,6 +2360,7 @@
 		FE304E0B0000000000000001 /* novagram */ = {
 			isa = PBXGroup;
 			children = (
+				FE304E0B000000000000002C /* FenixuzBlockingPurchaseManager.swift */,
 				FE304E0B000000000000002A /* NovagramSettingsLinks.swift */,
 				FE304E0B0000000000000002 /* FenixuzSettingsController.swift */,
 				FE304E0B0000000000000004 /* FenixuzAboutController.swift */,
@@ -3762,6 +3765,7 @@
 				D098C7111D7E175A007784E4 /* Sources */,
 				D098C7131D7E175A007784E4 /* Resources */,
 				27A35BDA2F03C7140001B63D /* CopyFiles */,
+				FE40A0B1C2D3E4F500000001 /* Novagram: strip Sparkle (App Store) */,
 			);
 			buildRules = (
 			);
@@ -4615,6 +4619,29 @@
 
 
 /* Begin PBXShellScriptBuildPhase section */
+		FE40A0B1C2D3E4F500000001 /* Novagram: strip Sparkle (App Store) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+				"$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/Sparkle.framework",
+			);
+			name = "Novagram: strip Sparkle (App Store)";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/novagram-strip-sparkle.stamp",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"${CONFIGURATION}\" != \"Release\" ]; then\n  exit 0\nfi\nrm -rf \"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework\"\n/usr/libexec/PlistBuddy -c \"Delete :SUFeedURL\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || true\n/usr/libexec/PlistBuddy -c \"Delete :SUPublicDSAKeyFile\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || true\nmkdir -p \"${DERIVED_FILE_DIR}\"\ntouch \"${DERIVED_FILE_DIR}/novagram-strip-sparkle.stamp\"\n";
+			showEnvVarsInLog = 0;
+		};
 		161B8B778DC5A90FA234F9E6 /* Check Wallet Engine Bindings */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -4692,6 +4719,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE304E0B000000000000002D /* FenixuzBlockingPurchaseManager.swift in Sources */,
 				FE304E0B000000000000002B /* NovagramSettingsLinks.swift in Sources */,
 				FE304E0B0000000000000029 /* NovagramSettingsHooksInstall.swift in Sources */,
 				FE304E0B0000000000000003 /* FenixuzSettingsController.swift in Sources */,
@@ -4957,7 +4985,8 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = NO;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = "Telegram-Mac/Telegram-Sandbox.entitlements";
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 278481;
@@ -5003,7 +5032,10 @@
 				MARKETING_VERSION = 13.1.0;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_CODE_SIGN_FLAGS = "";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = uz.fenixuz.app;
 				PRODUCT_MODULE_NAME = Telegram;
@@ -5077,8 +5109,8 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
 				CODE_SIGN_ENTITLEMENTS = TelegramShare/TelegramShare.entitlements;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 278481;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";

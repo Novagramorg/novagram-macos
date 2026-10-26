@@ -191,3 +191,28 @@ Not ported: the old emerald Next button (`FenixuzBrandColors.primary`), same rea
 | --- | --- |
 | `ChatUI/.../FenixuzSpeechToTextButton.swift` (ours) | button + `FenixuzSpeechToTextManager` driver. Sits inside the message field, left of the emoji/actions buttons (13.1 rebuilt the input around the glass row, so the old slot next to the send button is gone). Dictated text replaces the input; any manual change of the input stops dictation. Setting `pro_messager/stt_enabled` (default on, as in the old Mac build) |
 | `ChatUI/.../ChatInputView.swift` `ChatInputContainerView` | `fenixSpeechToText` lazy property; `textViewSize` reserves `FenixuzSpeechToTextButton.reservedWidth`; `updateLayout` places the button after the actions view (hidden for rich drafts and non-text input states) |
+
+### App Store gates and Release hygiene
+
+| File | What |
+| --- | --- |
+| `Telegram-Mac/novagram/FenixuzBlockingPurchaseManager.swift` (ours) | 3.1.1 StoreKit chokepoint: `buyProduct` shows the blocked alert and fails with `.cantMakePayments`, `restorePurchases` alerts and returns `.succeed(false)`, products and `canMakePayments` forward to the real manager |
+| `fenix-publish.sh` (ours) | App Store archive (`SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) APP_STORE'` on the command line so packages get it) into `build/archives/`, `--preflight` setting checks and `--check <xcarchive>` checks (sandbox, no get-task-allow, team, no Sparkle, no SU* keys, PrivacyInfo, bundle id). Uploads nothing |
+| `Telegram-Mac/account/AccountContext.swift` | `inAppPurchaseManager` wrapped in `FenixuzBlockingPurchaseManager` |
+| `Telegram-Mac/packages-integration/hooks/FeatureNavigationHooksInstall.swift` | `makePaymentsCheckoutController` and `...WithContext`: `shouldBlock(invoice:source:)` → alert, `completion?(.cancelled)`, `nil` (covers Premium boarding, gifting, star gifts, giveaways, Stars top-up) |
+| `Telegram-Mac/packages-integration/hooks/ChatUIHooksInstall.swift` | `showPaymentsCheckout` and `...WithContext`: invoice gate (`.message`) |
+| `Telegram-Mac/packages-integration/hooks/BrowserHooksInstall.swift` | `presentBrowserInvoice`: invoice gate (`.slug`), returns `cancelled` |
+| `Telegram-Mac/utils/InAppLinks.swift` | `executeInvoiceLink` card branch: invoice gate (`.slug`) |
+| `Telegram-Mac/packages-integration/hooks/TelegramLinksHooksInstall.swift` | `openExternalLink`: Fragment TON top-up (`fragmentTonAddFundsLink`) shows the blocked alert (Star_ListScreen, AddTonBalanceController). The same URL inside a chat message still opens |
+| `packages/FenixuzCore/.../FenixuzAppStoreIAP.swift` (ours) | `shouldBlock(invoice:source:)` (non-XTR digital sources blocked; `.slug`/`.message` only when a subscription; TON resale open), `shouldBlockExternalPurchase(link:)`, generic alert text `iap_blockPurchases_*` (no link, no mention of official Telegram) |
+| `Telegram-Mac/Novagram.xcconfig` (ours) | `OTHER_LDFLAGS[config=Release] = $(inherited) -Wl,-dead_strip_dylibs` (APP_STORE code never references Sparkle, so its load command goes) |
+| `Telegram.xcodeproj/project.pbxproj` | Telegram Release `OTHER_LDFLAGS = ($(inherited), -ObjC)` so the xcconfig flag applies; Telegram and TelegramShare Release `CODE_SIGN_IDENTITY` = `Apple Development` (was empty: ad-hoc archive, "No Team Found in Archive"); Run Script phase `FE40A0B1C2D3E4F500000001` "Novagram: strip Sparkle (App Store)" after the Copy Files phases (Release only: removes `Sparkle.framework`, deletes `SUFeedURL`/`SUPublicDSAKeyFile`); `FenixuzBlockingPurchaseManager.swift` (`FE304E0B…002C/2D`) |
+| `.gitignore` | `build/` (release archives) |
+
+### TelegramCore fork patches (prepared, applied with F06)
+
+`fork-patches/telegramcore/FenixuzBotAuthorization.swift` (13.1: `case let .authorization(authorizationData)`), `FenixuzBotSession.swift`, `fork-patches/telegramcore-hooks.patch` regenerated against `release-13.1.1` (AccountStateManagementUtils, ManagedChatListHoles, ManagedMessageHistoryHoles, ManagedPendingPeerNotificationSettings, ChatListFiltering), `fork-patches/apply-telegramcore-patches.sh`.
+
+### F39 strings
+
+`Telegram-Mac/novagram/FenixuzSettingsController.swift`: the rows the old fork hard-coded in Uzbek (ask before send, auto-approve, suggested/admin folders, footer) now use `FenixuzL10n` (en/uz/ru).

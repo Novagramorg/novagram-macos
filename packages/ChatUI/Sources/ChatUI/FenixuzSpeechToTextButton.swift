@@ -73,7 +73,8 @@ final class FenixuzSpeechToTextButton {
         }
         let isRecording = manager?.isRecording == true
         let color = isRecording ? theme.colors.redUI : theme.colors.grayIcon
-        let image = NSImage(systemSymbolName: "waveform.and.mic", accessibilityDescription: nil) ?? NSImage(systemSymbolName: "mic", accessibilityDescription: nil)
+        let symbol = NSImage(systemSymbolName: "waveform.and.mic", accessibilityDescription: nil) ?? NSImage(systemSymbolName: "mic", accessibilityDescription: nil)
+        let image = symbol?.withSymbolConfiguration(NSImage.SymbolConfiguration(pointSize: 17, weight: .regular)) ?? symbol
         if let icon = image?.precomposed(color) {
             button.set(image: icon, for: .Normal)
             button.set(image: icon, for: .Hover)

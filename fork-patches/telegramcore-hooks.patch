@@ -1,0 +1,88 @@
+diff --git a/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift b/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift
+index 3d99e59..49a1b24 100644
+--- a/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift
++++ b/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift
+@@ -4119,6 +4119,7 @@ func replayFinalState(
+     }
+     
+     var peerIdsWithAddedSecretMessages = Set<PeerId>()
++    let fenixuzBotSession = fenixuzIsBotSession(transaction: transaction, accountPeerId: accountPeerId) // Fenixuz
+     
+     var updatedTypingActivities: [PeerActivitySpace: [PeerId: PeerInputActivity?]] = [:]
+     var updatedIncomingThreadReadStates: [PeerAndBoundThreadId: MessageId.Id] = [:]
+@@ -4435,7 +4436,9 @@ func replayFinalState(
+                     }
+                 }
+             
++                fenixuzInitializeBotDMReadState(isBotSession: fenixuzBotSession, transaction: transaction, messages: messages, location: location) // Fenixuz
+                 let _ = transaction.addMessages(messages, location: location)
++                fenixuzForceBotChatInclusion(isBotSession: fenixuzBotSession, transaction: transaction, messages: messages, location: location) // Fenixuz
+                 if case .UpperHistoryBlock = location {
+                     for message in messages {
+                         let chatPeerId = message.id.peerId
+diff --git a/submodules/TelegramCore/Sources/State/ManagedChatListHoles.swift b/submodules/TelegramCore/Sources/State/ManagedChatListHoles.swift
+index a7249d6..f467906 100644
+--- a/submodules/TelegramCore/Sources/State/ManagedChatListHoles.swift
++++ b/submodules/TelegramCore/Sources/State/ManagedChatListHoles.swift
+@@ -76,7 +76,7 @@ func managedChatListHoles(network: Network, postbox: Postbox, accountPeerId: Pee
+             }
+             
+             for (entry, disposable) in added {
+-                disposable.set(fetchChatListHole(postbox: postbox, network: network, accountPeerId: accountPeerId, groupId: entry.groupId, hole: entry.hole).start())
++                disposable.set(fenixuzManagedChatListHole(postbox: postbox, network: network, accountPeerId: accountPeerId, groupId: entry.groupId, hole: entry.hole).start()) // Fenixuz
+             }
+         })
+         
+diff --git a/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift b/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift
+index efe3ecc..d5281d4 100644
+--- a/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift
++++ b/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift
+@@ -192,11 +192,11 @@ private final class ManagedMessageHistoryHolesContext {
+             let entry = pendingEntry.entry
+             switch pendingEntry.entry.hole {
+             case let .peer(hole):
+-                pendingEntry.disposable.set((fetchMessageHistoryHole(
++                pendingEntry.disposable.set((fenixuzManagedMessageHistoryHole( // Fenixuz
+                     accountPeerId: self.accountPeerId,
+-                    source: .network(self.network),
++                    network: self.network, // Fenixuz
+                     postbox: self.postbox,
+-                    peerInput: .direct(peerId: hole.peerId, threadId: hole.threadId), namespace: hole.namespace, direction: pendingEntry.entry.direction, space: pendingEntry.entry.space, count: pendingEntry.entry.count)
++                    hole: hole, direction: pendingEntry.entry.direction, space: pendingEntry.entry.space, count: pendingEntry.entry.count) // Fenixuz
+                 |> deliverOn(self.queue)).start(completed: { [weak self] in
+                     guard let self = self else {
+                         return
+diff --git a/submodules/TelegramCore/Sources/State/ManagedPendingPeerNotificationSettings.swift b/submodules/TelegramCore/Sources/State/ManagedPendingPeerNotificationSettings.swift
+index 214c08f..9b6e831 100644
+--- a/submodules/TelegramCore/Sources/State/ManagedPendingPeerNotificationSettings.swift
++++ b/submodules/TelegramCore/Sources/State/ManagedPendingPeerNotificationSettings.swift
+@@ -251,6 +251,7 @@ func pushPeerNotificationSettings(postbox: Postbox, network: Network, peerId: Pe
+                         }
+                     }
+                 } else {
++                    fenixuzCommitPendingSettingsIfBot(transaction: transaction, peerId: notificationPeerId, settings: settings) // Fenixuz
+                     if let pending = transaction.getPendingPeerNotificationSettings(peerId), pending.isEqual(to: settings) {
+                         transaction.updatePendingPeerNotificationSettings(peerId: peerId, settings: nil)
+                     }
+@@ -258,6 +259,7 @@ func pushPeerNotificationSettings(postbox: Postbox, network: Network, peerId: Pe
+                 }
+             }
+         } else {
++            fenixuzCommitPendingSettingsIfBot(transaction: transaction, peerId: peerId, settings: settings) // Fenixuz
+             if let pending = transaction.getPendingPeerNotificationSettings(peerId), pending.isEqual(to: settings) {
+                 transaction.updatePendingPeerNotificationSettings(peerId: peerId, settings: nil)
+             }
+diff --git a/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift b/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift
+index f8aacb5..9d0ce2f 100644
+--- a/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift
++++ b/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift
+@@ -1123,7 +1123,8 @@ func _internal_updateChatListFiltersInteractively(postbox: Postbox, _ f: @escapi
+         var hasUpdates = false
+         transaction.updatePreferencesEntry(key: PreferencesKeys.chatListFilters, { entry in
+             var state = entry?.get(ChatListFiltersState.self) ?? ChatListFiltersState.default
+-            let updatedFilters = f(state.filters)
++            var updatedFilters = f(state.filters) // Fenixuz
++            fenixuzEnsureAllChatsForBotFilters(transaction: transaction, filters: &updatedFilters) // Fenixuz
+             if updatedFilters != state.filters {
+                 state.filters = updatedFilters
+                 hasUpdates = true

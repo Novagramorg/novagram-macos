@@ -384,8 +384,8 @@ private func fenixuzSettingsEntries(state: FenixuzSettingsState, l10n: FenixuzL1
     entries.append(.disclosurePlaceholder(next(), .messagingAutoTranslate, l10n.settings_messaging_autoTranslate_title, trLabel, .innerItem, "auto_translate"))
     entries.append(.toggle(next(), .messagingTranslateToggle, l10n.settings_messaging_translateToggle_title, l10n.settings_messaging_translateToggle_subtitle, state.showTranslateMessages, .innerItem, FenixuzDefaultsKey.showTranslateMessages))
     entries.append(.disclosurePlaceholder(next(), .messagingTranslateLang, l10n.settings_messaging_translateLanguage_title, "", .innerItem, "translate_language"))
-    entries.append(.toggle(next(), .messagingAskVoice, "Ovozli xabarni tasdiqlash", "Yuborishdan oldin tasdiq so'rash", state.askBeforeSendVoice, .innerItem, FenixuzDefaultsKey.askBeforeSendVoice))
-    entries.append(.toggle(next(), .messagingAskSticker, "Stickerni tasdiqlash", "Sticker yuborishdan oldin tasdiq so'rash", state.askBeforeSendSticker, .lastItem, FenixuzDefaultsKey.askBeforeSendSticker))
+    entries.append(.toggle(next(), .messagingAskVoice, l10n.settings_askVoice_title, l10n.settings_askVoice_subtitle, state.askBeforeSendVoice, .innerItem, FenixuzDefaultsKey.askBeforeSendVoice))
+    entries.append(.toggle(next(), .messagingAskSticker, l10n.settings_askSticker_title, l10n.settings_askSticker_subtitle, state.askBeforeSendSticker, .lastItem, FenixuzDefaultsKey.askBeforeSendSticker))
     entries.append(.footer(next(), .messagingFooter, l10n.settings_messaging_footer))
 
     // ─── VOICE → TEXT ───
@@ -398,22 +398,22 @@ private func fenixuzSettingsEntries(state: FenixuzSettingsState, l10n: FenixuzL1
     entries.append(.section(sectionId)); sectionId += 1
     entries.append(.header(next(), .header(5), "AVTOMATLASHTIRISH VA JILDLAR"))
     entries.append(.toggle(next(), .remindersUnread, "O'qilmagan xabarlar eslatmasi", "O'qilmagan xabarlar mavjud bo'lsa bildirishnoma yuborish", state.unreadReminderEnabled, .firstItem, FenixuzDefaultsKey.unreadReminderEnabled))
-    entries.append(.toggle(next(), .autoApproveJoin, "So'rovlarni avto-qabul qilish", "Admin kanallarda qo'shilish so'rovlarini avtomatik tasdiqlash", state.autoApproveJoinRequests, .innerItem, FenixuzDefaultsKey.autoApproveJoinRequests))
-    entries.append(.action(next(), .actionSuggestedFolders, "Tavsiya etilgan jildlarni yaratish", "Shaxsiy, Guruhlar, Kanallar, Botlar, O'qilmagan", .innerItem, {
+    entries.append(.toggle(next(), .autoApproveJoin, l10n.settings_autoApprove_title, l10n.settings_autoApprove_subtitle, state.autoApproveJoinRequests, .innerItem, FenixuzDefaultsKey.autoApproveJoinRequests))
+    entries.append(.action(next(), .actionSuggestedFolders, l10n.settings_suggestedFolders_title, l10n.settings_suggestedFolders_subtitle, .innerItem, {
         FenixuzSuggestedFolders.createSuggestedFolders(context: arguments.context, completion: {
             DispatchQueue.main.async {
-                alert(for: arguments.context.window, info: "Tavsiya etilgan jildlar muvaffaqiyatli yaratildi!")
+                alert(for: arguments.context.window, info: l10n.settings_suggestedFolders_done)
             }
         })
     }))
-    entries.append(.action(next(), .actionAdminFolder, "Admin jildini yaratish", "Siz boshqaradigan guruh va kanallar", .lastItem, {
+    entries.append(.action(next(), .actionAdminFolder, l10n.settings_adminFolder_title, l10n.settings_adminFolder_subtitle, .lastItem, {
         FenixuzSuggestedFolders.createAdminFolder(context: arguments.context, completion: {
             DispatchQueue.main.async {
-                alert(for: arguments.context.window, info: "Admin jildi muvaffaqiyatli yaratildi!")
+                alert(for: arguments.context.window, info: l10n.settings_adminFolder_done)
             }
         })
     }))
-    entries.append(.footer(next(), .autoFooter, "Jildlar va kanal obunachilarini avtomatlashtirish imkoniyatlari."))
+    entries.append(.footer(next(), .autoFooter, l10n.settings_automationFooter))
 
     // ─── PROTECTION ───
     entries.append(.section(sectionId)); sectionId += 1

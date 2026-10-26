@@ -7,3 +7,7 @@ SFEED_URL = https:$(SIMPLE_SLASH)/127.0.0.1/none.xml
 // Release builds go to the Mac App Store: APP_STORE code paths and the "appstore" data folder.
 SOURCE[config=Release] = APP_STORE
 TYPE[config=Release] = -D'APP_STORE'
+
+// App Store Release: the APP_STORE code never references Sparkle, so drop its (weak) load command.
+// The "Novagram: strip Sparkle (App Store)" build phase then removes the framework and the SU* keys.
+OTHER_LDFLAGS[config=Release] = $(inherited) -Wl,-dead_strip_dylibs

@@ -228,7 +228,7 @@ final class AccountContext {
     let inlinePacksContext: InlineStickersContext
     let cachedGroupCallContexts: AccountGroupCallContextCacheImpl
     let networkStatusManager: NetworkStatusManager
-    lazy var inAppPurchaseManager: any InAppPurchaseManagerProtocol = InAppPurchaseManager(engine: self.engine)
+    lazy var inAppPurchaseManager: any InAppPurchaseManagerProtocol = FenixuzBlockingPurchaseManager(base: InAppPurchaseManager(engine: self.engine), window: { [weak self] in self?.window }) // Fenixuz
     let starsContext: StarsContext
     let tonContext: StarsContext
     private let walletContextStorage: Any?

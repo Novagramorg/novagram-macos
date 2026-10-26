@@ -1,5 +1,6 @@
 import Cocoa
 import TGUIKit
+import FenixuzCore // Fenixuz
 
 func installTelegramLinksHooks() {
     LinkHooks.install(LinkHooks(callbackLink: { text, handler in
@@ -7,6 +8,7 @@ func installTelegramLinksHooks() {
     }, globalLinkExecutor: {
         return globalLinkExecutor
     }, openExternalLink: { link, confirm in
+        if FenixuzAppStoreIAP.shouldBlockExternalPurchase(link: link) || link == strings().fragmentTonAddFundsLink { FenixuzAppStoreIAP.presentBlockedAlert(on: appDelegate?.currentContext?.window ?? mainWindow); return } // Fenixuz
         execute(inapp: .external(link: link, confirm))
     }, markdownLink: { contents in
         return inApp(for: contents.nsstring, context: appDelegate?.currentContext, openInfo: { peerId, _, _, _ in

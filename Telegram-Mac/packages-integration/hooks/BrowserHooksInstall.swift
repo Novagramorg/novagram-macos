@@ -9,6 +9,7 @@ import Postbox
 import TelegramCore
 import SwiftSignalKit
 import WebAppUI
+import FenixuzCore // Fenixuz
 
 func installBrowserUIHooks() {
     var hooks = BrowserHooks(classifyLink: { context, url in
@@ -218,6 +219,7 @@ extension MediaAnimatedStickerView: @retroactive BrowserStickerView {
 }
 
 private func presentBrowserInvoice(context: any AccountContextProtocol, invoice: TelegramMediaInvoice, slug: String, window: Window, completion: @escaping (String) -> Void) {
+    if FenixuzAppStoreIAP.shouldBlock(invoice: invoice, source: .slug(slug)) { FenixuzAppStoreIAP.presentBlockedAlert(on: window); completion("cancelled"); return } // Fenixuz
     let result = Atomic(value: "cancelled")
     let update: (String) -> Void = { status in
         _ = result.modify { current in current == "paid" ? current : status }

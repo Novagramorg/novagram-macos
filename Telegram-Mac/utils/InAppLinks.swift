@@ -12,6 +12,7 @@ import InputView
 import TelegramMedia
 import InAppSettings
 import WalletContext
+import FenixuzCore // Fenixuz
 
 
 
@@ -817,7 +818,7 @@ private func executeInvoiceLink(slug: String, context: AccountContext, window: W
             if invoice.currency == XTR {
                 showModal(with: Star_PurschaseInApp(context: context, invoice: invoice, source: .slug(slug), type: invoice.subscriptionPeriod != nil ? .botSubscription(invoice) : .bot), for: window)
             } else {
-                showModal(with: PaymentsCheckoutController(context: context, source: .slug(slug), invoice: invoice), for: window)
+                if FenixuzAppStoreIAP.shouldBlock(invoice: invoice, source: .slug(slug)) { FenixuzAppStoreIAP.presentBlockedAlert(on: window) } else { showModal(with: PaymentsCheckoutController(context: context, source: .slug(slug), invoice: invoice), for: window) } // Fenixuz
             }
         }, error: { error in
             let text: String

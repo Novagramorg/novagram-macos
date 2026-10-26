@@ -69,3 +69,19 @@ public extension FenixuzL10n {
     var stt_buttonTip: String { pick(en: "Speech to Text", uz: "Ovozni matnga", ru: "Голос в текст") }
     var stt_recordingTip: String { pick(en: "Listening… click to stop", uz: "Tinglanmoqda… to'xtatish uchun bosing", ru: "Слушаю… нажмите, чтобы остановить") }
 }
+
+public extension FenixuzL10n {
+    var settings_askVoice_title: String { pick(en: "Confirm voice messages", uz: "Ovozli xabarni tasdiqlash", ru: "Подтверждать голосовые") }
+    var settings_askVoice_subtitle: String { pick(en: "Ask before sending", uz: "Yuborishdan oldin tasdiq so'rash", ru: "Спрашивать перед отправкой") }
+    var settings_askSticker_title: String { pick(en: "Confirm stickers", uz: "Stickerni tasdiqlash", ru: "Подтверждать стикеры") }
+    var settings_askSticker_subtitle: String { pick(en: "Ask before sending a sticker", uz: "Sticker yuborishdan oldin tasdiq so'rash", ru: "Спрашивать перед отправкой стикера") }
+    var settings_autoApprove_title: String { pick(en: "Auto-approve join requests", uz: "So'rovlarni avto-qabul qilish", ru: "Автопринятие заявок") }
+    var settings_autoApprove_subtitle: String { pick(en: "Approve join requests in the groups and channels you admin", uz: "Admin kanallarda qo'shilish so'rovlarini avtomatik tasdiqlash", ru: "Одобрять заявки в группах и каналах, где вы админ") }
+    var settings_suggestedFolders_title: String { pick(en: "Create suggested folders", uz: "Tavsiya etilgan jildlarni yaratish", ru: "Создать рекомендуемые папки") }
+    var settings_suggestedFolders_subtitle: String { pick(en: "Personal, Groups, Channels, Bots, Unread", uz: "Shaxsiy, Guruhlar, Kanallar, Botlar, O'qilmagan", ru: "Личные, Группы, Каналы, Боты, Непрочитанные") }
+    var settings_suggestedFolders_done: String { pick(en: "Suggested folders created", uz: "Tavsiya etilgan jildlar muvaffaqiyatli yaratildi!", ru: "Рекомендуемые папки созданы") }
+    var settings_adminFolder_title: String { pick(en: "Create admin folder", uz: "Admin jildini yaratish", ru: "Создать папку админа") }
+    var settings_adminFolder_subtitle: String { pick(en: "Groups and channels you manage", uz: "Siz boshqaradigan guruh va kanallar", ru: "Группы и каналы, которыми вы управляете") }
+    var settings_adminFolder_done: String { pick(en: "Admin folder created", uz: "Admin jildi muvaffaqiyatli yaratildi!", ru: "Папка админа создана") }
+    var settings_automationFooter: String { pick(en: "Automation for folders and channel subscribers.", uz: "Jildlar va kanal obunachilarini avtomatlashtirish imkoniyatlari.", ru: "Автоматизация папок и подписчиков каналов.") }
+}

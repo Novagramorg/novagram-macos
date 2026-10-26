@@ -37,3 +37,6 @@ screenshots/
 *.tmp
 DerivedData/
 Telegram-Mac/NovagramAds.local.xcconfig
+
+# Novagram release archives
+build/

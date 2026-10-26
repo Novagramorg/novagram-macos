@@ -11,6 +11,7 @@ import ChatUI
 import WebAppUI
 import ImageCanvasUI
 import AvatarEditorUI
+import FenixuzCore // Fenixuz
 
 extension GlobalBadgeNode: @retroactive ChatUIBadgeNode {
 
@@ -249,12 +250,14 @@ private func makeChatNavigationHooks() -> ChatNavigationHooks {
         showModal(with: PaymentsReceiptController(context: context, messageId: messageId, invoice: invoice), for: window)
     }
     hooks.showPaymentsCheckout = { context, messageId, invoice, window in
+        if FenixuzAppStoreIAP.shouldBlock(invoice: invoice, source: .message(messageId)) { FenixuzAppStoreIAP.presentBlockedAlert(on: window); return } // Fenixuz
         showModal(with: PaymentsCheckoutController(context: context, source: .message(messageId), invoice: invoice), for: window)
     }
     hooks.showPaymentsReceiptWithContext = { context, messageId, invoice, window in
         showModal(with: PaymentsReceiptController(context: context, messageId: messageId, invoice: invoice), for: window)
     }
     hooks.showPaymentsCheckoutWithContext = { context, messageId, invoice, window in
+        if FenixuzAppStoreIAP.shouldBlock(invoice: invoice, source: .message(messageId)) { FenixuzAppStoreIAP.presentBlockedAlert(on: window); return } // Fenixuz
         showModal(with: PaymentsCheckoutController(context: context, source: .message(messageId), invoice: invoice), for: window)
     }
     hooks.applyExternalProxy = { server, accountManager in
