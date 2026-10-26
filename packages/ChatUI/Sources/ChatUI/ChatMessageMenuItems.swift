@@ -1255,6 +1255,7 @@ public func chatMenuItems(for message: Message, entry: ChatHistoryEntry?, textLa
            
             forwardItem.submenu = forwardMenu
             secondBlock.append(forwardItem)
+            secondBlock.append(contentsOf: fenixuzForwardMenuItems(message: message, chatInteraction: data.chatInteraction)) // Fenixuz
         }
         /*
          else if data.message.id.peerId.namespace == Namespaces.Peer.SecretChat, !data.message.containsSecretMedia {
@@ -1585,6 +1586,7 @@ public func chatMenuItems(for message: Message, entry: ChatHistoryEntry?, textLa
                 result = strings().chatContextEditedAt(string)
             }
             sevenBlock.append(ContextMenuItem(result, itemImage: MenuAnimation.menu_edited.value))
+            sevenBlock.append(fenixuzEditedHistoryMenuItem(message: message, chatInteraction: data.chatInteraction)) // Fenixuz
         }
         
         

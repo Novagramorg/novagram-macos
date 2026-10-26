@@ -55,3 +55,7 @@ public extension FenixuzL10n {
     var askSend_send: String { pick(en: "Send", uz: "Yuborish", ru: "Отправить") }
     var askSend_cancel: String { pick(en: "Cancel", uz: "Bekor qilish", ru: "Отмена") }
 }
+
+public extension FenixuzL10n {
+    var attach_roundVideo: String { pick(en: "Send as Round Video", uz: "Dumaloq video sifatida yuborish", ru: "Отправить как кружок") }
+}

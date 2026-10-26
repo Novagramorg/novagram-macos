@@ -1,3 +1,4 @@
+import FenixuzCore // Fenixuz
 import Cocoa
 import TelegramCore
 import ObjcUtils
@@ -165,7 +166,7 @@ public class Sender: NSObject {
         return enqueue(input: input, context: context, peerId: peerId, replyId: replyId, threadId: threadId, replyStoryId: replyStoryId, disablePreview: disablePreview, linkBelowMessage: linkBelowMessage, largeMedia: largeMedia, silent: silent, atDate: atDate, repeatPeriod: repeatPeriod, sendAsPeerId: sendAsPeerId, mediaPreview: mediaPreview, emptyHandler: emptyHandler, customChatContents: customChatContents, messageEffect: messageEffect, sendPaidMessageStars: sendPaidMessageStars, suggestPost: suggestPost, ephemeralBotPeerId: ephemeralBotPeerId, observedResult: nil)
     }
 
-    public static func enqueue(input:ChatTextInputState, context: any AccountContextProtocol, peerId:PeerId, replyId:EngineMessageReplySubject?, threadId: Int64?, replyStoryId: StoryId? = nil, disablePreview:Bool = false, linkBelowMessage: Bool = false, largeMedia: Bool? = nil, silent: Bool = false, atDate:Date? = nil, repeatPeriod: Int32? = nil, sendAsPeerId: PeerId? = nil, mediaPreview: TelegramMediaWebpage? = nil, emptyHandler:(()->Void)? = nil, customChatContents: ChatCustomContentsProtocol? = nil, messageEffect: AvailableMessageEffects.MessageEffect? = nil, sendPaidMessageStars: StarsAmount? = nil, suggestPost: ChatInterfaceState.ChannelSuggestPost? = nil, ephemeralBotPeerId: PeerId? = nil, observedResult: ((Int, [MessageId?]) -> Void)?) -> Signal<[MessageId?],NoError> {
+    public static func enqueue(input:ChatTextInputState, context: any AccountContextProtocol, peerId:PeerId, replyId:EngineMessageReplySubject?, threadId: Int64?, replyStoryId: StoryId? = nil, disablePreview:Bool = false, linkBelowMessage: Bool = false, largeMedia: Bool? = nil, silent: Bool = false, atDate:Date? = nil, repeatPeriod: Int32? = nil, sendAsPeerId: PeerId? = nil, mediaPreview: TelegramMediaWebpage? = nil, emptyHandler:(()->Void)? = nil, customChatContents: ChatCustomContentsProtocol? = nil, messageEffect: AvailableMessageEffects.MessageEffect? = nil, sendPaidMessageStars: StarsAmount? = nil, suggestPost: ChatInterfaceState.ChannelSuggestPost? = nil, ephemeralBotPeerId: PeerId? = nil, observedResult: ((Int, [MessageId?]) -> Void)?, skipAutoTranslate: Bool = false) -> Signal<[MessageId?],NoError> { // Fenixuz
         
         var inset:Int = 0
         let dynamicEmojiOrder = context.stickerSettings.dynamicPackOrder
@@ -197,6 +198,14 @@ public class Sender: NSObject {
         if let media = mediaPreview, !disablePreview {
             mediaReference = AnyMediaReference.standalone(media: media)
         }
+        if mediaReference == nil, let text = FenixuzOutgoing.withAutoText(input.inputText) { input = ChatTextInputState(inputText: text, selectionRange: input.selectionRange, attributes: input.attributes) } // Fenixuz
+        if !skipAutoTranslate, mediaReference == nil, customChatContents == nil, !input.inputText.isEmpty, let lang = FenixuzOutgoing.autoTranslateLanguage { // Fenixuz
+            let original = input // Fenixuz
+            return context.engine.messages.translate(text: original.inputText, toLang: lang) |> `catch` { _ in .single(nil) } |> mapToSignal { result -> Signal<[MessageId?], NoError> in // Fenixuz
+                let translated = result.map { ChatTextInputState(inputText: $0.0, selectionRange: 0 ..< $0.0.length, attributes: []) } ?? original // Fenixuz
+                return enqueue(input: translated, context: context, peerId: peerId, replyId: replyId, threadId: threadId, replyStoryId: replyStoryId, disablePreview: disablePreview, linkBelowMessage: linkBelowMessage, largeMedia: largeMedia, silent: silent, atDate: atDate, repeatPeriod: repeatPeriod, sendAsPeerId: sendAsPeerId, mediaPreview: mediaPreview, emptyHandler: emptyHandler, customChatContents: customChatContents, messageEffect: messageEffect, sendPaidMessageStars: sendPaidMessageStars, suggestPost: suggestPost, ephemeralBotPeerId: ephemeralBotPeerId, observedResult: observedResult, skipAutoTranslate: true) // Fenixuz
+            } // Fenixuz
+        } // Fenixuz
         
         
         
@@ -215,7 +224,7 @@ public class Sender: NSObject {
             inset += message.length
             
 
-            var attributes:[MessageAttribute] = [TextEntitiesMessageAttribute(entities: subState.messageTextEntities(parsingUrlType, extractDates: peerId.namespace == Namespaces.Peer.CloudUser))]
+            var attributes:[MessageAttribute] = [TextEntitiesMessageAttribute(entities: subState.messageTextEntities(parsingUrlType, extractDates: peerId.namespace == Namespaces.Peer.CloudUser) + FenixuzOutgoing.styleEntities(length: subState.inputText.length))] // Fenixuz
             if let date = atDate {
                 attributes.append(OutgoingScheduleInfoMessageAttribute(scheduleTime: Int32(date.timeIntervalSince1970), repeatPeriod: repeatPeriod))
             }
@@ -231,8 +240,8 @@ public class Sender: NSObject {
             if let sendAsPeerId = sendAsPeerId {
                 attributes.append(SendAsMessageAttribute(peerId: sendAsPeerId))
             }
-            if let messageEffect {
-                attributes.append(EffectMessageAttribute(id: messageEffect.id))
+            if let effectId = FenixuzOutgoing.effectId(messageEffect?.id) { // Fenixuz
+                attributes.append(EffectMessageAttribute(id: effectId)) // Fenixuz
             }
             if let sendPaidMessageStars {
                 attributes.append(PaidStarsMessageAttribute(stars: sendPaidMessageStars, postponeSending: false))
@@ -289,7 +298,7 @@ public class Sender: NSObject {
                         }
                     }
                     return .single(value)
-                } |> deliverOnMainQueue)
+                } |> mapToSignal { value in FenixuzOutgoing.sendAutoSticker(after: value, account: context.account, peerId: peerId, threadId: threadId, replyId: replyId, replyStoryId: replyStoryId) } |> deliverOnMainQueue) // Fenixuz
             } else {
                 DispatchQueue.main.async {
                     emptyHandler?()
@@ -698,9 +707,10 @@ public class Sender: NSObject {
         if isSpoiler {
             attributes.append(MediaSpoilerMessageAttribute())
         }
-        if let messageEffect {
-            attributes.append(EffectMessageAttribute(id: messageEffect.id))
+        if let effectId = FenixuzOutgoing.effectId(messageEffect?.id) { // Fenixuz
+            attributes.append(EffectMessageAttribute(id: effectId)) // Fenixuz
         }
+        FenixuzOutgoing.recordSent(media) // Fenixuz
         if let attr = suggestPost?.attribute {
             attributes.append(attr)
         }
