@@ -2,7 +2,7 @@
 
 # Novagram (fork of Telegram macOS 13.1)
 
-Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted keys such as `pro_messager`, `fenix_show_ads`, `__fenix_master__` and every Apple identifier keep their old values). Team **Vipads MCHJ**, Team ID `ZDBP5RSRZF`, bundle id `uz.fenixuz.app` (share extension `uz.fenixuz.app.TelegramShare`), App Store app `id6768202244`. The old fork (Telegram macOS 12.x base) is `../macOS`; the port plan is `../PORT_MAP_macOS13.md`. The iOS app is `../Telegram-iOS`.
+Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted keys such as `pro_messager`, `fenix_show_ads`, `__fenix_master__` and every Apple identifier keep their old values). Team **Vipads MCHJ**, Team ID `ZDBP5RSRZF`, bundle id `uz.fenixuz.app` (share extension `uz.fenixuz.app.TelegramShare`), App Store app `id6768202244`. This repo is `~/Documents/Telegram/macOS` (it was `macOS-13` until 2026-10-27). The old fork (Telegram macOS 12.x base) is `../macOS-old-12`, kept only for reference; the port plan is `../PORT_MAP_macOS13.md`. The iOS app is `../Telegram-iOS`.
 
 ## Rules
 
@@ -15,6 +15,7 @@ Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted 
 - TelegramCore fork changes live in `fork-patches/` (new files + `telegramcore-hooks.patch`); `git submodule update` deletes them, re-run `./fork-patches/apply-telegramcore-patches.sh`.
 - Shared settings use the `pro_messager` UserDefaults suite with the same keys as iOS.
 - Commits: short, lowercase, first person, English ("added …", "fixed …"). Never push to `upstream`.
+- Branches: only `main` exists, locally and on GitHub. Every task: a new branch from `main`, work, build and test, then merge into `main`, push `main` and delete the branch.
 
 ## iOS features
 
