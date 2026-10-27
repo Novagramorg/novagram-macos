@@ -318,6 +318,8 @@ public struct PeerListState : Equatable {
     
     public var hashtag: Hashtag?
     
+    public var novagramSettingsRevision: Int = 0 // Novagram
+    
     public var hasStories: Bool {
         if !NovagramChatListFilter.showStories { return false } // Novagram
         if let stories = self.stories, !isContacts, !mode.isForumLike {

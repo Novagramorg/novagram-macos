@@ -25,7 +25,7 @@
 //      "show_deleted_messages" Bool, "show_view_first_message" Bool,
 //      "show_ghost_mode_button" Bool, "long_press_camera_selection" Bool (default true),
 //      "show_translate_messages" Bool (default true),
-//      "stt_enabled" Bool (default true), "stt_language" String (default "en-US"),
+//      "stt_enabled" Bool (default false), "stt_language" String (default "en-US"),
 //      "block_foreign_users" Bool, "block_apk_files" Bool
 //
 
@@ -61,6 +61,8 @@ private enum NovagramDefaultsKey {
     static let askBeforeSendSticker       = "ask_before_send_sticker"
     static let unreadReminderEnabled      = "unread_reminder_enabled"
     static let autoApproveJoinRequests    = "auto_approve_join_requests"
+    static let unlimitedFolders           = "unlimited_folders"
+    static let adminFolders               = "fenix_admin_folders"
 }
 
 private struct NovagramSettingsState: Equatable {
@@ -83,6 +85,8 @@ private struct NovagramSettingsState: Equatable {
     var askBeforeSendSticker: Bool
     var unreadReminderEnabled: Bool
     var autoApproveJoinRequests: Bool
+    var unlimitedFolders: Bool
+    var adminFolders: Bool
     // Feature #46: derived from the keychain (source of truth), NOT novagramDefaults.
     var chatLockMasterEnabled: Bool
     // NovagramProxy opt-in — derived from NovagramAutoProxyManager (owns the "pro_messager" key).
@@ -106,13 +110,15 @@ private struct NovagramSettingsState: Equatable {
             textStyle: d?.string(forKey: NovagramDefaultsKey.textStyle) ?? "none",
             autoTextEnabled: d?.bool(forKey: NovagramDefaultsKey.autoTextEnabled) ?? false,
             autoTranslateEnabled: d?.bool(forKey: NovagramDefaultsKey.autoTranslateEnabled) ?? false,
-            sttEnabled: d?.object(forKey: NovagramDefaultsKey.sttEnabled) as? Bool ?? true,
+            sttEnabled: d?.object(forKey: NovagramDefaultsKey.sttEnabled) as? Bool ?? false,
             sttLanguage: d?.string(forKey: NovagramDefaultsKey.sttLanguage) ?? "en-US",
             blockForeignUsers: d?.bool(forKey: NovagramDefaultsKey.blockForeignUsers) ?? false,
             askBeforeSendVoice: d?.bool(forKey: NovagramDefaultsKey.askBeforeSendVoice) ?? false,
             askBeforeSendSticker: d?.bool(forKey: NovagramDefaultsKey.askBeforeSendSticker) ?? false,
             unreadReminderEnabled: d?.bool(forKey: NovagramDefaultsKey.unreadReminderEnabled) ?? false,
             autoApproveJoinRequests: d?.bool(forKey: NovagramDefaultsKey.autoApproveJoinRequests) ?? false,
+            unlimitedFolders: d?.bool(forKey: NovagramDefaultsKey.unlimitedFolders) ?? false,
+            adminFolders: NovagramAdminFoldersManager.isEnabled,
             chatLockMasterEnabled: NovagramChatPincodeManager.shared.isMasterEnabled(),
             novagramProxyEnabled: NovagramAutoProxyManager.shared.isEnabled
         )
@@ -159,7 +165,7 @@ private enum NovagramEntryId: Hashable {
     case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingAskVoice, messagingAskSticker, messagingFooter
     case sttEnabled, sttLanguage
     case protectionChatLock, protectionProxy, protectionForeign, protectionFooter
-    case remindersUnread, autoApproveJoin, actionSuggestedFolders, actionAdminFolder, autoFooter
+    case remindersUnread, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, actionAdminFolder, autoFooter
     case adsRemoveAll
 }
 
@@ -192,6 +198,7 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .protectionForeign:        map = ("person.crop.circle.badge.xmark", .orange)
     case .remindersUnread:          map = ("bell.badge.fill", .red)
     case .autoApproveJoin:          map = ("person.crop.circle.badge.checkmark", .green)
+    case .autoUnlimitedFolders:     map = ("infinity", .purple)
     case .actionSuggestedFolders:   map = ("folder.badge.plus", .blue)
     case .actionAdminFolder:        map = ("star.circle.fill", .gold)
     case .adsRemoveAll:             map = ("nosign", .red)
@@ -419,9 +426,10 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
 
     // ─── AUTOMATION & FOLDERS ───
     entries.append(.section(sectionId)); sectionId += 1
-    entries.append(.header(next(), .header(5), "AVTOMATLASHTIRISH VA JILDLAR"))
-    entries.append(.toggle(next(), .remindersUnread, "O'qilmagan xabarlar eslatmasi", "O'qilmagan xabarlar mavjud bo'lsa bildirishnoma yuborish", state.unreadReminderEnabled, .firstItem, NovagramDefaultsKey.unreadReminderEnabled))
+    entries.append(.header(next(), .header(5), l10n.settings_section_automation))
+    entries.append(.toggle(next(), .remindersUnread, l10n.settings_unreadReminder_title, l10n.settings_unreadReminder_subtitle, state.unreadReminderEnabled, .firstItem, NovagramDefaultsKey.unreadReminderEnabled))
     entries.append(.toggle(next(), .autoApproveJoin, l10n.settings_autoApprove_title, l10n.settings_autoApprove_subtitle, state.autoApproveJoinRequests, .innerItem, NovagramDefaultsKey.autoApproveJoinRequests))
+    entries.append(.toggle(next(), .autoUnlimitedFolders, l10n.settings_unlimitedFolders_title, l10n.settings_unlimitedFolders_subtitle, state.unlimitedFolders, .innerItem, NovagramDefaultsKey.unlimitedFolders))
     entries.append(.action(next(), .actionSuggestedFolders, l10n.settings_suggestedFolders_title, l10n.settings_suggestedFolders_subtitle, .innerItem, {
         NovagramSuggestedFolders.createSuggestedFolders(context: arguments.context, completion: {
             DispatchQueue.main.async {
@@ -429,13 +437,7 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
             }
         })
     }))
-    entries.append(.action(next(), .actionAdminFolder, l10n.settings_adminFolder_title, l10n.settings_adminFolder_subtitle, .lastItem, {
-        NovagramSuggestedFolders.createAdminFolder(context: arguments.context, completion: {
-            DispatchQueue.main.async {
-                alert(for: arguments.context.window, info: l10n.settings_adminFolder_done)
-            }
-        })
-    }))
+    entries.append(.toggle(next(), .actionAdminFolder, NovagramAdminFoldersStrings.toggleTitle(langCode: NovagramAdminFoldersManager.langCode), NovagramAdminFoldersStrings.toggleSubtitle(langCode: NovagramAdminFoldersManager.langCode), state.adminFolders, .lastItem, NovagramDefaultsKey.adminFolders))
     entries.append(.footer(next(), .autoFooter, l10n.settings_automationFooter))
 
     // ─── PROTECTION ───
@@ -505,6 +507,14 @@ class NovagramSettingsController: TableViewController {
             updateBool: { key, value in
                 if key == NovagramDefaultsKey.ghostModeActive {
                     NovagramGhostMode.isActive = value
+                } else if key == NovagramDefaultsKey.adminFolders {
+                    if value {
+                        NovagramAdminFoldersManager.enable(context: context, completion: { outcome in
+                            alert(for: window, info: NovagramAdminFoldersStrings.message(for: outcome, langCode: NovagramAdminFoldersManager.langCode))
+                        })
+                    } else {
+                        NovagramAdminFoldersManager.disable(context: context)
+                    }
                 } else {
                     novagramDefaults?.set(value, forKey: key)
                 }
@@ -521,6 +531,8 @@ class NovagramSettingsController: TableViewController {
                     case NovagramDefaultsKey.showTranslateMessages: state.showTranslateMessages = value
                     case NovagramDefaultsKey.sttEnabled: state.sttEnabled = value
                     case NovagramDefaultsKey.blockForeignUsers: state.blockForeignUsers = value
+                    case NovagramDefaultsKey.unlimitedFolders: state.unlimitedFolders = value
+                    case NovagramDefaultsKey.adminFolders: state.adminFolders = value
                     default: break
                     }
                 }

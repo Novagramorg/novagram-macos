@@ -31,7 +31,7 @@ public final class NovagramHiddenChatsManager {
     }
     
     /// Runtime state: whether hidden chats are currently revealed (unlocked) in this session
-    private(set) var isRevealed: Bool = false
+    public private(set) var isRevealed: Bool = false
 
     private init() {
         if let stored = defaults?.array(forKey: kHiddenPeerIdsKey) as? [Int64] {

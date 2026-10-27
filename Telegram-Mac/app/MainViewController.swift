@@ -693,6 +693,7 @@ class MainViewController: TelegramGenericViewController<MainController_View> {
             }
             
         }, itemImage: notifications.muteUntil < time ? MenuAnimation.menu_mute.value : MenuAnimation.menu_unmuted.value))
+        items.append(contentsOf: novagramQuickMenuItems(context: context, selectSettingsTab: { [weak self] in guard let self else { return }; self.tabController.select(index: self.tabController.count - 1) })) // Novagram
         
         if let event = NSApp.currentEvent {
             let menu = ContextMenu(betterInside: true)

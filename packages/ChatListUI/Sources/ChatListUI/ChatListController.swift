@@ -712,7 +712,7 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
         
         if !context.isPremium {
             if let index = data.tabs.firstIndex(of: data.filter) {
-                if index > context.premiumLimits.dialog_filters_limit_default {
+                if index > max(context.premiumLimits.dialog_filters_limit_default, NovagramPremiumUnlock.folderLimit) { // Novagram
                     FeatureNavigationHooks.shared.showPremiumLimit(context, .folders)
                     return
                 }
@@ -782,9 +782,9 @@ public class ChatListController<Context: AccountContextProtocol> : PeersListCont
         NovagramHiddenChatsShortcut.install() // Novagram
         novagramSettingsObserver = NotificationCenter.default.addObserver(forName: NovagramChatListFilter.settingsChanged, object: nil, queue: .main, using: { [weak self] _ in // Novagram
             guard let self else { return } // Novagram
-            if case .filter = self.mode {} else { self.updateFilter { $0.withUpdatedTabs(NovagramChatListFilter.hideFolders ? [] : self.novagramLastFolderTabs) } } // Novagram
+            if case .filter = self.mode {} else { let tabs = NovagramChatListFilter.hideFolders ? [] : self.novagramLastFolderTabs; if self.stateValue.with({ $0.filterData.tabs }) != tabs { self.updateFilter { $0.withUpdatedTabs(tabs) } } } // Novagram
             if !NovagramChatListFilter.showStories { self.completeUndefiedStates(animated: true) } // Novagram
-            self.updateState { $0 } // Novagram
+            self.updateState { var state = $0; state.novagramSettingsRevision += 1; return state } // Novagram
         }) // Novagram
         
         let initialSize = self.atomicSize

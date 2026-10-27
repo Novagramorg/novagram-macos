@@ -59,7 +59,7 @@ private func chatListPresetEntries(filtersWithCounts: [(ChatListFilter, Int)], s
     sectionId += 1
 
 
-    let limit = arguments.context.isPremium ? arguments.environment.limits.dialog_filters_limit_premium : arguments.environment.limits.dialog_filters_limit_default
+    let limit = max(NovagramPremiumUnlock.folderLimit, arguments.context.isPremium ? arguments.environment.limits.dialog_filters_limit_premium : arguments.environment.limits.dialog_filters_limit_default) // Novagram
 
     entries.append(.custom(sectionId: sectionId, index: index, value: .none, identifier: _id_header, equatable: nil, comparable: nil, item: { initialSize, stableId in
 
@@ -91,7 +91,7 @@ private func chatListPresetEntries(filtersWithCounts: [(ChatListFilter, Int)], s
 
         if filtersWithCounts.count == 1 {
             viewType = .firstItem
-        } else if filter == filtersWithCounts.last?.0, filtersWithCounts.count < arguments.environment.limits.dialog_filters_limit_premium {
+        } else if filter == filtersWithCounts.last?.0, filtersWithCounts.count < max(NovagramPremiumUnlock.folderLimit, arguments.environment.limits.dialog_filters_limit_premium) { // Novagram
             viewType = .innerItem
         }
 
@@ -160,7 +160,7 @@ private func chatListPresetEntries(filtersWithCounts: [(ChatListFilter, Int)], s
 
         }
     }
-    if filtersWithCounts.count < arguments.environment.limits.dialog_filters_limit_premium {
+    if filtersWithCounts.count < max(NovagramPremiumUnlock.folderLimit, arguments.environment.limits.dialog_filters_limit_premium) { // Novagram
         entries.append(.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_add_new, data: InputDataGeneralData(name: strings().chatListFilterListAddNew, color: theme.colors.accent, type: .next, viewType: filtersWithCounts.isEmpty ? .singleItem : .lastItem, action: {
 
             if filtersWithCounts.count < limit {

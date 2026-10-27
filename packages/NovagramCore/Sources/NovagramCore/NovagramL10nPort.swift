@@ -75,13 +75,20 @@ public extension NovagramL10n {
     var settings_askVoice_subtitle: String { pick(en: "Ask before sending", uz: "Yuborishdan oldin tasdiq so'rash", ru: "Спрашивать перед отправкой") }
     var settings_askSticker_title: String { pick(en: "Confirm stickers", uz: "Stickerni tasdiqlash", ru: "Подтверждать стикеры") }
     var settings_askSticker_subtitle: String { pick(en: "Ask before sending a sticker", uz: "Sticker yuborishdan oldin tasdiq so'rash", ru: "Спрашивать перед отправкой стикера") }
+    var settings_section_automation: String { pick(en: "AUTOMATION & FOLDERS", uz: "AVTOMATLASHTIRISH VA JILDLAR", ru: "АВТОМАТИЗАЦИЯ И ПАПКИ") }
+    var settings_unreadReminder_title: String { pick(en: "Unread message reminder", uz: "O'qilmagan xabarlar eslatmasi", ru: "Напоминание о непрочитанных") }
+    var settings_unreadReminder_subtitle: String { pick(en: "Get a reminder when messages stay unread", uz: "O'qilmagan xabarlar mavjud bo'lsa bildirishnoma yuborish", ru: "Напоминать, если сообщения остаются непрочитанными") }
     var settings_autoApprove_title: String { pick(en: "Auto-approve join requests", uz: "So'rovlarni avto-qabul qilish", ru: "Автопринятие заявок") }
     var settings_autoApprove_subtitle: String { pick(en: "Approve join requests in the groups and channels you admin", uz: "Admin kanallarda qo'shilish so'rovlarini avtomatik tasdiqlash", ru: "Одобрять заявки в группах и каналах, где вы админ") }
+    var settings_unlimitedFolders_title: String { pick(en: "Unlimited folders", uz: "Cheksiz papkalar", ru: "Безлимитные папки") }
+    var settings_unlimitedFolders_subtitle: String { pick(en: "Lift the 10-folder limit (30 with Premium)", uz: "10 ta papka limitini olib tashlaydi (Premium'da 30)", ru: "Снимает лимит в 10 папок (30 с Premium)") }
+    var quickMenu_ghostEnable: String { pick(en: "Enable Ghost Mode", uz: "Ghost rejimini yoqish", ru: "Включить режим призрака") }
+    var quickMenu_ghostDisable: String { pick(en: "Disable Ghost Mode", uz: "Ghost rejimini o'chirish", ru: "Выключить режим призрака") }
+    var quickMenu_hiddenShow: String { pick(en: "Show Hidden Chats", uz: "Yashirin chatlarni ko'rsatish", ru: "Показать скрытые чаты") }
+    var quickMenu_hiddenHide: String { pick(en: "Hide Hidden Chats", uz: "Yashirin chatlarni yashirish", ru: "Скрыть скрытые чаты") }
+    var quickMenu_novagramSettings: String { pick(en: "Novagram Settings", uz: "Novagram sozlamalari", ru: "Настройки Novagram") }
     var settings_suggestedFolders_title: String { pick(en: "Create suggested folders", uz: "Tavsiya etilgan jildlarni yaratish", ru: "Создать рекомендуемые папки") }
     var settings_suggestedFolders_subtitle: String { pick(en: "Personal, Groups, Channels, Bots, Unread", uz: "Shaxsiy, Guruhlar, Kanallar, Botlar, O'qilmagan", ru: "Личные, Группы, Каналы, Боты, Непрочитанные") }
     var settings_suggestedFolders_done: String { pick(en: "Suggested folders created", uz: "Tavsiya etilgan jildlar muvaffaqiyatli yaratildi!", ru: "Рекомендуемые папки созданы") }
-    var settings_adminFolder_title: String { pick(en: "Create admin folder", uz: "Admin jildini yaratish", ru: "Создать папку админа") }
-    var settings_adminFolder_subtitle: String { pick(en: "Groups and channels you manage", uz: "Siz boshqaradigan guruh va kanallar", ru: "Группы и каналы, которыми вы управляете") }
-    var settings_adminFolder_done: String { pick(en: "Admin folder created", uz: "Admin jildi muvaffaqiyatli yaratildi!", ru: "Папка админа создана") }
     var settings_automationFooter: String { pick(en: "Automation for folders and channel subscribers.", uz: "Jildlar va kanal obunachilarini avtomatlashtirish imkoniyatlari.", ru: "Автоматизация папок и подписчиков каналов.") }
 }

@@ -11,12 +11,23 @@ public enum NovagramBranding {
     // Tag of the "Check for Updates" item in MainMenu.xib (upstream removes it only in APP_STORE builds).
     public static let checkForUpdatesMenuTag = 1000
 
+    // Telegram's paid services keep their real names (rule from the approved old fork builds).
+    private static let serviceNames = ["Telegram Premium", "Telegram Stars", "TELEGRAM PREMIUM", "TELEGRAM STARS"]
+
     public static func rebrand(_ value: String) -> String {
-        return value
+        var result = value
+        for (index, name) in serviceNames.enumerated() {
+            result = result.replacingOccurrences(of: name, with: "\u{1}\(index)\u{1}")
+        }
+        result = result
             .replacingOccurrences(of: "Telegram", with: "Novagram")
             .replacingOccurrences(of: "TELEGRAM", with: "NOVAGRAM")
             .replacingOccurrences(of: "Fenixuz", with: "Novagram")
             .replacingOccurrences(of: "FENIXUZ", with: "NOVAGRAM")
+        for (index, name) in serviceNames.enumerated() {
+            result = result.replacingOccurrences(of: "\u{1}\(index)\u{1}", with: name)
+        }
+        return result
     }
 
     public static func rebrandMenu(_ menu: NSMenu?) {

@@ -124,6 +124,14 @@ private func novagramInfoIcon(_ color: NSColor) -> CGImage? {
 
 // Info button in the right part of the peer info header; opens NovagramInfoModalController.
 func novagramAddInfoButton(to bar: BarView, handler: @escaping () -> Void) {
+    // 13.x: the right bar is a StackedBarView that lays out its own glass buttons,
+    // so a raw subview landed under "Edit". Insert it as the first stacked button instead.
+    if let stackedBar = bar as? StackedBarView {
+        let button = stackedBar.insertButton(at: 0, image: novagramInfoIcon(theme.colors.accent), handler: handler)
+        button.identifier = novagramInfoButtonId
+        button.toolTip = NovagramL10n.current.info_title
+        return
+    }
     let button = ImageButton()
     button.identifier = novagramInfoButtonId
     button.autohighlight = false

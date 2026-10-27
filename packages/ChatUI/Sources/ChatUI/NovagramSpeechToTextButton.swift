@@ -13,7 +13,7 @@ final class NovagramSpeechToTextButton {
     static let width: CGFloat = 30
 
     static var isEnabled: Bool {
-        return NovagramSettingsKey.bool("stt_enabled", default: true)
+        return NovagramSettingsKey.bool("stt_enabled", default: false)
     }
 
     // Space the text view leaves free for the button.

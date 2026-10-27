@@ -15,7 +15,7 @@ import Localization
 
 
 
-public func alert(for window:Window, header:String? = "Telegram", info:String?, ok: String = strings().modalOK, disclaimer: String? = nil, completion: (()->Void)? = nil, onDeinit:(()->Void)? = nil, presentation: TelegramPresentationTheme = theme) {
+public func alert(for window:Window, header:String? = appName, info:String?, ok: String = strings().modalOK, disclaimer: String? = nil, completion: (()->Void)? = nil, onDeinit:(()->Void)? = nil, presentation: TelegramPresentationTheme = theme) { // Novagram
     
     
     let data = ModalAlertData(title: header, info: info ?? "", ok: ok, options: [], disclaimer: disclaimer)
