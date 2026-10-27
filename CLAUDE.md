@@ -16,6 +16,10 @@ Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted 
 - Shared settings use the `pro_messager` UserDefaults suite with the same keys as iOS.
 - Commits: short, lowercase, first person, English ("added …", "fixed …"). Never push to `upstream`.
 
+## iOS features
+
+- `docs/IOS_FEATURES_AND_HOOKS.md`: every Novagram iOS feature and iOS hook (a copy of the iOS repo's list, taken from the old fork on 2026-10-27). Read it before porting an iOS feature; iOS code is in `../Telegram-iOS/submodules/Fenixuz/<Module>/Sources/`.
+
 ## Build
 
 - `./novagram-build.sh` (Debug, real pass/fail, DerivedData `/tmp/tgmac13-dd`), `./novagram-build.sh run` launches, `./novagram-build.sh appstore` also sets `APP_STORE` in packages.

@@ -36,6 +36,7 @@ Old fork (overtake base, July 2025): `../macOS`, its hook list is `../macOS/NOVA
 | `TelegramShare/ShareViewController.swift`                                                                                          | `import NovagramCore` after `import PasscodeCore`; `localizedValueTransform = NovagramBranding.rebrand` before `applyUILocalization(localization)`                                                                                                                                                                                                                                                                                                                                                                             |
 | `packages/TelegramUtils/Sources/TelegramUtils/AppConstants.swift` | `itunesAppLink` = `https://apps.apple.com/app/id6768202244` (Novagram). Upstream pointed the "Update" button and other App Store links at Telegram |
 | `Telegram-Mac/updater/AppUpdateViewController.swift` | `import NovagramCore`; first line of `updater_resetWithUpdaterSource`: `guard NovagramBranding.allowsTelegramUpdater else { return }`. Telegram's updater (non App Store builds) downloads official Telegram from a Telegram channel (`requestUpdatesXml(... updates_channel_xml)`, it ignores `SUFeedURL`) and would install it over Novagram |
+| `Telegram-Mac/utils/Spotlight.swift` (2026-10-27) | `import TelegramUtils`; Spotlight contact items: `contentDescription` "Popular contact in \(appName)", `creator = appName` (were "telegram" / "Telegram"; old fork parity) |
 
 Notes:
 
@@ -150,7 +151,7 @@ AuthUI depends on NovagramCore (`// Novagram` on both Package.swift lines).
 
 | Feature | File | Change |
 | ------- | ---- | ------ |
-| F22 NovagramProxy on login | `AuthUI/.../AuthController.swift` `AuthView` | `novagramProxyButton` (text link, top centre `y: 18`), styled in `updateLocalizationAndTheme`, excluded from the step-view stretch loop in `layout()` (without it the button got a full-height hit area that swallowed footer clicks); `AuthController` handler + `toggleNovagramProxy()` (NovagramAutoProxyManager on/off + alert) |
+| F22 NovagramProxy on login | `AuthUI/.../AuthController.swift` `AuthView` | Removed in b42efb88 (owner: it belongs in Proxy Settings). Now a switch at the top of Proxy Settings, see "Novagram logo in QR codes, NovagramProxy in Proxy Settings" |
 | F37 demo login | `AuthController.swift` | `sendCode` first line `NovagramDemoCodeFetcher.prewarmIfDemo`; after `code_entry_c.update(...)` `autoFillIfDemo(... applyExternalLoginCode)`; `.passwordEntry` first line `dismissIfActive()` |
 | F23 login logo | `AuthUI/.../Auth_PhoneNumber.swift` (`logo`), `Auth_Token.swift` (`logoView`, QR centre) | `NSImageView` with `NSApp.applicationIconImage` instead of the Telegram airplane Lottie (4.1 copycat risk) |
 
