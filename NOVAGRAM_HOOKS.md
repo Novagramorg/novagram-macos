@@ -1,7 +1,7 @@
 # NOVAGRAM_HOOKS.md — Novagram changes to Telegram-owned files
 
 Base: official Telegram macOS 13.1.0 (`TelegramMessenger/telegram-macos` @ `272d85dd7`, 2026-10-25).
-Old fork (overtake base, July 2025): `../macOS-old-12` (folder renamed on 2026-10-27), its hook list is `../macOS-old-12/FENIXUZ_HOOKS.md`.
+Old fork (overtake base, July 2025): removed on 2026-10-27, history in `~/Documents/Novagram-backups/macOS-old-fork-2026-10-27.bundle` (its hook list is `FENIXUZ_HOOKS.md` there).
 
 ## Rules
 

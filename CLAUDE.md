@@ -2,7 +2,7 @@
 
 # Novagram (fork of Telegram macOS 13.1)
 
-Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted keys such as `pro_messager`, `fenix_show_ads`, `__fenix_master__` and every Apple identifier keep their old values). Team **Vipads MCHJ**, Team ID `ZDBP5RSRZF`, bundle id `uz.fenixuz.app` (share extension `uz.fenixuz.app.TelegramShare`), App Store app `id6768202244`. This repo is `~/Documents/Telegram/macOS` (it was `macOS-13` until 2026-10-27). The old fork (Telegram macOS 12.x base) is `../macOS-old-12`, kept only for reference; the port plan is `../PORT_MAP_macOS13.md`. The iOS app is `../Telegram-iOS`.
+Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted keys such as `pro_messager`, `fenix_show_ads`, `__fenix_master__` and every Apple identifier keep their old values). Team **Vipads MCHJ**, Team ID `ZDBP5RSRZF`, bundle id `uz.fenixuz.app` (share extension `uz.fenixuz.app.TelegramShare`), App Store app `id6768202244`. This repo is `~/Documents/Telegram/macOS` (it was `macOS-13` until 2026-10-27). The old fork (Telegram macOS 12.x base) was removed on 2026-10-27; its full history is in `~/Documents/Novagram-backups/macOS-old-fork-2026-10-27.bundle` (`git clone <bundle>` to read it); the port plan is `../PORT_MAP_macOS13.md`. The iOS app is `../Telegram-iOS`.
 
 ## Rules
 
