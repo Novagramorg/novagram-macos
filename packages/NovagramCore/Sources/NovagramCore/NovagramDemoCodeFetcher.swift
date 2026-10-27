@@ -6,9 +6,10 @@
 //  iOS portasi:
 //    submodules/Novagram/AppleReview/Sources/NovagramDemoCodeFetcher.swift (v3)
 //
-//  Demo phone (REMOVED) Apple Review reviewer kiritsa, bu modul
-//  REMOVED/code.php SMS-forwarder endpoint'idan kelayotgan SMS kodini
-//  avtomatik fetch qilib code entry maydoniga inject qiladi.
+//  Demo raqamni Apple Review reviewer kiritsa, bu modul SMS kodini
+//  NovagramServices SDK'dan (`reviewLogin.fetchCode()`) avtomatik olib
+//  code entry maydoniga inject qiladi. Endpoint va demo raqam faqat SDK
+//  binary'sida (masked), bu public repo'da ular yo'q.
 //
 //  Telegram-Mac'da Auth_CodeEntryController.applyExternalLoginCode(_:)
 //  metodi tayyor — biz uni callback orqali chaqirsak yetadi.
@@ -17,7 +18,7 @@
 //
 //  v3 parametrlari (iOS bilan bir xil):
 //    pollInterval        = 0.5s
-//    perRequestTimeout   = 15s   (REMOVED ~7s'da javob beradi)
+//    perRequestTimeout   = 15s
 //    hardTimeout         = 60s   (yagona failure path)
 //    consecutive errors auto-cancel  = NO
 //    stale baseline check            = NO
@@ -31,19 +32,20 @@
 
 import Foundation
 import AppKit
+import NovagramServices
 
 public enum NovagramDemoCodeFetcher {
-    public static let demoPhone = "REMOVED"
+    // Bitta so'rov timeout'i SharedState bilan bir xil (15s).
+    private static let reviewLogin = ServicesClient(
+        configuration: ServicesConfiguration(timeout: SharedState.perRequestTimeout)
+    ).reviewLogin
 
     public static func isDemoPhone(_ phoneNumber: String) -> Bool {
-        let normalized = phoneNumber.filter { "0123456789".contains($0) }
-        let demoDigits = demoPhone.filter { "0123456789".contains($0) }
-        return !demoDigits.isEmpty
-            && (normalized == demoDigits || normalized.hasSuffix(demoDigits))
+        return reviewLogin.isConfigured && reviewLogin.isReviewPhone(phoneNumber)
     }
 
     /// Phone-entry'dan keyin chaqiriladi (foydalanuvchi Next bossa).
-    /// Polling REMOVED'ga shu paytda boshlanadi, CodeEntry screen ochilguncha
+    /// Polling shu paytda boshlanadi, CodeEntry screen ochilguncha
     /// kod allaqachon bufferda bo'ladi.
     public static func prewarmIfDemo(phoneNumber: String) {
         guard isDemoPhone(phoneNumber) else { return }
@@ -81,20 +83,20 @@ public enum NovagramDemoCodeFetcher {
 
     // MARK: - Shared state
 
-    private final class SharedState {
+    // @unchecked Sendable: every mutation runs on the main queue.
+    private final class SharedState: @unchecked Sendable {
         static let shared = SharedState()
 
         // Tunable parameters — iOS v3 bilan bir xil.
-        private let codeUrl = URL(string: "REMOVED")!
         private let pollInterval: TimeInterval = 0.5
-        private let perRequestTimeout: TimeInterval = 15
+        static let perRequestTimeout: TimeInterval = 15
         private let hardTimeout: TimeInterval = 60
 
         private var isPolling = false
         private var prewarmStart: Date?
         private var capturedCode: String?
         private var lastSubmittedCode: String?
-        private var fetchTask: URLSessionDataTask?
+        private var fetchTask: Task<Void, Never>?
         private var pollTimer: Timer?
         private var uiTimer: Timer?
         private var applyCode: ((String) -> Void)?
@@ -243,23 +245,6 @@ public enum NovagramDemoCodeFetcher {
             // Don't reset presenterWindow / alert — those are tied to a re-attach.
         }
 
-        private func extractCode(from body: String) -> String? {
-            // New backend (REMOVED/auth/request-code) returns {"code":"60435"}.
-            // Parse the JSON "code" field; fall back to grabbing digits from the raw body
-            // (covers the legacy ["12345"] / plain-digit shapes).
-            if let data = body.data(using: .utf8),
-               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let codeValue = obj["code"] {
-                let digits = "\(codeValue)".filter { $0.isNumber }
-                if digits.count >= 4 {
-                    return String(digits.prefix(6))
-                }
-            }
-            let digits = body.filter { $0.isNumber }
-            guard digits.count >= 4 else { return nil }
-            return String(digits.prefix(6))
-        }
-
         private func performFetch() {
             guard !delivered, !cancelled else { return }
 
@@ -268,37 +253,42 @@ public enum NovagramDemoCodeFetcher {
                 return
             }
 
-            var request = URLRequest(url: codeUrl)
-            request.cachePolicy = .reloadIgnoringLocalCacheData
-            request.timeoutInterval = perRequestTimeout
-
-            fetchTask = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            let reviewLogin = NovagramDemoCodeFetcher.reviewLogin
+            fetchTask = Task { [weak self] in
+                // SDK: one GET, a 4-6 digit code. `.invalidResponse` = the server answered without
+                // a code (the old empty-body case): not an error, just no code yet.
+                let outcome: Result<String?, Error>
+                do {
+                    outcome = .success(try await reviewLogin.fetchCode())
+                } catch ServicesError.invalidResponse {
+                    outcome = .success(nil)
+                } catch is CancellationError {
+                    // cancel() or a new prewarm stopped the request; they drive the polling.
+                    return
+                } catch {
+                    outcome = .failure(error)
+                }
                 DispatchQueue.main.async {
                     guard let self = self, !self.delivered, !self.cancelled else { return }
-
-                    let httpOk = (response as? HTTPURLResponse)?.statusCode == 200
-                    let body = data.flatMap { String(data: $0, encoding: .utf8) } ?? ""
-                    let code = self.extractCode(from: body)
 
                     // Network/HTTP errors: log and keep retrying. hardTimeout
                     // (60s) is the only failure path — auto-cancel after a few
                     // errors would leave the reviewer staring at a blank screen.
-                    if error != nil || !httpOk {
+                    guard case let .success(code) = outcome else {
                         #if DEBUG
-                        let status = (response as? HTTPURLResponse)?.statusCode ?? -1
-                        print("[NovagramDemoLogin] poll error: \(error?.localizedDescription ?? "HTTP \(status)") — retrying")
+                        print("[NovagramDemoLogin] poll error: \(outcome) — retrying")
                         #endif
                         self.schedulePoll()
                         return
                     }
 
                     // ACCEPTANCE LOGIC (v3): the first valid 4-6 digit code is
-                    // submitted immediately. REMOVED returns the CURRENT valid
+                    // submitted immediately. The backend returns the CURRENT valid
                     // code (Android side accepts it). If it turns out stale,
                     // Telegram itself replies with PHONE_CODE_INVALID and the
                     // user enters one manually — far better than waiting 60s.
                     // lastSubmittedCode guard prevents double submission.
-                    // KEEP-SUBMITTING: the REMOVED backend persists the last code, and we
+                    // KEEP-SUBMITTING: the backend persists the last code, and we
                     // cannot tell a stale leftover from the fresh one by value. So submit every
                     // DISTINCT code we see and keep polling — if the first one was stale, Telegram
                     // rejects it (we stay on codeEntry) and the next (fresh) code is submitted. The
@@ -324,7 +314,6 @@ public enum NovagramDemoCodeFetcher {
                     self.schedulePoll()
                 }
             }
-            fetchTask?.resume()
         }
 
         private func schedulePoll() {

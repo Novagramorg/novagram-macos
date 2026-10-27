@@ -12,6 +12,9 @@ func installNovagramHooks() {
         let controller = NovagramEditedHistoryController(context: context, peerId: peerId, messageId: messageId, currentText: currentText)
         context.bindings.rootNavigation().push(controller)
     }
+    hooks.accountWillLogOut = { accountId in
+        NovagramAnalyticsManager.shared.accountWillLogOut(accountId: accountId)
+    }
     NovagramHooks.install(hooks)
     installNovagramSettingsHooks()
     installNovagramAdsHooks()

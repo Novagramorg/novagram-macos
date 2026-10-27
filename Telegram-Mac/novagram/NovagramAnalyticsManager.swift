@@ -1,22 +1,33 @@
 import Foundation
 import Security
 import SwiftSignalKit
+import Postbox
 import TelegramCore
+import NovagramCore
 
-// Orchestrates the two analytics counters against the Novagram Statistics API:
-//   • "Novagram users"   — distinct devices, counted ONCE per physical device
-//     (downloads, via POST /v1/install).
-//   • "Active accounts"  — one per device while it holds at least one account
-//     (active, via POST /v1/account/create when it gains its first account and
-//     POST /v1/account/delete when it loses its last).
+// Drives the two analytics counters of the Novagram Statistics API (through the NovagramServices
+// SDK, see NovagramStatisticsClient in NovagramCore):
+//   • "Novagram users"   — devices that ever installed the app (downloads).
+//   • "Active accounts"  — devices that hold at least one signed-in account (active).
 //
-// The server dedups by `device_id`, so the calls are idempotent and the client never owns a
-// counter. Local state (the stable device id + two "already sent" flags) lives in the macOS
-// KEYCHAIN on purpose: Keychain survives app deletion + reinstall on the same device, so a
-// reinstall does NOT re-count the device. A UserDefaults fallback covers the (rare) case
-// where the Keychain is unavailable.
+// The server counts DEVICES by `device_id` and dedups, so every call is idempotent. When to call:
+//   • POST /v1/install         — the first open after install; on success "sent" is saved in
+//                                UserDefaults (a reinstall sends it again: the server ignores a
+//                                known device id).
+//   • POST /v1/account/create  — every account that is added and has loaded (first login, every
+//                                Add Account).
+//   • POST /v1/account/delete  — every logout the user confirms (see accountWillLogOut). The
+//                                server then drops the whole device from "active", so if other
+//                                accounts stay signed in, /v1/account/create is sent again right after.
+//   • Every emission of the account list also reconciles with the `deviceActive` flag: it repairs
+//     a call that failed offline and a session that was ended from another device.
 //
-// Port of submodules/Novagram/Analytics/Sources/NovagramAnalyticsManager.swift (iOS).
+// The device id is a random UUID in the macOS KEYCHAIN (survives app deletion + reinstall, so a
+// reinstall is never counted as a new device), with a UserDefaults fallback for the rare case
+// where the Keychain is unavailable. Do not change its service/account names: every existing
+// device would be counted again.
+//
+// Port of submodules/Fenixuz/Analytics/Sources/FenixuzAnalyticsManager.swift (iOS).
 final class NovagramAnalyticsManager {
     static let shared = NovagramAnalyticsManager()
 
@@ -24,14 +35,16 @@ final class NovagramAnalyticsManager {
     private let keychainService = "uz.fenixuz.app.Analytics"
 
     private let deviceIdKey = "deviceId"
-    private let installRegisteredKey = "installRegistered"
     private let deviceActiveKey = "deviceActive"
+    private let installRegisteredDefaultsKey = "uz.fenixuz.app.Analytics.installRegistered"
 
     // UserDefaults fallback (used only when the Keychain read/write fails).
     private let fallbackDefaults = UserDefaults(suiteName: "uz.fenixuz.app.Analytics")
 
     private var accountsDisposable: Disposable?
     private var started = false
+    // stateQueue only. nil until the first emission of the account list after launch.
+    private var knownAccountIds: Set<AccountRecordId>?
 
     private init() {}
 
@@ -50,27 +63,26 @@ final class NovagramAnalyticsManager {
         }
     }
 
-    // MARK: - Install (downloads, once per device)
+    // MARK: - Install (downloads, the first open after install)
 
     private func registerInstallIfNeeded() {
-        guard NovagramAnalyticsConfig.isConfigured else {
+        guard NovagramStatisticsClient.shared.isConfigured else {
             return
         }
-        if self.readState(key: self.installRegisteredKey) == "1" {
+        if UserDefaults.standard.bool(forKey: self.installRegisteredDefaultsKey) {
             return
         }
         let deviceId = self.deviceId()
-        NovagramStatisticsClient.shared.registerInstall(deviceId: deviceId, completion: { [weak self] response in
-            guard let self = self, response != nil else {
+        NovagramStatisticsClient.shared.registerInstall(deviceId: deviceId, completion: { [weak self] success in
+            guard let self = self, success else {
+                // Not saved: the next open tries again.
                 return
             }
-            self.stateQueue.async {
-                self.writeState("1", key: self.installRegisteredKey)
-            }
+            UserDefaults.standard.set(true, forKey: self.installRegisteredDefaultsKey)
         })
     }
 
-    // MARK: - Active (one per device while it holds at least one account)
+    // MARK: - Accounts (active)
 
     private func observeAccounts(sharedContext: SharedAccountContext) {
         self.accountsDisposable = (sharedContext.activeAccounts
@@ -78,46 +90,79 @@ final class NovagramAnalyticsManager {
             guard let self = self else {
                 return
             }
-            let hasAccounts = !value.accounts.isEmpty
+            let accountIds = Set(value.accounts.map { $0.0 })
             self.stateQueue.async {
-                self.syncActiveState(hasAccounts: hasAccounts)
+                self.accountsChanged(accountIds)
             }
         })
     }
 
-    // Runs on stateQueue. Drives the device's active presence: +1 the moment it gains its
-    // first account, -1 the moment it loses its last. The local flag is updated optimistically
-    // and rolled back on network failure so the next emission / launch retries.
-    private func syncActiveState(hasAccounts: Bool) {
-        guard NovagramAnalyticsConfig.isConfigured else {
+    // Runs on stateQueue.
+    private func accountsChanged(_ accountIds: Set<AccountRecordId>) {
+        let previous = self.knownAccountIds
+        self.knownAccountIds = accountIds
+        guard NovagramStatisticsClient.shared.isConfigured else {
             return
         }
+        // Accounts that appear after the first emission were added and have loaded.
+        let added = previous.map { accountIds.subtracting($0) } ?? []
         let isActive = self.readState(key: self.deviceActiveKey) == "1"
-        if hasAccounts == isActive {
-            return
+        if !added.isEmpty {
+            for _ in added {
+                self.sendRegisterAccount()
+            }
+        } else if !accountIds.isEmpty && !isActive {
+            // Reconcile: accounts are here but the server may not count the device (a failed
+            // call, or an app version that never sent it).
+            self.sendRegisterAccount()
+        } else if accountIds.isEmpty && isActive {
+            // Reconcile: no account left without a confirmed logout (for example the session was
+            // ended from another device), or the logout's delete failed.
+            self.sendDeleteAccount(thenRegisterAgain: false)
         }
-        let deviceId = self.deviceId()
-        if hasAccounts {
-            self.writeState("1", key: self.deviceActiveKey)
-            NovagramStatisticsClient.shared.registerAccountCreate(deviceId: deviceId, completion: { [weak self] response in
-                guard let self = self, response == nil else {
-                    return
-                }
-                self.stateQueue.async {
+    }
+
+    // Call when the user confirms a logout, before the account is removed (installed as
+    // NovagramHooks.accountWillLogOut). Sends /v1/account/delete, then /v1/account/create again
+    // if other accounts stay signed in.
+    func accountWillLogOut(accountId: AccountRecordId) {
+        self.stateQueue.async {
+            guard NovagramStatisticsClient.shared.isConfigured else {
+                return
+            }
+            let remaining = (self.knownAccountIds ?? []).subtracting([accountId])
+            self.sendDeleteAccount(thenRegisterAgain: !remaining.isEmpty)
+        }
+    }
+
+    // Runs on stateQueue. The flag changes only after a successful call, so a failed one is
+    // repaired by the reconcile step on a later emission or launch.
+    private func sendRegisterAccount() {
+        NovagramStatisticsClient.shared.registerAccount(deviceId: self.deviceId(), completion: { [weak self] success in
+            guard let self = self, success else {
+                return
+            }
+            self.stateQueue.async {
+                self.writeState("1", key: self.deviceActiveKey)
+            }
+        })
+    }
+
+    // Runs on stateQueue. The two calls run one after the other, never in parallel.
+    private func sendDeleteAccount(thenRegisterAgain: Bool) {
+        NovagramStatisticsClient.shared.deleteAccount(deviceId: self.deviceId(), completion: { [weak self] success in
+            guard let self = self else {
+                return
+            }
+            self.stateQueue.async {
+                if success {
                     self.writeState("0", key: self.deviceActiveKey)
                 }
-            })
-        } else {
-            self.writeState("0", key: self.deviceActiveKey)
-            NovagramStatisticsClient.shared.registerAccountDelete(deviceId: deviceId, completion: { [weak self] response in
-                guard let self = self, response == nil else {
-                    return
+                if thenRegisterAgain {
+                    self.sendRegisterAccount()
                 }
-                self.stateQueue.async {
-                    self.writeState("1", key: self.deviceActiveKey)
-                }
-            })
-        }
+            }
+        })
     }
 
     // MARK: - Reading the counts for the UI

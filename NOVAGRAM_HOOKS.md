@@ -160,10 +160,10 @@ Not ported: the old emerald Next button (`NovagramBrandColors.primary`), same re
 
 | File | What |
 | --- | --- |
-| `Telegram-Mac/novagram/` | Novagram Settings and its sub-screens (About, Tips, Text style, Auto-text, Auto-translate, Translation language, Bots, All accounts, Analytics, Edited history) and the app-side managers (UnreadReminder, SuggestedFolders, Analytics, StatisticsClient/Config). `NovagramSuggestedFolders.swift` also holds `NovagramAdminFoldersManager` (2026-10-26), a port of the iOS `FenixAdminFoldersManager`: the "Admin Folders" switch (`pro_messager/fenix_admin_folders`, same key as iOS) keeps 4 real folders (👑/🔑 groups and channels, explicit chats) in sync on launch, account switch and app activation. It replaces the old one-shot "Create admin folder" action, which put every group and channel into an "Admin" ⭐️ folder; that folder is removed as a previous layout. Unlike iOS it only creates a folder while the Telegram folder limit has room, because the server rejects the rest with `DIALOG_FILTERS_TOO_MUCH`. The screens use the concrete `AccountContext` and the bridge `TableViewController`. Auto-text is now an `InputDataController` (13.x has no `GeneralInputRowItem`); keys `auto_text_enabled` and `auto_text_content` are unchanged. The hidden "Remove all ads" section is left out until `NovagramAdsGate` is ported |
+| `Telegram-Mac/novagram/` | Novagram Settings and its sub-screens (About, Tips, Text style, Auto-text, Auto-translate, Translation language, Bots, All accounts, Analytics, Edited history) and the app-side managers (UnreadReminder, SuggestedFolders, Analytics; the Statistics client is in NovagramCore since 2026-10-27, see "NovagramServices SDK"). `NovagramSuggestedFolders.swift` also holds `NovagramAdminFoldersManager` (2026-10-26), a port of the iOS `FenixAdminFoldersManager`: the "Admin Folders" switch (`pro_messager/fenix_admin_folders`, same key as iOS) keeps 4 real folders (👑/🔑 groups and channels, explicit chats) in sync on launch, account switch and app activation. It replaces the old one-shot "Create admin folder" action, which put every group and channel into an "Admin" ⭐️ folder; that folder is removed as a previous layout. Unlike iOS it only creates a folder while the Telegram folder limit has room, because the server rejects the rest with `DIALOG_FILTERS_TOO_MUCH`. The screens use the concrete `AccountContext` and the bridge `TableViewController`. Auto-text is now an `InputDataController` (13.x has no `GeneralInputRowItem`); keys `auto_text_enabled` and `auto_text_content` are unchanged. The hidden "Remove all ads" section is left out until `NovagramAdsGate` is ported |
 | `Telegram-Mac/novagram/novagram_bots.json`, `russia_proxies.txt` | App resources read through `Bundle.main` (Bots catalogue, `NovagramAutoProxy` pool) |
 | `Telegram-Mac/novagram/NovagramSettingsLinks.swift` | `tg://novagrampro`, `tg://novagram/<f>`, `tg://fenixuz/<f>`, `tg://settings/novagrampro[/<f>]` (f = about, bots, tips, text_style, auto_text, auto_translate, translate_language, translation_language, language) |
-| `Telegram-Mac/packages-integration/hooks/NovagramHooksInstall.swift` | `installNovagramHooks()`: `NovagramHooks.presentEditedHistory` pushes `NovagramEditedHistoryController`; calls `installNovagramSettingsHooks()` |
+| `Telegram-Mac/packages-integration/hooks/NovagramHooksInstall.swift` | `installNovagramHooks()`: `NovagramHooks.presentEditedHistory` pushes `NovagramEditedHistoryController`; `NovagramHooks.accountWillLogOut` calls `NovagramAnalyticsManager.shared.accountWillLogOut(accountId:)`; calls `installNovagramSettingsHooks()` |
 | `Telegram-Mac/packages-integration/hooks/NovagramSettingsHooksInstall.swift` | Rows: Accounts 910, gold Novagram Settings 911, Novagram Bots 912, Analytics 913 (914 reserved for Ads Analytics). Hides paid rows and inline accounts |
 | `packages/SettingsUI/Sources/SettingsUI/NovagramSettingsHooks.swift` | `NovagramSettingsHooks`: extra Settings rows (`rows(context, .accounts/.top)`, ids 900–998), `selectedRowId`, `rowsUpdated`, `hidePaidRows`, `showInlineAccounts`, `versionRowClick` (reserved for the ads gate). Neutral defaults |
 
@@ -260,6 +260,31 @@ QrStudioUI, InviteLinksUI and ProxyUI depend on NovagramCore (`// Novagram` Pack
 | `Telegram.xcodeproj/project.pbxproj` | `XCLocalSwiftPackageReference "packages/NovagramAdsBinary"` (`FE50AD500000000000000001`) in project `packageReferences`; products `…0002-0004` linked to the Telegram target only (build files `…0012-0014`); 12 Novagram sources (`…0020-0037`); Telegram target Debug + Release `MACOSX_DEPLOYMENT_TARGET = 14.0` (the SDK needs 12.0; 14.0 is the minimum the old Novagram shipped, and `scripts/xcode27.sh apply/revert` leaves it alone) |
 | `Telegram-Mac/Info.plist` | `NovagramAdsEnvironment = $(NOVAGRAM_ADS_ENVIRONMENT)` |
 | `Telegram-Mac/Novagram.xcconfig` | `NOVAGRAM_ADS_ENVIRONMENT = production`, `#include? "NovagramAds.local.xcconfig"`, `NOVAGRAM_ADS_ENVIRONMENT[config=Release] = production` |
+
+### NovagramServices SDK: review login and statistics (2026-10-27)
+
+The review login endpoint, the demo phone and the Statistics API URL + key are no longer in this repo. They live (masked) in the private NovagramServices SDK (`Codingtech2/novagram-services-ios-sdk`, guide `docs/INTEGRATION.md`). Never paste them into this repo, a doc or a commit message.
+
+| File | What |
+| --- | --- |
+| `packages/NovagramCore/Frameworks/NovagramServices.xcframework` | SDK v1.1.0 (release zip sha256 `b146eea7…`), dynamic, `macos-arm64_x86_64` slice only, min macOS 12.0 |
+| `packages/NovagramCore/Package.swift` | `.binaryTarget(name: "NovagramServices", path: "Frameworks/NovagramServices.xcframework")`, a dependency of the `NovagramCore` target only (not `NovagramShare`). Xcode embeds and signs it; no pbxproj change for it |
+| `packages/NovagramCore/Sources/NovagramCore/NovagramStatisticsClient.swift` | Bridge to `services.statistics` (completion API with `Bool` / counts, so the app never names an SDK type). Replaces the app-target `NovagramStatisticsClient.swift` + `NovagramStatisticsConfig.swift` (deleted; their 8 pbxproj lines `FE304E0B…001E`–`…0021` removed) |
+| `packages/NovagramCore/Sources/NovagramCore/NovagramDemoCodeFetcher.swift` | `isDemoPhone` = `reviewLogin.isConfigured && reviewLogin.isReviewPhone(_:)`; each poll is `reviewLogin.fetchCode()` (`.invalidResponse` = no code yet, `CancellationError` = stopped by cancel / a new prewarm). Polling, timers, alert and tuned values are unchanged; `demoPhone`, the URL and `extractCode` are gone |
+| `Telegram-Mac/novagram/NovagramAnalyticsManager.swift` | The SDK guide's rules (same as iOS): install "sent" flag in UserDefaults (`uz.fenixuz.app.Analytics.installRegistered`); `registerAccount` for every account added after launch; `accountWillLogOut(accountId:)` sends `deleteAccount`, then `registerAccount` if accounts remain; every account-list emission reconciles with the Keychain `deviceActive` flag. Device id unchanged (Keychain `uz.fenixuz.app.Analytics` / `deviceId`, UserDefaults fallback) |
+| `packages/NovagramCore/.../NovagramHooks.swift` | `accountWillLogOut: (AccountRecordId) -> Void`, installed in `NovagramHooksInstall.swift` |
+| `packages/SettingsUI/.../LogoutViewController.swift` | `import NovagramCore`; `NovagramHooks.shared.accountWillLogOut(context.account.id)` in the "Log out?" `successHandler`, before `logoutFromAccount` (2 lines) |
+| `packages/SettingsUI/.../AccountViewController.swift` | `import NovagramCore`; the same call in the account row's log out `successHandler` (2 lines) |
+| `Telegram-Mac/novagram/NovagramAccountsController.swift` (ours) | the same call (to the manager directly) in All accounts → log out |
+
+Updating the SDK: build it in the SDK repo (`scripts/build-xcframework.sh`) or take the release zip, remove the old copy, then
+
+```sh
+xcodebuild -create-xcframework -framework <build>/NovagramServices.xcframework/macos-arm64_x86_64/NovagramServices.framework -output packages/NovagramCore/Frameworks/NovagramServices.xcframework
+find packages/NovagramCore/Frameworks -type f -print0 | xargs -0 ../novagram-services-ios-sdk/scripts/generate-secrets.sh --scan
+```
+
+Commit the copy only when the scan exits 0.
 
 ### Fixes after the visual check (2026-10-26)
 

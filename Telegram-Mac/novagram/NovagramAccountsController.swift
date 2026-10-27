@@ -106,6 +106,7 @@ func NovagramAccountsController(context: AccountContext) -> InputDataController 
         context.sharedContext.openAccount(id: account.account.id)
     }, logoutAccount: { account in
         verifyAlert_button(for: context.window, information: strings().accountConfirmLogoutText, successHandler: { _ in
+            NovagramAnalyticsManager.shared.accountWillLogOut(accountId: account.account.id)
             _ = logoutFromAccount(id: account.account.id, accountManager: context.sharedContext.accountManager, alreadyLoggedOutRemotely: false).start()
         })
     }, addAccount: {

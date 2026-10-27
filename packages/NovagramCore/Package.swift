@@ -19,6 +19,12 @@ let package = Package(
         .package(name: "TelegramContext", path: "../TelegramContext")
     ],
     targets: [
+        // NovagramServices SDK (private repo, release v1.1.0), macOS slice only. It holds the review
+        // login endpoint, the demo phone and the Statistics API URL + key (masked), so none of them is
+        // in this public repo. How to update it: NOVAGRAM_HOOKS.md, "NovagramServices SDK".
+        .binaryTarget(
+            name: "NovagramServices",
+            path: "Frameworks/NovagramServices.xcframework"),
         .target(
             name: "NovagramShare",
             dependencies: [
@@ -37,7 +43,8 @@ let package = Package(
                 .product(name: "TGUIKit", package: "TGUIKit", condition: nil),
                 .product(name: "Localization", package: "Localization", condition: nil),
                 .product(name: "AlertsUI", package: "AlertsUI", condition: nil),
-                .product(name: "TelegramContext", package: "TelegramContext", condition: nil)
+                .product(name: "TelegramContext", package: "TelegramContext", condition: nil),
+                .target(name: "NovagramServices")
             ],
             path: "Sources/NovagramCore")
     ]

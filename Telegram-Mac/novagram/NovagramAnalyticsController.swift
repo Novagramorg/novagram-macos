@@ -3,7 +3,7 @@
 //  Telegram-Mac
 //
 //  Settings → Analytics page for the Novagram fork. Shows two live numbers from the
-//  Novagram Statistics API (REMOVED):
+//  Novagram Statistics API (through the NovagramServices SDK):
 //    • "Novagram users"  — downloads (one per device).
 //    • "Active accounts" — devices currently holding at least one logged-in account.
 //

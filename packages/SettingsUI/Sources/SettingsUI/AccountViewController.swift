@@ -3,6 +3,7 @@ import TGUIKit
 import TelegramCore
 import Localization
 import Postbox
+import NovagramCore // Novagram
 import SwiftSignalKit
 import InAppSettings
 import TelegramTheme
@@ -353,6 +354,7 @@ private enum AccountInfoEntry<Context: AccountContextProtocol> : TableItemListNo
                 
                 items.append(ContextMenuItem(strings().accountSettingsDeleteAccount, handler: {
                     verifyAlert_button(for: arguments.context.window, information: strings().accountConfirmLogoutText, successHandler: { _ in
+                        NovagramHooks.shared.accountWillLogOut(info.account.id) // Novagram
                         _ = logoutFromAccount(id: info.account.id, accountManager: arguments.context.sharedContext.accountManager, alreadyLoggedOutRemotely: false).start()
                     })
                 }, itemMode: .destruct, itemImage: MenuAnimation.menu_delete.value))

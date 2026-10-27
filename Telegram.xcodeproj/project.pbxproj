@@ -39,8 +39,6 @@
 		FE304E0B0000000000000019 /* NovagramUnreadReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000018 /* NovagramUnreadReminderManager.swift */; };
 		FE304E0B000000000000001B /* NovagramSuggestedFolders.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000001A /* NovagramSuggestedFolders.swift */; };
 		FE304E0B000000000000001D /* NovagramAnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000001C /* NovagramAnalyticsManager.swift */; };
-		FE304E0B000000000000001F /* NovagramStatisticsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000001E /* NovagramStatisticsClient.swift */; };
-		FE304E0B0000000000000021 /* NovagramStatisticsConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000020 /* NovagramStatisticsConfig.swift */; };
 		FE304E0B0000000000000023 /* novagram_bots.json in Resources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000022 /* novagram_bots.json */; };
 		FE304E0B0000000000000025 /* russia_proxies.txt in Resources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000024 /* russia_proxies.txt */; };
 		FE304E0B0000000000000027 /* NovagramHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000026 /* NovagramHooksInstall.swift */; };
@@ -1099,8 +1097,6 @@
 		FE304E0B0000000000000018 /* NovagramUnreadReminderManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramUnreadReminderManager.swift; sourceTree = "<group>"; };
 		FE304E0B000000000000001A /* NovagramSuggestedFolders.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSuggestedFolders.swift; sourceTree = "<group>"; };
 		FE304E0B000000000000001C /* NovagramAnalyticsManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAnalyticsManager.swift; sourceTree = "<group>"; };
-		FE304E0B000000000000001E /* NovagramStatisticsClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramStatisticsClient.swift; sourceTree = "<group>"; };
-		FE304E0B0000000000000020 /* NovagramStatisticsConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramStatisticsConfig.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000022 /* novagram_bots.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = novagram_bots.json; sourceTree = "<group>"; };
 		FE304E0B0000000000000024 /* russia_proxies.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = russia_proxies.txt; sourceTree = "<group>"; };
 		FE304E0B0000000000000026 /* NovagramHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramHooksInstall.swift; sourceTree = "<group>"; };
@@ -2417,8 +2413,6 @@
 				FE304E0B0000000000000018 /* NovagramUnreadReminderManager.swift */,
 				FE304E0B000000000000001A /* NovagramSuggestedFolders.swift */,
 				FE304E0B000000000000001C /* NovagramAnalyticsManager.swift */,
-				FE304E0B000000000000001E /* NovagramStatisticsClient.swift */,
-				FE304E0B0000000000000020 /* NovagramStatisticsConfig.swift */,
 				FE304E0B0000000000000022 /* novagram_bots.json */,
 				FE304E0B0000000000000024 /* russia_proxies.txt */,
 			);
@@ -4794,8 +4788,6 @@
 				FE304E0B0000000000000019 /* NovagramUnreadReminderManager.swift in Sources */,
 				FE304E0B000000000000001B /* NovagramSuggestedFolders.swift in Sources */,
 				FE304E0B000000000000001D /* NovagramAnalyticsManager.swift in Sources */,
-				FE304E0B000000000000001F /* NovagramStatisticsClient.swift in Sources */,
-				FE304E0B0000000000000021 /* NovagramStatisticsConfig.swift in Sources */,
 				FE304E0B0000000000000027 /* NovagramHooksInstall.swift in Sources */,
 				BE3536CA4246405D5520629A /* WalletUIHooksInstall.swift in Sources */,
 				4B9679F90FE2EF0F0FD21C7A /* PasscodeUIHooksInstall.swift in Sources */,

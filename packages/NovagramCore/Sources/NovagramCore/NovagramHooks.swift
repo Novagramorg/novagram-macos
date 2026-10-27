@@ -1,5 +1,6 @@
 import Foundation
 import Postbox
+import TelegramCore
 import TelegramContext
 
 // Novagram screens live in the app target (they use the concrete AccountContext and the app's
@@ -7,6 +8,8 @@ import TelegramContext
 // Telegram-Mac/packages-integration/hooks/NovagramHooksInstall.swift. Defaults do nothing.
 public struct NovagramHooks {
     public var presentEditedHistory: (_ context: any AccountContextProtocol, _ peerId: PeerId, _ messageId: Int32, _ currentText: String) -> Void = { _, _, _, _ in }
+    // Statistics: the user confirmed a logout of this account (called right before logoutFromAccount).
+    public var accountWillLogOut: (_ accountId: AccountRecordId) -> Void = { _ in }
 
     public init() {}
 

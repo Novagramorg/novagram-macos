@@ -3,6 +3,7 @@ import TGUIKit
 import TelegramCore
 
 import Postbox
+import NovagramCore // Novagram
 import SwiftSignalKit
 import WebKit
 import InputDataUI
@@ -136,6 +137,7 @@ public func LogoutViewController<Context: AccountContextProtocol>(context: Conte
         logoutConfirmationDisposable.set((LogoutHooks.shared.logoutConfirmationText(context) |> deliverOnMainQueue).start(next: { text in
             verifyAlert_button(for: context.window, header: strings().accountConfirmLogout, information: text, successHandler: { _ in
                 closeAllModals()
+                NovagramHooks.shared.accountWillLogOut(context.account.id) // Novagram
                 _ = logoutFromAccount(id: context.account.id, accountManager: context.sharedContext.accountManager, alreadyLoggedOutRemotely: false).start()
                 FastSettings.clear_uuid(context.account.id.int64)
             })
