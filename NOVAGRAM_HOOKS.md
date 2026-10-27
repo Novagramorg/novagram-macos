@@ -10,6 +10,7 @@ Old fork (overtake base, July 2025): `../macOS-old-12` (folder renamed on 2026-1
 - Edit Telegram files with exact line edits only. A formatter run over a Telegram file rewrites the whole file and breaks the next merge.
 - `scripts/xcode27.sh apply` changes are local only (Xcode 27), never commit them (`scripts/xcode27.sh revert` before staging those files).
 - Never push to `upstream` (push URL is disabled on purpose).
+- Upstream updates go through `scripts/novagram-upstream-update.sh` (header explains the steps). It counts the `// Novagram` lines per file before and after the merge: a file with fewer lines means a hook was lost in the merge, restore it from this document.
 
 ## Branding (2026-10-26)
 

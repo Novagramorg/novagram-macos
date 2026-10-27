@@ -21,6 +21,10 @@ Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted 
 
 - `docs/IOS_FEATURES_AND_HOOKS.md`: every Novagram iOS feature and iOS hook (a copy of the iOS repo's list, taken from the old fork on 2026-10-27). Read it before porting an iOS feature; iOS code is in `../Telegram-iOS/submodules/Fenixuz/<Module>/Sources/`.
 
+## Upstream updates
+
+- `scripts/novagram-upstream-update.sh` merges the latest `upstream/master` on a new `feature/upstream-<date>` branch: reverts the local Xcode 27 changes, merges, updates moved submodules, re-applies the TelegramCore patches, checks that no `// Novagram` hook was lost, builds. `--check` only reports what upstream has; `--finish` continues after conflicts were resolved by hand. Never merge upstream on `main` by hand. Run it often (weekly): small merges rarely conflict.
+
 ## Build
 
 - `./novagram-build.sh` (Debug, real pass/fail, DerivedData `/tmp/tgmac13-dd`), `./novagram-build.sh run` launches, `./novagram-build.sh appstore` also sets `APP_STORE` in packages.
