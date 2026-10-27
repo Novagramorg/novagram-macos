@@ -44,7 +44,7 @@ enum NovagramAdMessage {
         if let chatPeer {
             messagePeers[chatPeer.id] = chatPeer
         }
-        let author = self.author(title: ad.displayTitle)
+        let author = self.author(title: ad.displayTitle, avatarURL: ad.promoted.avatarURL)
         messagePeers[author.id] = author
 
         var media: [Media] = []
@@ -111,13 +111,13 @@ enum NovagramAdMessage {
         return Int32(bitPattern: hash & 0x7FFF_FFFF) | 1
     }
 
-    private static func author(title: String) -> Peer {
+    private static func author(title: String, avatarURL: URL?) -> Peer {
         return TelegramChannel(
             id: self.authorPeerId,
             accessHash: nil,
             title: title,
             username: nil,
-            photo: [],
+            photo: self.authorPhoto(avatarURL),
             creationDate: 0,
             version: 0,
             participationStatus: .left,
@@ -140,6 +140,20 @@ enum NovagramAdMessage {
             sendPaidMessageStars: nil,
             linkedMonoforumId: nil
         )
+    }
+
+    /// The advertiser photo (`promoted.avatar_url`) for the author avatar the video banner draws;
+    /// none when the url is not https, so the banner keeps its letter avatar.
+    private static func authorPhoto(_ url: URL?) -> [TelegramMediaImageRepresentation] {
+        guard let url, url.scheme?.lowercased() == "https", let host = url.host, !host.isEmpty else {
+            return []
+        }
+        return [TelegramMediaImageRepresentation(
+            dimensions: PixelDimensions(width: 160, height: 160),
+            resource: HttpReferenceMediaResource(url: url.absoluteString, size: nil),
+            progressiveSizes: [],
+            immediateThumbnailData: nil
+        )]
     }
 
     /// Stable media id for an immutable media url (FNV-1a 64-bit).
