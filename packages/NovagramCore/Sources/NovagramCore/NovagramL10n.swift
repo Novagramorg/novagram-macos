@@ -1267,6 +1267,40 @@ public struct NovagramL10n {
         pick(en: "Ads Analytics", uz: "Reklama analitikasi", ru: "Аналитика рекламы")
     }
 
+    // MARK: - Analytics screen (Settings → Analytics)
+
+    public var analytics_title: String {
+        pick(en: "Analytics", uz: "Analitika", ru: "Аналитика")
+    }
+
+    public var analytics_subtitle: String {
+        pick(en: "App usage numbers", uz: "Ilovadan foydalanish ko'rsatkichlari", ru: "Статистика использования приложения")
+    }
+
+    public var analytics_usersCaption: String {
+        pick(en: "Novagram users", uz: "Novagram foydalanuvchilari", ru: "Пользователи Novagram")
+    }
+
+    public var analytics_accountsCaption: String {
+        pick(en: "Active accounts", uz: "Faol accountlar", ru: "Активные аккаунты")
+    }
+
+    public var analytics_usersInfo: String {
+        pick(
+            en: "The number of unique devices that have installed Novagram. Each device is counted once.",
+            uz: "Novagram o'rnatilgan noyob qurilmalar soni. Har bir qurilma bir marta hisoblanadi.",
+            ru: "Количество уникальных устройств, на которых установлен Novagram. Каждое устройство учитывается один раз."
+        )
+    }
+
+    public var analytics_accountsInfo: String {
+        pick(
+            en: "The number of devices that have at least one account signed in right now.",
+            uz: "Hozir kamida bitta account kirgan qurilmalar soni.",
+            ru: "Количество устройств, на которых сейчас выполнен вход хотя бы в один аккаунт."
+        )
+    }
+
     public var ads_admin_title: String {
         pick(en: "Admin verification", uz: "Admin tasdiqlash", ru: "Подтверждение администратора")
     }

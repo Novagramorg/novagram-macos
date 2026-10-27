@@ -2,218 +2,136 @@
 //  NovagramAnalyticsController.swift
 //  Telegram-Mac
 //
-//  Settings → Analytics page for the Novagram fork. Shows two live numbers from the
-//  Novagram Statistics API (through the NovagramServices SDK):
+//  Settings → Analytics, like the iOS screen: the duck sticker over the NovagramServices SDK's
+//  StatisticsCard (NovagramServicesUI, hosted by NovagramStatisticsCardView in NovagramCore).
 //    • "Novagram users"  — downloads (one per device).
-//    • "Active accounts" — devices currently holding at least one logged-in account.
+//    • "Active accounts" — devices with at least one account signed in now.
 //
-//  Mirror of the iOS Analytics page, but native AppKit (TableViewController). The install +
-//  active-presence tracking itself lives in NovagramAnalyticsManager; this screen only renders
-//  GET /v1/stats.
+//  The duck is gigagroup.tgs, the same file as iOS BroadcastGroup.tgs. The numbers come from
+//  GET /v1/stats through NovagramAnalyticsManager, which also does the install and active-presence
+//  tracking; this screen only renders them.
 //
 
 import Cocoa
 import TGUIKit
-import TelegramCore
 import SwiftSignalKit
+import TelegramMedia
 import NovagramCore
 
-// MARK: - Number formatting
+private let novagramAnalyticsDuckSize = NSMakeSize(140, 140)
 
-private let novagramAnalyticsNumberFormatter: NumberFormatter = {
-    let formatter = NumberFormatter()
-    formatter.numberStyle = .decimal
-    formatter.groupingSeparator = " "
-    formatter.usesGroupingSeparator = true
-    return formatter
-}()
+final class NovagramAnalyticsView: View {
+    let card: NovagramStatisticsCardView
+    private let duck: LottiePlayerView
 
-private func novagramFormatCount(_ value: Int?) -> String {
-    guard let value = value else {
-        return "—"
+    required init(frame frameRect: NSRect) {
+        let duck = LottiePlayerView(frame: NSMakeRect(0, 0, novagramAnalyticsDuckSize.width, novagramAnalyticsDuckSize.height))
+        self.duck = duck
+        self.card = NovagramStatisticsCardView(header: duck, headerSize: novagramAnalyticsDuckSize)
+        super.init(frame: frameRect)
+        addSubview(card)
+        playDuck()
     }
-    return novagramAnalyticsNumberFormatter.string(from: NSNumber(value: value)) ?? "\(value)"
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func playDuck() {
+        guard let data = LocalAnimatedSticker.gigagroup.data else {
+            return
+        }
+        let animation = LottieAnimation(compressed: data, key: LottieAnimationEntryKey(key: .bundle("novagram_analytics_duck"), size: novagramAnalyticsDuckSize), type: .lottie, cachePurpose: .none, playPolicy: .loop, maximumFps: 60, colors: [], metalSupport: false)
+        duck.set(animation, reset: true, saveContext: false, animated: false)
+    }
+
+    override func layout() {
+        super.layout()
+        let width = min(frame.width - 32, 480)
+        let height = card.height(for: width)
+        card.frame = NSMakeRect(floorToScreenPixels(backingScaleFactor, (frame.width - width) / 2), 24, width, height)
+    }
 }
 
-// MARK: - State
-
-private struct NovagramAnalyticsState: Equatable {
+private struct NovagramAnalyticsCounts: Equatable {
     var devices: Int?
     var accounts: Int?
-    var loaded: Bool
-    var failed: Bool
 }
 
-// MARK: - Entries
+final class NovagramAnalyticsController: TelegramGenericViewController<NovagramAnalyticsView> {
 
-private enum NovagramAnalyticsEntryId: Hashable {
-    case section(Int)
-    case header(Int)
-    case devicesRow
-    case devicesFooter
-    case accountsRow
-    case accountsFooter
-}
-
-private enum NovagramAnalyticsEntry: Comparable, Identifiable {
-    case section(Int)
-    case header(Int, NovagramAnalyticsEntryId, String)
-    case valueRow(Int, NovagramAnalyticsEntryId, String, CGImage?, String, GeneralViewType)
-    case footer(Int, NovagramAnalyticsEntryId, String)
-
-    var stableId: AnyHashable {
-        switch self {
-        case let .section(id):              return NovagramAnalyticsEntryId.section(id)
-        case let .header(_, id, _):         return id
-        case let .valueRow(_, id, _, _, _, _): return id
-        case let .footer(_, id, _):         return id
-        }
-    }
-
-    var sortIndex: Int {
-        switch self {
-        case let .section(id):              return id * 1000
-        case let .header(idx, _, _):        return idx
-        case let .valueRow(idx, _, _, _, _, _): return idx
-        case let .footer(idx, _, _):        return idx
-        }
-    }
-
-    static func < (lhs: NovagramAnalyticsEntry, rhs: NovagramAnalyticsEntry) -> Bool {
-        lhs.sortIndex < rhs.sortIndex
-    }
-
-    static func == (lhs: NovagramAnalyticsEntry, rhs: NovagramAnalyticsEntry) -> Bool {
-        switch (lhs, rhs) {
-        case let (.section(l), .section(r)): return l == r
-        case let (.header(l1, l2, l3), .header(r1, r2, r3)): return l1 == r1 && l2 == r2 && l3 == r3
-        case let (.valueRow(l1, l2, l3, l4, l5, l6), .valueRow(r1, r2, r3, r4, r5, r6)):
-            return l1 == r1 && l2 == r2 && l3 == r3 && l4 === r4 && l5 == r5 && l6 == r6
-        case let (.footer(l1, l2, l3), .footer(r1, r2, r3)): return l1 == r1 && l2 == r2 && l3 == r3
-        default: return false
-        }
-    }
-
-    func item(initialSize: NSSize) -> TableRowItem {
-        switch self {
-        case .section:
-            return GeneralRowItem(initialSize, height: 20, stableId: stableId, viewType: .separator)
-        case let .header(_, _, text):
-            return GeneralTextRowItem(initialSize, stableId: stableId, text: text, viewType: .textTopItem)
-        case let .valueRow(_, _, title, icon, value, viewType):
-            return GeneralInteractedRowItem(
-                initialSize, stableId: stableId,
-                name: title,
-                icon: icon,
-                type: .context(value),
-                viewType: viewType,
-                action: {}
-            )
-        case let .footer(_, _, text):
-            return GeneralTextRowItem(initialSize, stableId: stableId, text: text, viewType: .textBottomItem)
-        }
-    }
-}
-
-private func novagramAnalyticsEntries(state: NovagramAnalyticsState) -> [NovagramAnalyticsEntry] {
-    var entries: [NovagramAnalyticsEntry] = []
-    var idx = 0
-    func next() -> Int { idx += 1; return idx }
-    var sectionId = 0
-
-    let devicesValue = state.failed ? "—" : novagramFormatCount(state.devices)
-    let accountsValue = state.failed ? "—" : novagramFormatCount(state.accounts)
-
-    // ─── NOVAGRAM USERS ───
-    entries.append(.section(sectionId)); sectionId += 1
-    entries.append(.header(next(), .header(1), "NOVAGRAM USERS"))
-    entries.append(.valueRow(next(), .devicesRow, "Novagram users",
-                             novagramSettingsIcon(systemName: "person.3.fill", color: .blue),
-                             devicesValue, .singleItem))
-    entries.append(.footer(next(), .devicesFooter, "Total number of devices that have installed Novagram."))
-
-    // ─── ACTIVE ACCOUNTS ───
-    entries.append(.section(sectionId)); sectionId += 1
-    entries.append(.header(next(), .header(2), "ACTIVE ACCOUNTS"))
-    entries.append(.valueRow(next(), .accountsRow, "Active accounts",
-                             novagramSettingsIcon(systemName: "checkmark.seal.fill", color: .green),
-                             accountsValue, .singleItem))
-    entries.append(.footer(next(), .accountsFooter, "Devices that currently have at least one account logged in."))
-
-    entries.append(.section(sectionId))
-
-    return entries
-}
-
-// MARK: - Transition
-
-private func prepareNovagramAnalyticsTransition(left: [AppearanceWrapperEntry<NovagramAnalyticsEntry>], right: [AppearanceWrapperEntry<NovagramAnalyticsEntry>], initialSize: NSSize) -> TableUpdateTransition {
-    let (removed, inserted, updated) = proccessEntriesWithoutReverse(left, right: right) { entry -> TableRowItem in
-        return entry.entry.item(initialSize: initialSize)
-    }
-    return TableUpdateTransition(deleted: removed, inserted: inserted, updated: updated, animated: true)
-}
-
-// MARK: - Controller
-
-final class NovagramAnalyticsController: TableViewController {
-
-    private let disposable = MetaDisposable()
     private let statsDisposable = MetaDisposable()
-    private let statePromise = ValuePromise(NovagramAnalyticsState(devices: nil, accounts: nil, loaded: false, failed: false), ignoreRepeated: true)
-    private let stateValue = Atomic(value: NovagramAnalyticsState(devices: nil, accounts: nil, loaded: false, failed: false))
+    private var counts = NovagramAnalyticsCounts(devices: nil, accounts: nil)
 
     override var defaultBarTitle: String {
-        return "Analytics"
-    }
-
-    private func updateState(_ mutate: (inout NovagramAnalyticsState) -> Void) {
-        let new = self.stateValue.modify { current in
-            var s = current
-            mutate(&s)
-            return s
-        }
-        self.statePromise.set(new)
+        return NovagramL10n.current.analytics_title
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        genericView.card.onInfo = { [weak self] counter in
+            self?.showInfo(counter)
+        }
+        render()
+        readyOnce()
+        loadStats()
+    }
 
-        let initialSize = self.atomicSize
-        let previousEntries = Atomic<[AppearanceWrapperEntry<NovagramAnalyticsEntry>]>(value: [])
+    override func updateLocalizationAndTheme(theme: PresentationTheme) {
+        super.updateLocalizationAndTheme(theme: theme)
+        render()
+    }
 
-        let signal = combineLatest(queue: prepareQueue, statePromise.get(), appearanceSignal)
-            |> map { state, appearance -> TableUpdateTransition in
-                let entries = novagramAnalyticsEntries(state: state)
-                    .map { AppearanceWrapperEntry(entry: $0, appearance: appearance) }
-                let previous = previousEntries.swap(entries)
-                return prepareNovagramAnalyticsTransition(left: previous, right: entries, initialSize: initialSize.modify { $0 })
-            }
-            |> deliverOnMainQueue
+    private func render() {
+        guard isLoaded() else {
+            return
+        }
+        let l10n = NovagramL10n.current
+        let colors = theme.colors
+        genericView.backgroundColor = colors.listBackground
+        genericView.card.update(
+            downloads: counts.devices,
+            active: counts.accounts,
+            colors: NovagramServicesCardColors(
+                cardBackground: colors.background,
+                separator: colors.border,
+                primaryText: colors.text,
+                secondaryText: colors.grayText,
+                accent: colors.accent,
+                positive: colors.greenUI,
+                negative: colors.redUI,
+                isDark: colors.isDark
+            ),
+            languageCode: appCurrentLanguage.languageCode,
+            subtitle: l10n.analytics_subtitle,
+            downloadsCaption: l10n.analytics_usersCaption,
+            activeCaption: l10n.analytics_accountsCaption
+        )
+        genericView.needsLayout = true
+    }
 
-        disposable.set(signal.start(next: { [weak self] transition in
-            self?.genericView.merge(with: transition)
-            self?.readyOnce()
-        }))
-
-        self.loadStats()
+    private func showInfo(_ counter: NovagramStatisticsCardView.Counter) {
+        let l10n = NovagramL10n.current
+        switch counter {
+        case .downloads:
+            showModalText(for: context.window, text: l10n.analytics_usersInfo)
+        case .active:
+            showModalText(for: context.window, text: l10n.analytics_accountsInfo)
+        }
     }
 
     private func loadStats() {
         statsDisposable.set((NovagramAnalyticsManager.shared.counts()
         |> deliverOnMainQueue).start(next: { [weak self] result in
-            guard let self = self else { return }
-            self.updateState { state in
-                state.devices = result.devices
-                state.accounts = result.accounts
-                state.loaded = true
-                state.failed = (result.devices == nil && result.accounts == nil)
+            guard let self = self else {
+                return
             }
+            self.counts = NovagramAnalyticsCounts(devices: result.devices, accounts: result.accounts)
+            self.render()
         }))
     }
 
     deinit {
-        disposable.dispose()
         statsDisposable.dispose()
     }
 }

@@ -2,16 +2,27 @@
 // swift-compiler-version: Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)
 // swift-module-flags: -target x86_64-apple-macos12.0 -enable-objc-interop -enable-library-evolution -language-mode 6 -O -enable-experimental-feature DebugDescriptionMacro -module-name NovagramServices -package-name novagramservices
 // swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.4
+import CryptoKit
 import Foundation
 import StoreKit
 import Swift
 import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
+public struct ServicesCachePolicy : Swift::Sendable, Swift::Equatable {
+  public var isEnabled: Swift::Bool
+  public var currencyRatesMaxAge: Foundation::TimeInterval
+  public var statisticsMaxAge: Foundation::TimeInterval
+  public init(isEnabled: Swift::Bool = true, currencyRatesMaxAge: Foundation::TimeInterval = 86_400, statisticsMaxAge: Foundation::TimeInterval = 3_600)
+  public static let `default`: NovagramServices::ServicesCachePolicy
+  public static let disabled: NovagramServices::ServicesCachePolicy
+  public static func == (a: NovagramServices::ServicesCachePolicy, b: NovagramServices::ServicesCachePolicy) -> Swift::Bool
+}
 public struct ServicesConfiguration : Swift::Sendable {
   public var timeout: Foundation::TimeInterval
   public var userAgent: Swift::String
-  public init(timeout: Foundation::TimeInterval = 15, userAgent: Swift::String = "NovagramServices/\(NovagramServices.version)")
+  public var cache: NovagramServices::ServicesCachePolicy
+  public init(timeout: Foundation::TimeInterval = 15, userAgent: Swift::String = "NovagramServices/\(NovagramServices.version)", cache: NovagramServices::ServicesCachePolicy = .default)
 }
 public enum NovagramServices {
   public static let version: Swift::String
@@ -22,6 +33,7 @@ public enum NovagramServices {
   final public let weather: NovagramServices::WeatherAPI
   final public let statistics: NovagramServices::StatisticsAPI
   convenience public init(configuration: NovagramServices::ServicesConfiguration = ServicesConfiguration())
+  final public func clearCache() async throws
   @objc deinit
 }
 public enum ServicesError : Swift::Error, Swift::Sendable, Swift::Equatable {
@@ -142,6 +154,8 @@ public struct WeatherForecast : Swift::Sendable, Swift::Equatable {
   public let validUntil: Foundation::Date?
   public let current: NovagramServices::CurrentWeather
   public let days: [NovagramServices::DailyWeather]
+  public let timeZone: Foundation::TimeZone
+  public init(latitude: Swift::Double, longitude: Swift::Double, updatedAt: Foundation::Date, validUntil: Foundation::Date?, current: NovagramServices::CurrentWeather, days: [NovagramServices::DailyWeather], timeZone: Foundation::TimeZone)
   public static func == (a: NovagramServices::WeatherForecast, b: NovagramServices::WeatherForecast) -> Swift::Bool
 }
 public struct CurrentWeather : Swift::Sendable, Swift::Equatable {
@@ -155,6 +169,7 @@ public struct CurrentWeather : Swift::Sendable, Swift::Equatable {
   public let symbolCode: Swift::String?
   public let condition: NovagramServices::WeatherCondition
   public let precipitationNextHour: Swift::Double?
+  public init(time: Foundation::Date, temperature: Swift::Double, relativeHumidity: Swift::Double?, windSpeed: Swift::Double?, windDirection: Swift::Double?, cloudCover: Swift::Double?, pressure: Swift::Double?, symbolCode: Swift::String?, condition: NovagramServices::WeatherCondition, precipitationNextHour: Swift::Double?)
   public static func == (a: NovagramServices::CurrentWeather, b: NovagramServices::CurrentWeather) -> Swift::Bool
 }
 public struct DailyWeather : Swift::Sendable, Swift::Equatable {
@@ -163,6 +178,7 @@ public struct DailyWeather : Swift::Sendable, Swift::Equatable {
   public let maxTemperature: Swift::Double
   public let symbolCode: Swift::String?
   public let condition: NovagramServices::WeatherCondition
+  public init(date: Foundation::Date, minTemperature: Swift::Double, maxTemperature: Swift::Double, symbolCode: Swift::String?, condition: NovagramServices::WeatherCondition)
   public static func == (a: NovagramServices::DailyWeather, b: NovagramServices::DailyWeather) -> Swift::Bool
 }
 public enum WeatherCondition : Swift::Sendable, Swift::Equatable, Swift::Hashable {

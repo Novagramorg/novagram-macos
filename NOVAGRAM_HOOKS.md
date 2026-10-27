@@ -271,7 +271,10 @@ The review login endpoint, the demo phone and the Statistics API URL + key are n
 
 | File | What |
 | --- | --- |
-| `packages/NovagramCore/Frameworks/NovagramServices.xcframework` | SDK v1.1.0 (release zip sha256 `b146eea7…`), dynamic, `macos-arm64_x86_64` slice only, min macOS 12.0 |
+| `packages/NovagramCore/Frameworks/NovagramServices.xcframework` | SDK v1.2.1 (core binary 1.2.0: answer cache, counts kept 1 h), dynamic, `macos-arm64_x86_64` slice only, min macOS 12.0; was v1.1.0 until 2026-10-27 |
+| `packages/NovagramCore/Frameworks/NovagramServicesUI.xcframework` | SDK v1.2.1 SwiftUI cards (links NovagramServices, no copy of it), `macos-arm64_x86_64` slice only; `.binaryTarget(name: "NovagramServicesUI")`, a dependency of the `NovagramCore` target |
+| `packages/NovagramCore/Sources/NovagramCore/NovagramStatisticsCardView.swift` | the only place that imports NovagramServicesUI: hosts `StatisticsCard` in an AppKit view, the app's header view (duck) goes into the card's header slot |
+| `Telegram-Mac/novagram/NovagramAnalyticsController.swift` | Settings → Analytics like iOS: `gigagroup.tgs` duck (same file as iOS `BroadcastGroup.tgs`) over the SDK `StatisticsCard`; info icon shows a toast; texts in `NovagramL10n` (`analytics_*`) |
 | `packages/NovagramCore/Package.swift` | `.binaryTarget(name: "NovagramServices", path: "Frameworks/NovagramServices.xcframework")`, a dependency of the `NovagramCore` target only (not `NovagramShare`). Xcode embeds and signs it; no pbxproj change for it |
 | `packages/NovagramCore/Sources/NovagramCore/NovagramStatisticsClient.swift` | Bridge to `services.statistics` (completion API with `Bool` / counts, so the app never names an SDK type). Replaces the app-target `NovagramStatisticsClient.swift` + `NovagramStatisticsConfig.swift` (deleted; their 8 pbxproj lines `FE304E0B…001E`–`…0021` removed) |
 | `packages/NovagramCore/Sources/NovagramCore/NovagramDemoCodeFetcher.swift` | `isDemoPhone` = `reviewLogin.isConfigured && reviewLogin.isReviewPhone(_:)`; each poll is `reviewLogin.fetchCode()` (`.invalidResponse` = no code yet, `CancellationError` = stopped by cancel / a new prewarm). Polling, timers, alert and tuned values are unchanged; `demoPhone`, the URL and `extractCode` are gone |
@@ -285,6 +288,7 @@ Updating the SDK: build it in the SDK repo (`scripts/build-xcframework.sh`) or t
 
 ```sh
 xcodebuild -create-xcframework -framework <build>/NovagramServices.xcframework/macos-arm64_x86_64/NovagramServices.framework -output packages/NovagramCore/Frameworks/NovagramServices.xcframework
+xcodebuild -create-xcframework -framework <build>/NovagramServicesUI.xcframework/macos-arm64_x86_64/NovagramServicesUI.framework -output packages/NovagramCore/Frameworks/NovagramServicesUI.xcframework
 find packages/NovagramCore/Frameworks -type f -print0 | xargs -0 ../novagram-services-ios-sdk/scripts/generate-secrets.sh --scan
 ```
 
