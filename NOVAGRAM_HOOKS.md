@@ -262,6 +262,7 @@ QrStudioUI, InviteLinksUI and ProxyUI depend on NovagramCore (`// Novagram` Pack
 | `Telegram.xcodeproj/project.pbxproj` | `XCLocalSwiftPackageReference "packages/NovagramAdsBinary"` (`FE50AD500000000000000001`) in project `packageReferences`; products `…0002-0004` linked to the Telegram target only (build files `…0012-0014`); 12 Novagram sources (`…0020-0037`); Telegram target Debug + Release `MACOSX_DEPLOYMENT_TARGET = 14.0` (the SDK needs 12.0; 14.0 is the minimum the old Novagram shipped, and `scripts/xcode27.sh apply/revert` leaves it alone) |
 | `Telegram-Mac/Info.plist` | `NovagramAdsEnvironment = $(NOVAGRAM_ADS_ENVIRONMENT)` |
 | `Telegram-Mac/Novagram.xcconfig` | `NOVAGRAM_ADS_ENVIRONMENT = production`, `#include? "NovagramAds.local.xcconfig"`, `NOVAGRAM_ADS_ENVIRONMENT[config=Release] = production` |
+| `packages/ChatListUI/.../SearchController.swift` (2026-10-27) | global peers section condition `if !remotePeers.1.isEmpty \|\| promoted != nil`: our SEARCH ad replaces Telegram's ad peers, so a query with no other global result still shows the section with our ad |
 
 ### NovagramServices SDK: review login and statistics (2026-10-27)
 

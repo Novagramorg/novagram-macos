@@ -1348,7 +1348,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                                 entries += peers
                             }
                         }
-                        if !remotePeers.1.isEmpty {
+                        if !remotePeers.1.isEmpty || promoted != nil { // Novagram
                             
                             let state: SeparatorBlockState
                             if remotePeers.1.count > 5 {
