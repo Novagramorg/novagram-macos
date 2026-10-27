@@ -9,6 +9,8 @@
 //
 
 import Foundation
+import ImageIO
+import SwiftSignalKit
 import Postbox
 import TelegramCore
 import NovagramCore
@@ -22,7 +24,9 @@ enum NovagramAdMessage {
 
     /// - Parameter displayDurations: VIDEO slot only — min / max display duration (seconds), read by
     ///   the video banner's countdown and close button.
-    static func make(served: SDKServedAd, peerId: PeerId, chatPeer: Peer?, displayDurations: (min: Int32, max: Int32)? = nil) -> Message {
+    /// - Parameter avatar: the advertiser photo, already in the media box (`NovagramAdAvatar.load`).
+    ///   Shown as the small sponsor image (bot panel, channel bubble) only when there is no content media.
+    static func make(served: SDKServedAd, peerId: PeerId, chatPeer: Peer?, displayDurations: (min: Int32, max: Int32)? = nil, avatar: NovagramAdAvatar.Loaded? = nil) -> Message {
         let ad = served.ad
         let contentMedia = self.contentMedia(ad)
         let otherInfo = ad.otherInfo.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -44,12 +48,14 @@ enum NovagramAdMessage {
         if let chatPeer {
             messagePeers[chatPeer.id] = chatPeer
         }
-        let author = self.author(title: ad.displayTitle, avatarURL: ad.promoted.avatarURL)
+        let author = self.author(title: ad.displayTitle, avatarURL: NovagramAdAvatar.url(ad))
         messagePeers[author.id] = author
 
         var media: [Media] = []
         if let contentMedia {
             media.append(contentMedia)
+        } else if let avatar {
+            media.append(self.avatarImage(avatar))
         }
 
         // A new random_id is a new showing, so the list must treat it as a changed item.
@@ -143,9 +149,9 @@ enum NovagramAdMessage {
     }
 
     /// The advertiser photo (`promoted.avatar_url`) for the author avatar the video banner draws;
-    /// none when the url is not https, so the banner keeps its letter avatar.
+    /// none without a valid https url, so the banner keeps its letter avatar.
     private static func authorPhoto(_ url: URL?) -> [TelegramMediaImageRepresentation] {
-        guard let url, url.scheme?.lowercased() == "https", let host = url.host, !host.isEmpty else {
+        guard let url else {
             return []
         }
         return [TelegramMediaImageRepresentation(
@@ -154,6 +160,25 @@ enum NovagramAdMessage {
             progressiveSizes: [],
             immediateThumbnailData: nil
         )]
+    }
+
+    /// The advertiser photo as a web image (same HttpReferenceMediaResource path as a PHOTO ad). Its
+    /// `hasContentMedia` stays false, so Telegram's UI draws it as the small sponsor image.
+    private static func avatarImage(_ avatar: NovagramAdAvatar.Loaded) -> TelegramMediaImage {
+        let representation = TelegramMediaImageRepresentation(
+            dimensions: avatar.dimensions,
+            resource: HttpReferenceMediaResource(url: avatar.url.absoluteString, size: nil),
+            progressiveSizes: [],
+            immediateThumbnailData: nil
+        )
+        return TelegramMediaImage(
+            imageId: self.mediaId(namespace: Namespaces.Media.LocalImage, url: avatar.url),
+            representations: [representation],
+            immediateThumbnailData: nil,
+            reference: nil,
+            partialReference: nil,
+            flags: []
+        )
     }
 
     /// Stable media id for an immutable media url (FNV-1a 64-bit).
@@ -168,7 +193,7 @@ enum NovagramAdMessage {
 
     /// PHOTO as a web image, VIDEO as a web mp4, both through HttpReferenceMediaResource (TelegramCore
     /// downloads the whole immutable file over HTTPS, keyed by url). Only https media is accepted.
-    private static func contentMedia(_ ad: SDKSponsoredAd) -> Media? {
+    fileprivate static func contentMedia(_ ad: SDKSponsoredAd) -> Media? {
         guard let media = ad.media, let url = media.mediaURL, url.scheme == "https" else {
             return nil
         }
@@ -216,5 +241,69 @@ enum NovagramAdMessage {
         @unknown default:
             return nil
         }
+    }
+}
+
+/// The advertiser photo of OUR ad (`promoted.avatar_url`). Telegram shows its own sponsor photo as the
+/// sponsored message's small image (bot panel, channel bubble) when the ad has no content media, so ours
+/// goes the same way. Port of iOS submodules/Novagram/Sponsored/Sources/NovagramAdAvatar.swift.
+///
+/// The photo is added only after the file is in the media box and decodes as an image. A missing,
+/// invalid or slow url, or a broken file, leaves the ad exactly as it was without a photo.
+enum NovagramAdAvatar {
+    /// How long a new showing waits for the photo before it renders without one. The download keeps
+    /// going, so the next showing of the same advertiser has it at once.
+    static let loadTimeout: Double = 3.0
+
+    struct Loaded {
+        let url: URL
+        let dimensions: PixelDimensions
+    }
+
+    /// `avatar_url` when it is a valid absolute https url, else nil.
+    static func url(_ ad: SDKSponsoredAd) -> URL? {
+        guard let url = ad.promoted.avatarURL, url.scheme?.lowercased() == "https", let host = url.host, !host.isEmpty else {
+            return nil
+        }
+        return url
+    }
+
+    /// Emits once: the loaded photo, or nil (no url, PHOTO / VIDEO ad, load failed or timed out).
+    static func load(postbox: Postbox, ad: SDKSponsoredAd) -> Signal<Loaded?, NoError> {
+        guard NovagramAdMessage.contentMedia(ad) == nil, let url = self.url(ad) else {
+            return .single(nil)
+        }
+        let resource = HttpReferenceMediaResource(url: url.absoluteString, size: nil)
+        // Not tied to this signal: a timeout must not cancel the download. The media box runs one fetch
+        // per url, and it ends by itself when the file arrives or the request fails.
+        _ = fetchedMediaResource(mediaBox: postbox.mediaBox, userLocation: .other, userContentType: .avatar, reference: .standalone(resource: resource), statsCategory: .image).start()
+
+        return postbox.mediaBox.resourceData(resource)
+        |> filter { data in
+            return data.complete
+        }
+        |> take(1)
+        |> map { data -> Loaded? in
+            guard let dimensions = self.imageDimensions(path: data.path) else {
+                NovagramAdsCenter.logger.debug("ad photo skipped: not an image")
+                return nil
+            }
+            return Loaded(url: url, dimensions: dimensions)
+        }
+        |> timeout(self.loadTimeout, queue: Queue.concurrentDefaultQueue(), alternate: .single(nil))
+    }
+
+    /// Pixel size of the image file, or nil when it is not a readable image (e.g. an error page).
+    private static func imageDimensions(path: String) -> PixelDimensions? {
+        guard let source = CGImageSourceCreateWithURL(URL(fileURLWithPath: path) as CFURL, nil), CGImageSourceGetCount(source) > 0 else {
+            return nil
+        }
+        guard let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any] else {
+            return nil
+        }
+        guard let width = properties[kCGImagePropertyPixelWidth] as? Int, let height = properties[kCGImagePropertyPixelHeight] as? Int, width > 0, height > 0 else {
+            return nil
+        }
+        return PixelDimensions(width: Int32(clamping: width), height: Int32(clamping: height))
     }
 }

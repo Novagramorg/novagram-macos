@@ -184,11 +184,15 @@ enum NovagramChatAds {
                 return .single(nil)
             }
             return NovagramAdsCenter.visibleAd(context: context, slot: .channel(channelId: self.requestChannelId(channelId)))
-            |> map { served -> Message? in
+            |> mapToSignal { served -> Signal<Message?, NoError> in
                 guard let served else {
-                    return nil
+                    return .single(nil)
                 }
-                return NovagramAdMessage.make(served: served, peerId: peerId, chatPeer: peer._asPeer())
+                // The advertiser photo when there is one (waits up to NovagramAdAvatar.loadTimeout).
+                return NovagramAdAvatar.load(postbox: context.account.postbox, ad: served.ad)
+                |> map { avatar -> Message? in
+                    return NovagramAdMessage.make(served: served, peerId: peerId, chatPeer: peer._asPeer(), avatar: avatar)
+                }
             }
         }
     }
@@ -205,11 +209,15 @@ enum NovagramChatAds {
                 return .single(nil)
             }
             return NovagramAdsCenter.visibleAd(context: context, slot: .bot(username: username))
-            |> map { served -> Message? in
+            |> mapToSignal { served -> Signal<Message?, NoError> in
                 guard let served else {
-                    return nil
+                    return .single(nil)
                 }
-                return NovagramAdMessage.make(served: served, peerId: peerId, chatPeer: user)
+                // The advertiser photo when there is one (waits up to NovagramAdAvatar.loadTimeout).
+                return NovagramAdAvatar.load(postbox: context.account.postbox, ad: served.ad)
+                |> map { avatar -> Message? in
+                    return NovagramAdMessage.make(served: served, peerId: peerId, chatPeer: user, avatar: avatar)
+                }
             }
         }
     }

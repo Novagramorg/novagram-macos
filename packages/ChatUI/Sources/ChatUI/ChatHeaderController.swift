@@ -3121,6 +3121,7 @@ private final class ChatAdHeaderView : Control, ChatHeaderProtocol {
             }
             current.layer?.cornerRadius = 4
             current.update(with: media, size: current.frame.size, context: self.chatInteraction.interactionContext, parent: botAd.message, table: nil, animated: false)
+            current.userInteractionEnabled = !NovagramAdsHooks.isOurs(message: botAd.message) // Novagram
             current.fetch(userInitiated: true)
         } else if let view = self.imageView {
             performSubviewRemoval(view, animated: animated)
