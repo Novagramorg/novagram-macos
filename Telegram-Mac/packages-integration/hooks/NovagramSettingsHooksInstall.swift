@@ -11,6 +11,7 @@ private enum NovagramSettingsRowId {
     static let bots = 912
     static let analytics = 913
     static let adsAnalytics = 914
+    static let currencyRates = 915
 }
 
 private let novagramGold = NSColor(rgb: 0xD4AF37)
@@ -25,6 +26,7 @@ private func novagramRow(_ id: Int, _ title: String, _ symbol: String, _ color: 
 }
 
 func installNovagramSettingsHooks() {
+    NovagramDeveloperSection.installPressClock()
     var hooks = NovagramSettingsHooks()
     hooks.hidePaidRows = true
     hooks.showInlineAccounts = false
@@ -43,7 +45,13 @@ func installNovagramSettingsHooks() {
                 novagramRow(NovagramSettingsRowId.bots, "Novagram Bots", "bolt.fill", .green, make: { NovagramBotsController($0) }),
                 novagramRow(NovagramSettingsRowId.analytics, "Analytics", "chart.bar.fill", .green, make: { NovagramAnalyticsController($0) })
             ]
-            if NovagramInsightsEntry.isVisible {
+            // Developer switches (Novagram Settings → Developer), like iOS.
+            if NovagramDeveloperFlags.isCurrencyRatesViewEnabled {
+                rows.append(NovagramSettingsRow(id: NovagramSettingsRowId.currencyRates, title: NovagramCurrencyRatesEntry.rowTitle, icon: novagramSettingsIcon(systemName: "dollarsign.circle.fill", color: .green), action: { _, present in
+                    present(NovagramCurrencyRatesEntry.makeController())
+                }))
+            }
+            if NovagramInsightsEntry.isVisible || NovagramDeveloperFlags.isAdsPanelEnabled {
                 rows.append(adsAnalyticsRow())
             }
             return rows
@@ -57,18 +65,20 @@ func installNovagramSettingsHooks() {
             return NovagramSettingsRowId.bots
         case is NovagramAnalyticsController:
             return NovagramSettingsRowId.analytics
+        case let controller where NovagramCurrencyRatesEntry.isCalculator(controller):
+            return NovagramSettingsRowId.currencyRates
         default:
             return nil
         }
     }
     hooks.rowsUpdated = { _ in
-        return NovagramInsightsEntry.visibleSignal |> map { _ in Void() }
+        return combineLatest(NovagramInsightsEntry.visibleSignal, NovagramDeveloperFlags.currencyRatesViewSignal, NovagramDeveloperFlags.adsPanelSignal) |> map { _ in Void() }
     }
     hooks.versionRowClick = { context in
         guard let context = context as? AccountContext else {
             return false
         }
-        return NovagramAdsGate.handleVersionClick(window: context.window, onUnlocked: {
+        return NovagramAdsGate.handleVersionRelease(window: context.window, onUnlocked: {
             context.bindings.rootNavigation().push(NovagramSettingsController(context))
         })
     }

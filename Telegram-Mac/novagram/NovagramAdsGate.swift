@@ -10,10 +10,11 @@
 //
 //  ON  = no Novagram and no Telegram ads anywhere (chat/channel, bot panel, search, chat-list banner,
 //        video player). OFF = ads as usual.
-//  Trigger: 10 quick clicks (≤ 0.7 s apart) on the version row at the bottom of Settings
-//  (AccountViewController). Revealing the toggle then asks for the admin login + password
-//  (NovagramAdsAdminAuth) and opens Novagram Settings, where the toggle shows in its own section
-//  while revealed (NovagramSettingsController); hiding it again needs no password. No deep link reaches it.
+//  Trigger (like iOS): hold the version row at the bottom of Settings (AccountViewController) for
+//  NovagramDeveloperSection.revealDuration (20 s), then release. Revealing asks for the developer login
+//  + password (NovagramAdsAdminAuth) and opens Novagram Settings, where the toggle shows in the Developer
+//  section with the other Developer switches (NovagramDeveloperFlags); hiding it again needs no
+//  password. No deep link reaches it.
 //
 //  Consumers: every Novagram ad source gates on `enabledSignal` live (NovagramAdsCenter.gated), and
 //  ChatController skips Telegram's ChatAdData when `showAds` is false at chat open.
@@ -65,13 +66,9 @@ final class NovagramAdsGate {
         |> distinctUntilChanged
     }
 
-    /// The hidden row's title and tip ("Remove all ads"; the switch is ON when `showAds` is false).
+    /// The Developer section row's title ("Remove all ads"; the switch is ON when `showAds` is false).
     static var toggleTitle: String {
         return NovagramL10n.current.ads_removeAll_title
-    }
-
-    static var toggleTip: String {
-        return NovagramL10n.current.ads_removeAll_tip
     }
 
     static func setShowAds(_ value: Bool) {
@@ -80,30 +77,20 @@ final class NovagramAdsGate {
         uiState.set(currentState())
     }
 
-    // 10 quick clicks on the version row (iOS uses the same count/window).
-    private static let requiredClicks = 10
-    private static let clickWindow: Double = 0.7
-    private static var lastClickTimestamp: Double = 0
-    private static var clickCount: Int = 0
     private static var isPrompting = false
 
-    /// `onUnlocked` runs after a successful admin login (not when the toggle is hidden again).
-    // Returns true when the click belongs to a fast series (2nd click on), so the caller skips its own
-    // single-click action (Settings copies the version string).
+    /// The version row was released. After a hold of `NovagramDeveloperSection.revealDuration` this
+    /// toggles the Developer section and returns true, so Settings skips copying the version string;
+    /// `onUnlocked` runs after a successful developer login (not when the section is hidden again).
     @discardableResult
-    static func handleVersionClick(window: Window, onUnlocked: (() -> Void)? = nil) -> Bool {
-        let timestamp = CACurrentMediaTime()
-        if timestamp - lastClickTimestamp > clickWindow {
-            clickCount = 0
+    static func handleVersionRelease(window: Window, onUnlocked: (() -> Void)? = nil) -> Bool {
+        guard NovagramDeveloperSection.currentPressDuration >= NovagramDeveloperSection.revealDuration else {
+            return false
         }
-        lastClickTimestamp = timestamp
-        clickCount += 1
-        guard clickCount >= requiredClicks, !isPrompting else {
-            return clickCount > 1 || isPrompting
+        guard !isPrompting else {
+            return true
         }
-        clickCount = 0
-
-        // Hiding the row again is always allowed; revealing it needs the admin login.
+        // Hiding the section again is always allowed; revealing it needs the developer login.
         if memoRevealed {
             setRevealed(false, window: window)
             return true
@@ -124,6 +111,7 @@ final class NovagramAdsGate {
         defaults?.set(revealed, forKey: revealedKey)
         uiState.set(currentState())
         let strings = NovagramL10n.current
-        alert(for: window, info: revealed ? strings.ads_section_shown : strings.ads_section_hidden)
+        NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
+        alert(for: window, info: revealed ? strings.developer_shownAlert(path: strings.developer_settingsPath) : strings.developer_hiddenAlert)
     }
 }

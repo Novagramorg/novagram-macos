@@ -94,6 +94,9 @@ private struct NovagramSettingsState: Equatable {
     // Hidden "Remove all ads" section: filled from NovagramAdsGate.uiState, not from defaults.
     var adsRevealed: Bool = false
     var showAds: Bool = true
+    // The other Developer switches: filled from NovagramDeveloperFlags.
+    var currencyRatesView: Bool = false
+    var adsPanel: Bool = false
 
     static func load() -> NovagramSettingsState {
         let d = novagramDefaults
@@ -166,7 +169,7 @@ private enum NovagramEntryId: Hashable {
     case sttEnabled, sttLanguage
     case protectionChatLock, protectionProxy, protectionForeign, protectionFooter
     case remindersUnread, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, actionAdminFolder, autoFooter
-    case adsRemoveAll
+    case adsRemoveAll, devCurrencyRates, devAdsPanel, devFooter
 }
 
 // iOS 1:1 — har bir row uchun rangli kvadrat ikonka (NovagramIconColor + SF Symbol).
@@ -201,7 +204,9 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .autoUnlimitedFolders:     map = ("infinity", .purple)
     case .actionSuggestedFolders:   map = ("folder.badge.plus", .blue)
     case .actionAdminFolder:        map = ("star.circle.fill", .gold)
-    case .adsRemoveAll:             map = ("nosign", .red)
+    case .adsRemoveAll:             map = ("megaphone.fill", .orange)
+    case .devCurrencyRates:         map = ("dollarsign.circle.fill", .green)
+    case .devAdsPanel:              map = ("rectangle.stack.badge.person.crop.fill", .purple)
     default:                        map = nil
     }
     guard let (symbol, color) = map else { return nil }
@@ -218,6 +223,7 @@ private enum NovagramEntry: Comparable, Identifiable {
     case disclosureSTTLanguage(Int, NovagramEntryId, String, String, GeneralViewType)
     case action(Int, NovagramEntryId, String, String?, GeneralViewType, () -> Void)
     case adsToggle(Int, NovagramEntryId, String, String?, Bool, GeneralViewType)
+    case developerToggle(Int, NovagramEntryId, String, String?, Bool, GeneralViewType)
     case footer(Int, NovagramEntryId, String)
 
     var stableId: AnyHashable {
@@ -231,6 +237,7 @@ private enum NovagramEntry: Comparable, Identifiable {
         case let .disclosureSTTLanguage(_, id, _, _, _): return id
         case let .action(_, id, _, _, _, _):         return id
         case let .adsToggle(_, id, _, _, _, _):      return id
+        case let .developerToggle(_, id, _, _, _, _): return id
         case let .footer(_, id, _):                  return id
         }
     }
@@ -246,6 +253,7 @@ private enum NovagramEntry: Comparable, Identifiable {
         case let .disclosureSTTLanguage(idx, _, _, _, _): return idx
         case let .action(idx, _, _, _, _, _): return idx
         case let .adsToggle(idx, _, _, _, _, _): return idx
+        case let .developerToggle(idx, _, _, _, _, _): return idx
         case let .footer(idx, _, _): return idx
         }
     }
@@ -272,6 +280,8 @@ private enum NovagramEntry: Comparable, Identifiable {
             return l1 == r1 && l2 == r2 && l3 == r3 && l4 == r4 && l5 == r5
         case let (.footer(l1, l2, l3), .footer(r1, r2, r3)): return l1 == r1 && l2 == r2 && l3 == r3
         case let (.adsToggle(l1, l2, l3, l4, l5, l6), .adsToggle(r1, r2, r3, r4, r5, r6)):
+            return l1 == r1 && l2 == r2 && l3 == r3 && l4 == r4 && l5 == r5 && l6 == r6
+        case let (.developerToggle(l1, l2, l3, l4, l5, l6), .developerToggle(r1, r2, r3, r4, r5, r6)):
             return l1 == r1 && l2 == r2 && l3 == r3 && l4 == r4 && l5 == r5 && l6 == r6
         default: return false
         }
@@ -368,6 +378,25 @@ private enum NovagramEntry: Comparable, Identifiable {
                     NovagramAdsGate.setShowAds(value)
                 }
             )
+        case let .developerToggle(_, entryId, title, subtitle, value, viewType):
+            return GeneralInteractedRowItem(
+                initialSize, stableId: stableId,
+                name: title,
+                icon: novagramSettingsRowIcon(entryId),
+                description: subtitle,
+                type: .switchable(value),
+                viewType: viewType,
+                action: {
+                    switch entryId {
+                    case .devCurrencyRates:
+                        NovagramDeveloperFlags.isCurrencyRatesViewEnabled = !value
+                    case .devAdsPanel:
+                        NovagramDeveloperFlags.isAdsPanelEnabled = !value
+                    default:
+                        break
+                    }
+                }
+            )
         case let .footer(_, _, text):
             return GeneralTextRowItem(initialSize, stableId: stableId, text: text, viewType: .textBottomItem)
         }
@@ -448,10 +477,14 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.toggle(next(), .protectionForeign, l10n.settings_protection_foreign_title, l10n.settings_protection_foreign_subtitle, state.blockForeignUsers, .lastItem, NovagramDefaultsKey.blockForeignUsers))
     entries.append(.footer(next(), .protectionFooter, l10n.settings_protection_footer))
 
-    // Hidden "Remove all ads" (shown only while revealed from the version row in main Settings).
+    // Hidden Developer section, like iOS: shown while revealed by a 20 s hold on the Settings version line.
     if state.adsRevealed {
         entries.append(.section(sectionId)); sectionId += 1
-        entries.append(.adsToggle(next(), .adsRemoveAll, NovagramAdsGate.toggleTitle, NovagramAdsGate.toggleTip, !state.showAds, .singleItem))
+        entries.append(.header(next(), .header(7), l10n.developer_sectionTitle))
+        entries.append(.adsToggle(next(), .adsRemoveAll, NovagramAdsGate.toggleTitle, l10n.developer_removeAdsTip, !state.showAds, .firstItem))
+        entries.append(.developerToggle(next(), .devCurrencyRates, l10n.developer_currencyRatesTitle, l10n.developer_currencyRatesTip, state.currencyRatesView, .innerItem))
+        entries.append(.developerToggle(next(), .devAdsPanel, l10n.developer_adsPanelTitle, l10n.developer_adsPanelTip, state.adsPanel, .lastItem))
+        entries.append(.footer(next(), .devFooter, l10n.developer_footer))
     }
 
     // trailing spacer
@@ -475,6 +508,7 @@ class NovagramSettingsController: TableViewController {
 
     private let disposable = MetaDisposable()
     private let adsDisposable = MetaDisposable()
+    private let developerDisposable = MetaDisposable()
     private let statePromise = ValuePromise(NovagramSettingsState.load(), ignoreRepeated: true)
     private let stateValue = Atomic(value: NovagramSettingsState.load())
 
@@ -606,6 +640,13 @@ class NovagramSettingsController: TableViewController {
             }
         }))
 
+        developerDisposable.set(combineLatest(NovagramDeveloperFlags.currencyRatesViewSignal, NovagramDeveloperFlags.adsPanelSignal).start(next: { currencyRatesView, adsPanel in
+            updateState { state in
+                state.currencyRatesView = currencyRatesView
+                state.adsPanel = adsPanel
+            }
+        }))
+
         let initialSize = self.atomicSize
         let previousEntries = Atomic<[AppearanceWrapperEntry<NovagramEntry>]>(value: [])
 
@@ -653,6 +694,7 @@ class NovagramSettingsController: TableViewController {
     deinit {
         disposable.dispose()
         adsDisposable.dispose()
+        developerDisposable.dispose()
     }
 
     override func viewWillDisappear(_ animated: Bool) {

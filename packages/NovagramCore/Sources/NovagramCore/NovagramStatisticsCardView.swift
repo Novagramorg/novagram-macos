@@ -34,7 +34,7 @@ public struct NovagramServicesCardColors: Equatable {
         self.isDark = isDark
     }
 
-    fileprivate var theme: ServicesUITheme {
+    var theme: ServicesUITheme {
         return ServicesUITheme(
             cardBackground: Color(nsColor: self.cardBackground),
             separator: Color(nsColor: self.separator),

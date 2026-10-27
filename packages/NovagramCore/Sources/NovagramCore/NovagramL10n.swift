@@ -1247,20 +1247,54 @@ public struct NovagramL10n {
         pick(en: "Remove all ads", uz: "Barcha reklamalarni o'chirish", ru: "Убрать всю рекламу")
     }
 
-    public var ads_removeAll_tip: String {
+    // MARK: - Developer section (Novagram Settings, 20 s hold on the Settings version line)
+
+    public var developer_sectionTitle: String {
+        pick(en: "DEVELOPER", uz: "DASTURCHI", ru: "ДЛЯ РАЗРАБОТЧИКОВ")
+    }
+
+    public var developer_removeAdsTip: String {
         pick(
-            en: "When on, no Novagram or Telegram ads are shown on this device.",
-            uz: "Yoqilsa, bu qurilmada Novagram va Telegram reklamalari ko'rsatilmaydi.",
-            ru: "Если включено, на этом устройстве не показывается реклама Novagram и Telegram."
+            en: "On — no Novagram or Telegram ads on this device",
+            uz: "Yoqilsa — bu qurilmada Novagram va Telegram reklamalari ko'rsatilmaydi",
+            ru: "Вкл — на этом устройстве нет рекламы ни Novagram, ни Telegram"
         )
     }
 
-    public var ads_section_shown: String {
-        pick(en: "Ads section shown", uz: "Reklama bo'limi ochildi", ru: "Раздел рекламы открыт")
+    public var developer_currencyRatesTitle: String {
+        pick(en: "Show currency rates", uz: "Valyuta kursini ko'rsatish", ru: "Показывать курсы валют")
     }
 
-    public var ads_section_hidden: String {
-        pick(en: "Ads section hidden", uz: "Reklama bo'limi yashirildi", ru: "Раздел рекламы скрыт")
+    public var developer_currencyRatesTip: String {
+        pick(en: "Central Bank rates view", uz: "Markaziy bank kurslari oynasi", ru: "Курсы Центрального банка")
+    }
+
+    public var developer_adsPanelTitle: String {
+        pick(en: "Novagram ads panel", uz: "Novagram reklama paneli", ru: "Рекламная панель Novagram")
+    }
+
+    public var developer_adsPanelTip: String {
+        pick(en: "Show the Novagram ads panel", uz: "Novagram reklama panelini ko'rsatish", ru: "Показывать рекламную панель Novagram")
+    }
+
+    public var developer_footer: String {
+        pick(
+            en: "Hidden switches for features in testing. They apply to this device only. To hide this section, hold the version line at the bottom of Settings for 20 seconds.",
+            uz: "Sinovdagi funksiyalar uchun yashirin tugmalar. Faqat shu qurilmada ishlaydi. Bo'limni yashirish uchun Sozlamalar pastidagi versiya qatorini 20 soniya bosib turing.",
+            ru: "Скрытые переключатели для функций в тестировании. Действуют только на этом устройстве. Чтобы скрыть раздел, удерживайте строку версии внизу Настроек 20 секунд."
+        )
+    }
+
+    public func developer_shownAlert(path: String) -> String {
+        pick(en: "Developer section is open: \(path)", uz: "Dasturchi bo'limi ochildi: \(path)", ru: "Раздел для разработчиков открыт: \(path)")
+    }
+
+    public var developer_hiddenAlert: String {
+        pick(en: "Developer section hidden", uz: "Dasturchi bo'limi yashirildi", ru: "Раздел для разработчиков скрыт")
+    }
+
+    public var developer_settingsPath: String {
+        pick(en: "Settings → Novagram Settings", uz: "Sozlamalar → Novagram Settings", ru: "Настройки → Novagram Settings")
     }
 
     public var ads_analytics_title: String {
@@ -1302,14 +1336,14 @@ public struct NovagramL10n {
     }
 
     public var ads_admin_title: String {
-        pick(en: "Admin verification", uz: "Admin tasdiqlash", ru: "Подтверждение администратора")
+        pick(en: "Developer verification", uz: "Dasturchini tasdiqlash", ru: "Подтверждение разработчика")
     }
 
     public var ads_admin_message: String {
         pick(
-            en: "Enter the admin login and password to open the Ads section",
-            uz: "Reklama bo'limini ochish uchun admin login va parolini kiriting",
-            ru: "Введите логин и пароль администратора, чтобы открыть раздел рекламы"
+            en: "Enter the developer login and password to continue",
+            uz: "Davom etish uchun dasturchi login va parolini kiriting",
+            ru: "Введите логин и пароль разработчика, чтобы продолжить"
         )
     }
 
