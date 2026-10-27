@@ -46,6 +46,7 @@ die() {
 # ---- local-only changes (never committed) -------------------------------------
 
 revert_local() {
+    scripts/novagram-local.sh show >> "$LOG" 2>&1 || die "scripts/novagram-local.sh show failed, see $LOG"
     scripts/xcode27.sh revert >> "$LOG" 2>&1 || die "scripts/xcode27.sh revert failed, see $LOG"
     local f
     for f in "${EXTRA_BUMP[@]}"; do
@@ -64,6 +65,7 @@ restore_local() {
     for f in "${EXTRA_BUMP[@]}"; do
         [ -f "$f" ] && perl -pi -e 's/(MACOSX_DEPLOYMENT_TARGET = )(?:10|11)(?:\.\d+)*;/${1}12.0;/g' "$f"
     done
+    scripts/novagram-local.sh hide >> "$LOG" 2>&1 || echo "WARNING: scripts/novagram-local.sh hide failed, see $LOG" >&2
 }
 
 # ---- TelegramCore fork patches ------------------------------------------------
@@ -175,7 +177,7 @@ start() {
     RESTORE_ON_EXIT=1
     revert_local
     local dirty
-    dirty="$(git status --porcelain --untracked-files=no --ignore-submodules=all)"
+    dirty="$(git status --porcelain --untracked-files=no --ignore-submodules=all -- . ':(exclude).claude/settings.local.json')"
     [ -z "$dirty" ] || die "uncommitted changes, commit or stash them first:
 $dirty"
     check_fork_patches

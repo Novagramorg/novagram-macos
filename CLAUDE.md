@@ -12,6 +12,7 @@ Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted 
 - Packages that NovagramCore depends on (AlertsUI, GeneralRows, InputDataUI, InAppSettings, TelegramUtils, AvatarUI, ...) must never import NovagramCore (dependency cycle).
 - `APP_STORE` is false inside packages in Xcode builds. App Store archives must pass `SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) APP_STORE'` on the xcodebuild command line (`novagram-publish.sh` does).
 - `scripts/xcode27.sh apply` changes (deployment target 12.0, Metal, ImplicitStrongCapture) stay local: `scripts/xcode27.sh revert` before staging those files, `apply` after.
+- `scripts/novagram-local.sh hide` keeps the local-only changes out of `git status` (Xcode 27 changes, `.claude/settings.local.json`, submodule work trees); a file with any other change stays visible. To stage one of those files: `scripts/novagram-local.sh show && scripts/xcode27.sh revert`, `git add`, then `scripts/xcode27.sh apply && scripts/novagram-local.sh hide`. The pre-commit hook it installs stops a commit while a hidden file has other changes.
 - TelegramCore fork changes live in `fork-patches/` (new files + `telegramcore-hooks.patch`); `git submodule update` deletes them, re-run `./fork-patches/apply-telegramcore-patches.sh`.
 - Shared settings use the `pro_messager` UserDefaults suite with the same keys as iOS.
 - Commits: short, lowercase, first person, English ("added …", "fixed …"). Never push to `upstream`.
@@ -28,4 +29,4 @@ Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted 
 ## Build
 
 - `./novagram-build.sh` (Debug, real pass/fail, DerivedData `/tmp/tgmac13-dd`), `./novagram-build.sh run` launches, `./novagram-build.sh appstore` also sets `APP_STORE` in packages.
-- Fresh clone: `git submodule update --init --recursive`, `scripts/xcode27.sh apply`, `./fork-patches/apply-telegramcore-patches.sh`, `sh scripts/configure_frameworks.sh`, then `./novagram-build.sh`.
+- Fresh clone: `git submodule update --init --recursive`, `scripts/xcode27.sh apply`, `./fork-patches/apply-telegramcore-patches.sh`, `sh scripts/configure_frameworks.sh`, `scripts/novagram-local.sh hide`, then `./novagram-build.sh`.
