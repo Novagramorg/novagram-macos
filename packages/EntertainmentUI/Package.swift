@@ -33,6 +33,7 @@ let deps: [(String, String)] = [
     ("InputView", "../InputView"),
     ("InlineStickerLayer", "../InlineStickerLayer"),
     ("PerfLab", "../PerfLab"),
+    ("NovagramCore", "../NovagramCore"), // Novagram
 ]
 
 let package = Package(

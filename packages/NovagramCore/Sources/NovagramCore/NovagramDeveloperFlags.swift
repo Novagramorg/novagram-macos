@@ -19,6 +19,7 @@ public enum NovagramDeveloperFlags {
     private static let udSuite = "pro_messager"
     private static let currencyRatesViewKey = "novagram_currency_rates_view"
     private static let adsPanelKey = "novagram_ads_panel"
+    private static let stickerPackSaveKey = "novagram_sticker_pack_save"
 
     /// Show the currency rates row (Settings, under Analytics).
     public static var isCurrencyRatesViewEnabled: Bool {
@@ -32,6 +33,12 @@ public enum NovagramDeveloperFlags {
         set { self.setValue(newValue, forKey: self.adsPanelKey) }
     }
 
+    /// Show "Save All" in the sticker and emoji pack menu (macOS only).
+    public static var isStickerPackSaveEnabled: Bool {
+        get { return self.value(forKey: self.stickerPackSaveKey) }
+        set { self.setValue(newValue, forKey: self.stickerPackSaveKey) }
+    }
+
     /// Emits the current value, then again whenever a Developer switch flips. Main queue.
     public static var currencyRatesViewSignal: Signal<Bool, NoError> {
         return self.signal { self.isCurrencyRatesViewEnabled }
@@ -39,6 +46,10 @@ public enum NovagramDeveloperFlags {
 
     public static var adsPanelSignal: Signal<Bool, NoError> {
         return self.signal { self.isAdsPanelEnabled }
+    }
+
+    public static var stickerPackSaveSignal: Signal<Bool, NoError> {
+        return self.signal { self.isStickerPackSaveEnabled }
     }
 
     private static func value(forKey key: String) -> Bool {

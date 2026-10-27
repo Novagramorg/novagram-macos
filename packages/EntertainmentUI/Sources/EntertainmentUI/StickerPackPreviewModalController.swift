@@ -686,6 +686,7 @@ public func StickerPackPreviewModalController(_ context: any AccountContextProto
             })
             arguments.share(shareText.trimmed)
         }, itemImage: MenuAnimation.menu_share.value))
+        items.append(contentsOf: novagramStickerPackSaveMenuItems(context: context, packs: collections.map { ($0.info, $0.items) })) // Novagram
 
         if controllerSource == .install, collections.count == 1 {
             let collection = collections[0]

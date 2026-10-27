@@ -1277,6 +1277,42 @@ public struct NovagramL10n {
         pick(en: "Show the Novagram ads panel", uz: "Novagram reklama panelini ko'rsatish", ru: "Показывать рекламную панель Novagram")
     }
 
+    public var developer_stickerPackSaveTitle: String {
+        pick(en: "Save sticker packs", uz: "Stiker paketlarini saqlash", ru: "Сохранение наборов стикеров")
+    }
+
+    public var developer_stickerPackSaveTip: String {
+        pick(
+            en: "\"Save All\" in the sticker and emoji pack menu",
+            uz: "Stiker va emoji paketi menyusida \"Hammasini saqlash\"",
+            ru: "«Сохранить все» в меню набора стикеров и эмодзи"
+        )
+    }
+
+    public var stickerPack_saveAll: String {
+        pick(en: "Save All…", uz: "Hammasini saqlash…", ru: "Сохранить все…")
+    }
+
+    public var stickerPack_saveHere: String {
+        pick(en: "Save Here", uz: "Shu yerga saqlash", ru: "Сохранить сюда")
+    }
+
+    public func stickerPack_saving(_ count: Int) -> String {
+        pick(en: "Saving \(count) files…", uz: "\(count) ta fayl saqlanmoqda…", ru: "Сохраняется файлов: \(count)…")
+    }
+
+    public func stickerPack_saved(_ count: Int, folder: String) -> String {
+        pick(en: "Saved \(count) files to \(folder)", uz: "\(count) ta fayl saqlandi: \(folder)", ru: "Сохранено файлов: \(count) в \(folder)")
+    }
+
+    public func stickerPack_savedWithFailures(_ saved: Int, failed: Int) -> String {
+        pick(
+            en: "Saved \(saved) files, \(failed) could not be downloaded",
+            uz: "\(saved) ta fayl saqlandi, \(failed) tasini yuklab bo'lmadi",
+            ru: "Сохранено: \(saved), не удалось скачать: \(failed)"
+        )
+    }
+
     public var developer_footer: String {
         pick(
             en: "Hidden switches for features in testing. They apply to this device only. To hide this section, hold the version line at the bottom of Settings for 20 seconds.",
