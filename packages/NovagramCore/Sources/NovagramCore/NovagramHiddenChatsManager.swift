@@ -58,6 +58,10 @@ public final class NovagramHiddenChatsManager {
         return hiddenIds.count
     }
 
+    public var hiddenPeerIds: [PeerId] {
+        return hiddenIds.map { PeerId($0) }
+    }
+
     // MARK: - Mutation
 
     public func setHidden(_ hidden: Bool, for peerId: PeerId) {

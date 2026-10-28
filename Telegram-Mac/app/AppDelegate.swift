@@ -1738,6 +1738,7 @@ class AppDelegate: NSResponder, NSApplicationDelegate, NSUserNotificationCenterD
     }
     
     func application(_ application: NSApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([NSUserActivityRestoring]) -> Void) -> Bool {
+        if novagramContinueSpotlight(userActivity, context: self.contextValue?.context) { return true } // Novagram
         if userActivity.activityType == CSSearchableItemActionType {
             if let uniqueIdentifier = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String {
                 if let identifier = parseSpotlightIdentifier(uniqueIdentifier) {

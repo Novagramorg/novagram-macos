@@ -368,3 +368,16 @@ App: Interface → Unlimited Pins switch; turning it off runs `novagramTrimPinne
 ### Phase 7: Novagram Settings links
 
 No Telegram file changed (the `tg://settings/novagrampro` routing in `InAppLinks.swift` already existed). Ours: `NovagramSettingsLinks.swift` takes the iOS kebab-case slugs (old underscore forms still work) and the `?f=<slug>` alias; a slug that is not a sub-screen scrolls to its row and highlights it (`NovagramSettingsController.focusSlug`). Every Novagram Settings row with a slug has a right-click menu: Copy link (toast) and Share link (`ShareModalController`). New row "Share Novagram Settings link" at the end of Automation, hint in its footer. The slug table (`novagramSettingsSlugs`) matches iOS `NovagramSettingsFeature`; Mac-only rows: `ghost-button`, `send-confirm-sticker`, `unlimited-folders`. The developer rows have no link, as on iOS.
+
+### Phase 8: Spotlight and Siri
+
+| File | Change |
+| --- | --- |
+| `Telegram-Mac/utils/Spotlight.swift` | `import NovagramCore`; `SpotlightContext` keeps a `NovagramSpotlightContacts(account:)` (property + init line); recent-peer items skip hidden / locked chats (`peers.filter { !NovagramSpotlightContacts.isExcluded($0.id) }`) |
+| `Telegram-Mac/app/AppDelegate.swift` | first line of `application(_:continue:)`: `if novagramContinueSpotlight(userActivity, context: self.contextValue?.context) { return true }` |
+| `Telegram-Mac/app/ApplicationContext.swift` | `novagramSpotlightAndSiriDidStart(context:)` after the auto-accept start |
+| `Telegram.xcodeproj/project.pbxproj` | app target: `Telegram-Mac/novagram/NovagramAppIntents.swift` (Sources, ids `FE304E0B…2E/2F`) and `AppShortcuts.xcstrings` (Resources, ids `FE304E0B…30/31`) |
+
+Ours:
+- `NovagramSpotlightContacts` (NovagramCore): every contact of every account in Spotlight (name, @username, the cached small avatar), ids `novagram-profile:<accountId>:<peerId>`, domain `novagram.contacts.<accountId>` (deleted with the account). Hidden chats and locked chats are never indexed, and Telegram's own items for hidden chats are deleted. Opening a result shows the profile (another account: switches account and opens the chat).
+- `NovagramAppIntents.swift`: App Intents (macOS 14+) Open Chat, Open Profile, Send Message (always asks first, text only, refuses hidden / locked chats), Set Ghost Mode, Unread Messages, Open Novagram Settings; `NovagramContactEntity` searches the current account's contacts; `NovagramShortcuts` (7 App Shortcuts, Siri phrases with the app name, English + Russian in `AppShortcuts.xcstrings`; Siri has no Uzbek). `updateAppShortcutParameters()` runs at account start.

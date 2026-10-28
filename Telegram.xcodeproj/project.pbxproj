@@ -24,6 +24,8 @@
 		FE50AD500000000000000037 /* NovagramAdsHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE50AD500000000000000036 /* NovagramAdsHooksInstall.swift */; };
 		FE304E0B000000000000002D /* NovagramBlockingPurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002C /* NovagramBlockingPurchaseManager.swift */; };
 		FE304E0B000000000000002B /* NovagramSettingsLinks.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002A /* NovagramSettingsLinks.swift */; };
+		FE304E0B000000000000002F /* NovagramAppIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B000000000000002E /* NovagramAppIntents.swift */; };
+		FE304E0B0000000000000031 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000030 /* AppShortcuts.xcstrings */; };
 		FE304E0B0000000000000029 /* NovagramSettingsHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */; };
 		FE304E0B0000000000000003 /* NovagramSettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000002 /* NovagramSettingsController.swift */; };
 		FE304E0B0000000000000005 /* NovagramAboutController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE304E0B0000000000000004 /* NovagramAboutController.swift */; };
@@ -1082,6 +1084,8 @@
 		FE50AD500000000000000036 /* NovagramAdsHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAdsHooksInstall.swift; sourceTree = "<group>"; };
 		FE304E0B000000000000002C /* NovagramBlockingPurchaseManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramBlockingPurchaseManager.swift; sourceTree = "<group>"; };
 		FE304E0B000000000000002A /* NovagramSettingsLinks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsLinks.swift; sourceTree = "<group>"; };
+		FE304E0B000000000000002E /* NovagramAppIntents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAppIntents.swift; sourceTree = "<group>"; };
+		FE304E0B0000000000000030 /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
 		FE304E0B0000000000000028 /* NovagramSettingsHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsHooksInstall.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000002 /* NovagramSettingsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramSettingsController.swift; sourceTree = "<group>"; };
 		FE304E0B0000000000000004 /* NovagramAboutController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NovagramAboutController.swift; sourceTree = "<group>"; };
@@ -2399,6 +2403,8 @@
 				FE50AD500000000000000032 /* NovagramAdsGate.swift */,
 				FE50AD500000000000000034 /* NovagramAdsAdminAuth.swift */,
 				FE304E0B000000000000002A /* NovagramSettingsLinks.swift */,
+				FE304E0B000000000000002E /* NovagramAppIntents.swift */,
+				FE304E0B0000000000000030 /* AppShortcuts.xcstrings */,
 				FE304E0B0000000000000002 /* NovagramSettingsController.swift */,
 				FE304E0B0000000000000004 /* NovagramAboutController.swift */,
 				FE304E0B0000000000000006 /* NovagramTipsController.swift */,
@@ -4513,6 +4519,7 @@
 				2729341C2779A35C00F10D3C /* menu_select_multiple.tgs in Resources */,
 				275E4B432EEC31DF00BC1A68 /* AppIcon.icon in Resources */,
 				FE10DEC04E14C190FFFFFFF1 /* PrivacyInfo.xcprivacy in Resources */,
+				FE304E0B0000000000000031 /* AppShortcuts.xcstrings in Resources */,
 				2773A56825FA4E4B00AB45E9 /* voice_chat_raise_hand_7.tgs in Resources */,
 				270FD5942C500B8A000070E6 /* duck_webapp_error.tgs in Resources */,
 				D07450F32340E89100769D7F /* sad_man.tgs in Resources */,
@@ -4773,6 +4780,7 @@
 				FE50AD500000000000000035 /* NovagramAdsAdminAuth.swift in Sources */,
 				FE50AD500000000000000037 /* NovagramAdsHooksInstall.swift in Sources */,
 				FE304E0B000000000000002B /* NovagramSettingsLinks.swift in Sources */,
+				FE304E0B000000000000002F /* NovagramAppIntents.swift in Sources */,
 				FE304E0B0000000000000029 /* NovagramSettingsHooksInstall.swift in Sources */,
 				FE304E0B0000000000000003 /* NovagramSettingsController.swift in Sources */,
 				FE304E0B0000000000000005 /* NovagramAboutController.swift in Sources */,

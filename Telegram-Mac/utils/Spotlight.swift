@@ -9,6 +9,7 @@ import MurMurHash32
 import TelegramTheme
 import TelegramLinks
 import TelegramUtils // Novagram
+import NovagramCore // Novagram
 
 public enum SpotlightIdentifierSource : Equatable {
     case peerId(PeerId)
@@ -88,10 +89,12 @@ private enum SpotlightItem : Identifiable, Comparable {
 
 public final class SpotlightContext {
     public let engine: TelegramEngine
+    private let novagramContacts: NovagramSpotlightContacts // Novagram
     private let disposable = MetaDisposable()
     private var previousItems:[SpotlightItem] = []
     public init(engine: TelegramEngine) {
         self.engine = engine
+        self.novagramContacts = NovagramSpotlightContacts(account: engine.account) // Novagram
         if #available(macOS 10.12, *) {
             let accountPeer = engine.account.postbox.loadedPeerWithId(engine.account.peerId)
             
@@ -126,7 +129,7 @@ public final class SpotlightContext {
                     return
                 }
                 var items: [SpotlightItem] = []
-                for (i, peer) in peers.enumerated() {
+                for (i, peer) in peers.filter({ !NovagramSpotlightContacts.isExcluded($0.id) }).enumerated() { // Novagram
                     if #available(OSX 10.13, *) {
                         items.append(makeSearchItem(for: peer, index: i, accountPeer: accountPeer, accountId: engine.account.id))
                     } else {

@@ -1,0 +1,126 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Open ${contact} in ${applicationName}": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открой ${contact} в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Message ${contact} in ${applicationName}": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Напиши ${contact} в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Open a chat in ${applicationName}": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открой чат в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Show ${contact} profile in ${applicationName}": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Покажи профиль ${contact} в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Open a profile in ${applicationName}": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открой профиль в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Send a message with ${applicationName}": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправь сообщение через ${applicationName}"
+          }
+        }
+      }
+    },
+    "Send a ${applicationName} message": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Отправь сообщение в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Turn on ghost mode in ${applicationName}": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Включи режим призрака в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Turn off ghost mode in ${applicationName}": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выключи режим призрака в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Unread messages in ${applicationName}": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Непрочитанные сообщения в ${applicationName}"
+          }
+        }
+      }
+    },
+    "How many unread messages in ${applicationName}": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сколько непрочитанных в ${applicationName}"
+          }
+        }
+      }
+    },
+    "Open ${applicationName} settings": {
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открой настройки ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
