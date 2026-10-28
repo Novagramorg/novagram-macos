@@ -514,6 +514,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
         NovagramUnreadReminderManager.shared.start(with: context) // Novagram
         NovagramAdminFoldersManager.startGlobalMonitor(context: context) // Novagram
         NovagramSuggestedFolders.presentFirstLaunchPromptIfNeeded(context: context) // Novagram
+        NovagramAutoDownload.applyIfNeeded(context: context) // Novagram
 
         if #available(macOS 10.15, *), let walletContext = context.walletContext {
             tonConnectPresentationDisposable.set((walletContext.tonConnectState

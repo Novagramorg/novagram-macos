@@ -57,5 +57,11 @@ public extension NovagramL10n {
         default: return pick(en: "Default notification sound", uz: "Bildirishnoma ovozi", ru: "Звук уведомления по умолчанию")
         }
     }
+    var settings_autoDownloadOff_title: String { pick(en: "Disable auto-download", uz: "Avto-yuklashni o'chirish", ru: "Отключить автозагрузку") }
+    var settings_autoDownloadOff_subtitle: String { pick(en: "Turns off media auto-download (Settings → Data and Storage)", uz: "Media avtomatik yuklab olinishini o'chiradi (Sozlamalar → Ma'lumotlar va xotira)", ru: "Отключает автозагрузку медиа (Настройки → Данные и память)") }
+    var settings_section_appearance: String { pick(en: "APPEARANCE", uz: "KO'RINISH", ru: "ВНЕШНИЙ ВИД") }
+    var settings_lightAccent_title: String { pick(en: "Brand accent in light theme", uz: "Yorqin temada brand rangi", ru: "Акцент бренда в светлой теме") }
+    var settings_lightAccent_subtitle: String { pick(en: "Applies Novagram blue as the accent color in the light theme", uz: "Yorqin (oq) temada Novagram ko'k rangini accent sifatida qo'llaydi", ru: "Применяет фирменный синий Novagram в качестве акцента в светлой теме") }
+    var settings_lightAccent_footer: String { pick(en: "Affects the light theme only. Takes effect without restarting.", uz: "Faqat yorqin (oq) temaga ta'sir qiladi. Qayta ishga tushirmasdan kuchga kiradi.", ru: "Влияет только на светлую тему. Применяется без перезапуска.") }
     var settings_voiceTranslate_subtitle: String { pick(en: "When dictation ends, the text is translated into the auto-translate language. Works when “Ask to translate on send” is off", uz: "Diktovka tugagach matn avto-tarjima tiliga tarjima qilinadi. «Yuborishda tarjima so'rovi» o'chiq bo'lsa ishlaydi", ru: "После диктовки текст переводится на язык автоперевода. Работает, когда «Запрос перевода при отправке» выключен") }
 }

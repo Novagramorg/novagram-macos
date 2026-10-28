@@ -332,3 +332,11 @@ Ours: `NovagramTranslateConfirm.swift` ("Ask to translate on send", `translate_c
 ### Phase 3: reminder time and sound
 
 No Telegram file changed. Ours: `NovagramUnreadReminderManager` reads the iOS key `unread_reminder_minutes` (default 5; the old Mac key `unread_reminder_interval` is copied once and removed), follows `NovagramSettingsChanged` (the Settings switch now starts and stops the timer right away), localized notification text, `unread_reminder_sound`. The 12 iOS tones are NovagramCore resources (`Resources/ReminderSounds`, `resources: [.copy(...)]` in `packages/NovagramCore/Package.swift`, bundle `NovagramCore_NovagramCore.bundle`); a custom tone is played by the app (`NovagramReminderSounds.play`) and the notification goes out silent. The Mac repeating timer is unchanged. Settings: Reminder time (1–60 min menu) and Reminder sound (Default, 12 tones, None; picking one plays it).
+
+### Phase 4: auto-download and light accent
+
+| File | Change |
+| --- | --- |
+| `Telegram-Mac/app/ApplicationContext.swift` | `NovagramAutoDownload.applyIfNeeded(context:)` after the folders prompt (keeps a newly started account's auto-download off) |
+
+Ours: `NovagramSettingsController.swift` `NovagramAutoDownload` (`auto_download_disabled` sets `AutomaticMediaDownloadSettings.automaticDownload` for every logged-in account; Mac has one switch for all networks) and `NovagramWhiteThemeAccent` (`white_theme_accent_enabled`: `LocalAccentColor` #0A9BF5 for `.day` and `.dayClassic`, re-applied with `installDefaultAccent()` when a light builtin theme is active; off removes only our accent). `NovagramBrandColors` now uses the iOS blue palette (was the old green, unused).

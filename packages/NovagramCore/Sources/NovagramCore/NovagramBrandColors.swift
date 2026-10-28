@@ -18,15 +18,18 @@ import AppKit
 import TGUIKit
 
 public enum NovagramBrandColors {
-    // MARK: - Brand greens (signature)
-    public static let brand50  = NSColor(rgb: 0xECFDF5)
-    public static let brand100 = NSColor(rgb: 0xD1FAE5)
-    public static let brand300 = NSColor(rgb: 0x6EE7B7)
-    public static let brand400 = NSColor(rgb: 0x34D399)
-    public static let brand500 = NSColor(rgb: 0x10B981)   // Primary brand
-    public static let brand600 = NSColor(rgb: 0x059669)   // Primary hover
-    public static let brand700 = NSColor(rgb: 0x047857)   // Primary deep
-    public static let brand900 = NSColor(rgb: 0x064E3B)
+    // MARK: - Brand blues (same values as iOS)
+    public static let brand50  = NSColor(rgb: 0xEAF6FF)
+    public static let brand100 = NSColor(rgb: 0xCFE9FF)
+    public static let brand300 = NSColor(rgb: 0x7CC3FD)
+    public static let brand400 = NSColor(rgb: 0x36A8FA)
+    public static let brand500 = NSColor(rgb: 0x0A9BF5)   // Primary brand (Novagram blue)
+    public static let brand600 = NSColor(rgb: 0x0A85E8)   // Primary hover
+    public static let brand700 = NSColor(rgb: 0x086FC6)   // Primary deep
+    public static let brand900 = NSColor(rgb: 0x07406F)
+
+    // Accent of the light themes when "Brand accent in light theme" is on.
+    public static let lightThemeAccent = brand500
 
     // MARK: - Ink (dark text / dark backgrounds)
     public static let inkBase = NSColor(rgb: 0x0F1115)    // Dark bg (dark mode)

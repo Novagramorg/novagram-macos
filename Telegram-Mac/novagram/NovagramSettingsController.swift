@@ -35,6 +35,8 @@ import TelegramCore
 import Localization
 import SwiftSignalKit
 import Postbox
+import ThemeSettings
+import ColorPalette
 import NovagramCore
 
 // MARK: - Storage facade
@@ -73,6 +75,8 @@ private enum NovagramDefaultsKey {
     static let translateChatsUnlock       = "fenix_translate_chats_unlock"
     static let translateConfirmEnabled    = "translate_confirm_enabled"
     static let voiceTranslateEnabled      = "voice_translate_enabled"
+    static let autoDownloadDisabled       = "auto_download_disabled"
+    static let whiteThemeAccentEnabled    = "white_theme_accent_enabled"
 }
 
 private struct NovagramSettingsState: Equatable {
@@ -109,6 +113,8 @@ private struct NovagramSettingsState: Equatable {
     var voiceTranslateEnabled: Bool
     var reminderMinutes: Int
     var reminderSound: String
+    var autoDownloadDisabled: Bool
+    var whiteThemeAccentEnabled: Bool
     // Feature #46: derived from the keychain (source of truth), NOT novagramDefaults.
     var chatLockMasterEnabled: Bool
     // NovagramProxy opt-in — derived from NovagramAutoProxyManager (owns the "pro_messager" key).
@@ -157,6 +163,8 @@ private struct NovagramSettingsState: Equatable {
             voiceTranslateEnabled: d?.bool(forKey: NovagramDefaultsKey.voiceTranslateEnabled) ?? false,
             reminderMinutes: NovagramUnreadReminderManager.shared.intervalMinutes,
             reminderSound: NovagramUnreadReminderManager.shared.soundKey,
+            autoDownloadDisabled: d?.bool(forKey: NovagramDefaultsKey.autoDownloadDisabled) ?? false,
+            whiteThemeAccentEnabled: d?.bool(forKey: NovagramDefaultsKey.whiteThemeAccentEnabled) ?? false,
             chatLockMasterEnabled: NovagramChatPincodeManager.shared.isMasterEnabled(),
             novagramProxyEnabled: NovagramAutoProxyManager.shared.isEnabled
         )
@@ -202,7 +210,8 @@ private enum NovagramEntryId: Hashable {
     case chatDeleted, chatEditedHistory, chatFirstMessage, chatGhostActive, chatGhost, chatCamera, chatRoundVideo, chatForwardHideNames, chatFooter
     case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingTranslateConfirm, messagingAskVoice, messagingAskSticker, messagingAutoSticker, messagingHeartEffect, messagingFooter
     case sttEnabled, sttLanguage, sttVoiceTranslate
-    case protectionChatLock, protectionProxy, protectionForeign, protectionFooter
+    case protectionChatLock, protectionProxy, protectionForeign, protectionAutoDownload, protectionFooter
+    case appearanceAccent, appearanceFooter
     case remindersUnread, remindersTime, remindersSound, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoStoryUnlock, autoTranslateChats, autoFooter
     case adsRemoveAll, devCurrencyRates, devAdsPanel, devStickerPackSave, devFooter
 }
@@ -244,6 +253,8 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .protectionChatLock:       map = ("lock.shield.fill", .green)
     case .protectionProxy:          map = ("network.badge.shield.half.filled", .green)
     case .protectionForeign:        map = ("person.crop.circle.badge.xmark", .orange)
+    case .protectionAutoDownload:   map = ("arrow.down.circle.dotted", .gray)
+    case .appearanceAccent:         map = ("paintpalette.fill", .blue)
     case .remindersUnread:          map = ("bell.badge.fill", .red)
     case .remindersTime:            map = ("clock.fill", .blue)
     case .remindersSound:           map = ("speaker.wave.2.fill", .pink)
@@ -538,8 +549,15 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.header(next(), .header(6), l10n.settings_section_protection))
     entries.append(.chatLockToggle(next(), .protectionChatLock, l10n.chatLock_settingsTitle, l10n.chatLock_settingsSubtitle, state.chatLockMasterEnabled, .firstItem))
     entries.append(.novagramProxyToggle(next(), .protectionProxy, NovagramAutoProxyStrings.toggleTitle(langCode: appCurrentLanguage.languageCode), NovagramAutoProxyStrings.toggleTip(langCode: appCurrentLanguage.languageCode), state.novagramProxyEnabled, .innerItem))
-    entries.append(.toggle(next(), .protectionForeign, l10n.settings_protection_foreign_title, l10n.settings_protection_foreign_subtitle, state.blockForeignUsers, .lastItem, NovagramDefaultsKey.blockForeignUsers))
+    entries.append(.toggle(next(), .protectionForeign, l10n.settings_protection_foreign_title, l10n.settings_protection_foreign_subtitle, state.blockForeignUsers, .innerItem, NovagramDefaultsKey.blockForeignUsers))
+    entries.append(.toggle(next(), .protectionAutoDownload, l10n.settings_autoDownloadOff_title, l10n.settings_autoDownloadOff_subtitle, state.autoDownloadDisabled, .lastItem, NovagramDefaultsKey.autoDownloadDisabled))
     entries.append(.footer(next(), .protectionFooter, l10n.settings_protection_footer))
+
+    // ─── APPEARANCE ───
+    entries.append(.section(sectionId)); sectionId += 1
+    entries.append(.header(next(), .header(8), l10n.settings_section_appearance))
+    entries.append(.toggle(next(), .appearanceAccent, l10n.settings_lightAccent_title, l10n.settings_lightAccent_subtitle, state.whiteThemeAccentEnabled, .singleItem, NovagramDefaultsKey.whiteThemeAccentEnabled))
+    entries.append(.footer(next(), .appearanceFooter, l10n.settings_lightAccent_footer))
 
     // Hidden Developer section, like iOS: shown while revealed by a 20 s hold on the Settings version line.
     if state.adsRevealed {
@@ -626,6 +644,11 @@ class NovagramSettingsController: TableViewController {
                     if key == NovagramDefaultsKey.autoStickerEnabled && !value {
                         NovagramOutgoing.clearAutoSticker()
                     }
+                    if key == NovagramDefaultsKey.autoDownloadDisabled {
+                        NovagramAutoDownload.apply(disabled: value, sharedContext: context.sharedContext)
+                    } else if key == NovagramDefaultsKey.whiteThemeAccentEnabled {
+                        NovagramWhiteThemeAccent.apply(enabled: value, accountManager: context.sharedContext.accountManager)
+                    }
                     // The send prompt and the dictation translate exclude each other, as on iOS.
                     if value && key == NovagramDefaultsKey.translateConfirmEnabled {
                         novagramDefaults?.set(false, forKey: NovagramDefaultsKey.voiceTranslateEnabled)
@@ -660,6 +683,8 @@ class NovagramSettingsController: TableViewController {
                     case NovagramDefaultsKey.translateChatsUnlock: state.translateChatsUnlock = value
                     case NovagramDefaultsKey.translateConfirmEnabled: state.translateConfirmEnabled = value
                     case NovagramDefaultsKey.voiceTranslateEnabled: state.voiceTranslateEnabled = value
+                    case NovagramDefaultsKey.autoDownloadDisabled: state.autoDownloadDisabled = value
+                    case NovagramDefaultsKey.whiteThemeAccentEnabled: state.whiteThemeAccentEnabled = value
                     default: break
                     }
                 }
@@ -818,5 +843,62 @@ class NovagramSettingsController: TableViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         window?.removeAllHandlers(for: self)
+    }
+}
+
+// MARK: - Side effects of Novagram switches
+
+// iOS "Disable auto-download" (`auto_download_disabled`): turns the app's own auto-download switch
+// (Settings → Data and Storage) off, or back on, for every logged-in account.
+enum NovagramAutoDownload {
+    static func apply(disabled: Bool, sharedContext: SharedAccountContext) {
+        _ = (sharedContext.activeAccounts |> take(1) |> deliverOnMainQueue).start(next: { accounts in
+            for (_, account, _) in accounts.accounts {
+                _ = updateMediaDownloadSettingsInteractively(postbox: account.postbox, {
+                    $0.withUpdatedAutomaticDownload(!disabled)
+                }).start()
+            }
+        })
+    }
+
+    // An account added later starts with auto-download on; keep it off while the switch is on.
+    static func applyIfNeeded(context: AccountContext) {
+        guard NovagramSettingsKey.bool(NovagramDefaultsKey.autoDownloadDisabled) else {
+            return
+        }
+        _ = updateMediaDownloadSettingsInteractively(postbox: context.account.postbox, {
+            $0.withUpdatedAutomaticDownload(false)
+        }).start()
+    }
+}
+
+// iOS "Brand accent in light theme" (`white_theme_accent_enabled`): Novagram blue becomes the saved accent
+// of the Day and Day Classic themes. Turning it off removes only our accent, a user-picked one stays.
+enum NovagramWhiteThemeAccent {
+    private static let lightThemes: [TelegramBuiltinTheme] = [.day, .dayClassic]
+
+    static func apply(enabled: Bool, accountManager: AccountManager<TelegramAccountManagerTypes>) {
+        let ours = PaletteAccentColor(NovagramBrandColors.lightThemeAccent)
+        _ = updateThemeInteractivetly(accountManager: accountManager, f: { settings in
+            var accents = settings.accents
+            for name in lightThemes {
+                let index = accents.firstIndex(where: { $0.name == name && $0.cloud == nil })
+                if enabled {
+                    let accent = LocalAccentColor(name: name, color: ours, cloud: nil)
+                    if let index {
+                        accents[index] = accent
+                    } else {
+                        accents.append(accent)
+                    }
+                } else if let index, accents[index].color == ours {
+                    accents.remove(at: index)
+                }
+            }
+            var updated = ThemePaletteSettings(palette: settings.palette, bubbled: settings.bubbled, fontSize: settings.fontSize, wallpaper: settings.wallpaper, defaultDark: settings.defaultDark, defaultDay: settings.defaultDay, defaultIsDark: settings.defaultIsDark, wallpapers: settings.wallpapers, accents: accents, cloudTheme: settings.cloudTheme, associated: settings.associated, legacyMenu: settings.legacyMenu)
+            if settings.cloudTheme == nil, lightThemes.contains(settings.palette.parent) {
+                updated = updated.installDefaultAccent()
+            }
+            return updated
+        }).start()
     }
 }
