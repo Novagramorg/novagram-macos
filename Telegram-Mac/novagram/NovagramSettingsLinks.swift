@@ -5,10 +5,18 @@ import NovagramCore
 
 // tg://novagrampro, tg://novagram/<feature>, tg://fenixuz/<feature> and
 // tg://settings/novagrampro[/<feature>] open Novagram Settings and, optionally, one sub-screen.
+// The `?f=<feature>` form (iOS alias) works too. Features use the iOS kebab-case slugs.
 struct NovagramSettingsLink {
     let feature: String?
 
     private static let roots: Set<String> = ["novagrampro", "novagram", "fenixuz"]
+
+    static func url(slug: String?) -> String {
+        if let slug {
+            return "tg://settings/novagrampro/\(slug)"
+        }
+        return "tg://settings/novagrampro"
+    }
 
     static func parse(_ url: String) -> NovagramSettingsLink? {
         var rest = url.lowercased()
@@ -19,7 +27,9 @@ struct NovagramSettingsLink {
         guard url.lowercased() != rest else {
             return nil
         }
-        rest = rest.components(separatedBy: "?").first ?? rest
+        let pieces = rest.components(separatedBy: "?")
+        rest = pieces.first ?? rest
+        let queryFeature = pieces.count > 1 ? pieces[1].components(separatedBy: "&").first(where: { $0.hasPrefix("f=") }).map { String($0.dropFirst(2)) } : nil
         var parts = rest.components(separatedBy: "/").filter { !$0.isEmpty }
         if parts.first == "settings" {
             parts.removeFirst()
@@ -27,14 +37,15 @@ struct NovagramSettingsLink {
         guard let root = parts.first, roots.contains(root) else {
             return nil
         }
-        return NovagramSettingsLink(feature: parts.count > 1 ? parts[1] : nil)
+        return NovagramSettingsLink(feature: parts.count > 1 ? parts[1] : queryFeature)
     }
 }
 
 func openNovagramSettings(context: AccountContext, feature: String?) {
     let navigation = context.bindings.rootNavigation()
-    navigation.push(NovagramSettingsController(context))
-    guard let feature = feature else {
+    let controller = NovagramSettingsController(context)
+    navigation.push(controller)
+    guard let feature = feature?.replacingOccurrences(of: "_", with: "-") else {
         return
     }
     switch feature {
@@ -44,16 +55,16 @@ func openNovagramSettings(context: AccountContext, feature: String?) {
         navigation.push(NovagramBotsController(context))
     case "tips":
         navigation.push(NovagramTipsController(context))
-    case "text_style":
+    case "text-style":
         navigation.push(NovagramTextStyleController(context))
-    case "auto_text":
+    case "auto-text":
         navigation.push(NovagramAutoTextController(context))
-    case "auto_translate":
+    case "auto-translate":
         navigation.push(NovagramAutoTranslateController(context))
-    case "translate_language", "translation_language", "language":
+    case "translate-language", "translation-language", "language":
         navigation.push(NovagramTranslationLanguageController(context))
     default:
-        break
+        controller.focusSlug = feature
     }
 }
 

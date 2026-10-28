@@ -220,7 +220,7 @@ private enum NovagramEntryId: Hashable {
     case sttEnabled, sttLanguage, sttVoiceTranslate
     case protectionChatLock, protectionProxy, protectionForeign, protectionAutoDownload, protectionFooter
     case appearanceAccent, appearanceFooter
-    case remindersUnread, remindersTime, remindersSound, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoFolderStyle, autoChannelHistory, autoStoryUnlock, autoTranslateChats, autoFooter
+    case remindersUnread, remindersTime, remindersSound, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoFolderStyle, autoChannelHistory, autoStoryUnlock, autoTranslateChats, actionShareLink, autoFooter
     case adsRemoveAll, devCurrencyRates, devAdsPanel, devStickerPackSave, devFooter
 }
 
@@ -249,6 +249,7 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .sttVoiceTranslate:        map = ("waveform.badge.plus", .teal)
     case .autoFoldersPrompt:        map = ("folder.badge.questionmark", .lightBlue)
     case .autoStoryUnlock:          map = ("arrow.down.circle.fill", .violet)
+    case .actionShareLink:          map = ("link", .blue)
     case .autoFolderStyle:          map = ("square.grid.2x2.fill", .teal)
     case .autoChannelHistory:       map = ("list.bullet.rectangle.fill", .orange)
     case .autoTranslateChats:       map = ("character.bubble", .pink)
@@ -375,7 +376,8 @@ private enum NovagramEntry: Comparable, Identifiable {
                     arguments.updateBool(key, !value)
                 },
                 // Story saving asks first, so its switch must not flip before the user confirms.
-                autoswitch: key != NovagramDefaultsKey.storyUnlockEnabled
+                autoswitch: key != NovagramDefaultsKey.storyUnlockEnabled,
+                menuItems: novagramSettingsLinkMenu(entryId, arguments: arguments)
             )
         case let .chatLockToggle(_, entryId, title, subtitle, value, viewType):
             return GeneralInteractedRowItem(
@@ -391,7 +393,8 @@ private enum NovagramEntry: Comparable, Identifiable {
                 // The row's true value comes from the keychain and only flips on sheet success.
                 // Without autoswitch:false the switch optimistically snaps ON on tap and, if the
                 // user dismisses the Set-Pincode sheet with X, never reconciles back to OFF.
-                autoswitch: false
+                autoswitch: false,
+                menuItems: novagramSettingsLinkMenu(entryId, arguments: arguments)
             )
         case let .novagramProxyToggle(_, entryId, title, subtitle, value, viewType):
             return GeneralInteractedRowItem(
@@ -403,7 +406,8 @@ private enum NovagramEntry: Comparable, Identifiable {
                 viewType: viewType,
                 action: {
                     arguments.updateNovagramProxy(!value)
-                }
+                },
+                menuItems: novagramSettingsLinkMenu(entryId, arguments: arguments)
             )
         case let .disclosurePlaceholder(_, entryId, title, label, viewType, subKey):
             return GeneralInteractedRowItem(
@@ -414,7 +418,8 @@ private enum NovagramEntry: Comparable, Identifiable {
                 viewType: viewType,
                 action: {
                     arguments.openSubController(subKey)
-                }
+                },
+                menuItems: novagramSettingsLinkMenu(entryId, arguments: arguments)
             )
         case let .disclosureSTTLanguage(_, entryId, title, label, viewType):
             return GeneralInteractedRowItem(
@@ -425,7 +430,8 @@ private enum NovagramEntry: Comparable, Identifiable {
                 viewType: viewType,
                 action: {
                     arguments.pickSTTLanguage()
-                }
+                },
+                menuItems: novagramSettingsLinkMenu(entryId, arguments: arguments)
             )
         case let .action(_, entryId, title, subtitle, viewType, handler):
             return GeneralInteractedRowItem(
@@ -435,7 +441,8 @@ private enum NovagramEntry: Comparable, Identifiable {
                 description: subtitle,
                 type: .next,
                 viewType: viewType,
-                action: handler
+                action: handler,
+                menuItems: novagramSettingsLinkMenu(entryId, arguments: arguments)
             )
         case let .adsToggle(_, entryId, title, subtitle, value, viewType):
             // `value` is the switch state (ON = ads removed), so the new `showAds` is the old switch state.
@@ -555,8 +562,11 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.disclosurePlaceholder(next(), .autoFolderStyle, l10n.settings_folderStyle_title, l10n.settings_folderStyle_label(state.folderStyle), .innerItem, "folder_style"))
     entries.append(.toggle(next(), .autoChannelHistory, l10n.settings_channelHistory_title, l10n.settings_channelHistory_subtitle, state.channelHistoryButton, .innerItem, NovagramDefaultsKey.channelHistoryButton))
     entries.append(.toggle(next(), .autoStoryUnlock, l10n.settings_storyUnlock_title, l10n.settings_storyUnlock_subtitle, state.storyUnlockEnabled, .innerItem, NovagramDefaultsKey.storyUnlockEnabled))
-    entries.append(.toggle(next(), .autoTranslateChats, l10n.settings_translateUnlock_title, l10n.settings_translateUnlock_subtitle, state.translateChatsUnlock, .lastItem, NovagramDefaultsKey.translateChatsUnlock))
-    entries.append(.footer(next(), .autoFooter, l10n.settings_automationFooter))
+    entries.append(.toggle(next(), .autoTranslateChats, l10n.settings_translateUnlock_title, l10n.settings_translateUnlock_subtitle, state.translateChatsUnlock, .innerItem, NovagramDefaultsKey.translateChatsUnlock))
+    entries.append(.action(next(), .actionShareLink, l10n.settingsLink_shareTitle, nil, .lastItem, {
+        novagramShareSettingsLink(NovagramSettingsLink.url(slug: nil), context: arguments.context)
+    }))
+    entries.append(.footer(next(), .autoFooter, l10n.settings_automationFooter + " " + l10n.settingsLink_hint))
 
     // ─── PROTECTION ───
     entries.append(.section(sectionId)); sectionId += 1
@@ -602,6 +612,20 @@ private func prepareNovagramTransition(left: [AppearanceWrapperEntry<NovagramEnt
 // MARK: - Controller
 
 class NovagramSettingsController: TableViewController {
+
+    // Set by a tg://settings/novagrampro/<slug> link: the row to scroll to and highlight once loaded.
+    var focusSlug: String?
+
+    private func applyFocusSlug() {
+        guard let slug = focusSlug, let entryId = novagramSettingsEntryId(slug: slug) else {
+            return
+        }
+        guard genericView.item(stableId: AnyHashable(entryId)) != nil else {
+            return
+        }
+        focusSlug = nil
+        genericView.scroll(to: .center(id: AnyHashable(entryId), innerId: nil, animated: true, focus: .init(focus: true), inset: 0), inset: NSEdgeInsets())
+    }
 
     private let disposable = MetaDisposable()
     private let adsDisposable = MetaDisposable()
@@ -829,6 +853,7 @@ class NovagramSettingsController: TableViewController {
         disposable.set(signal.start(next: { [weak self] transition in
             self?.genericView.merge(with: transition)
             self?.readyOnce()
+            self?.applyFocusSlug()
         }))
     }
 
@@ -871,6 +896,61 @@ class NovagramSettingsController: TableViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         window?.removeAllHandlers(for: self)
+    }
+}
+
+// MARK: - Settings links (iOS NovagramSettingsFeature slugs, same kebab-case values)
+
+private let novagramSettingsSlugs: [(NovagramEntryId, String)] = [
+    (.topAbout, "about"), (.topBots, "bots"),
+    (.interfaceHideFolders, "hide-folders"), (.interfaceStories, "stories"), (.interfaceMutual, "mutual-contacts"), (.interfaceUnlimitedPins, "unlimited-pins"),
+    (.chatDeleted, "deleted-messages"), (.chatEditedHistory, "edited-history"), (.chatFirstMessage, "first-message"), (.chatGhostActive, "ghost-mode"), (.chatGhost, "ghost-button"),
+    (.chatCamera, "camera-picker"), (.chatRoundVideo, "round-video"), (.chatForwardHideNames, "forward-hide-names"),
+    (.messagingTextStyle, "text-style"), (.messagingAutoText, "auto-text"), (.messagingAutoTranslate, "auto-translate"), (.messagingTranslateToggle, "translate-button"),
+    (.messagingTranslateLang, "translate-language"), (.messagingTranslateConfirm, "translate-on-send"), (.messagingAskVoice, "send-confirm"), (.messagingAskSticker, "send-confirm-sticker"),
+    (.messagingAutoSticker, "auto-sticker"), (.messagingHeartEffect, "heart-effect"),
+    (.sttEnabled, "voice-to-text"), (.sttLanguage, "voice-language"), (.sttVoiceTranslate, "voice-translate"),
+    (.remindersUnread, "reminder"), (.remindersTime, "reminder-time"), (.remindersSound, "reminder-sound"),
+    (.autoApproveJoin, "auto-accept"), (.autoUnlimitedFolders, "unlimited-folders"), (.actionSuggestedFolders, "recommended-folders"), (.autoFoldersPrompt, "folders-prompt"),
+    (.actionAdminFolder, "admin-folders"), (.autoFolderStyle, "folder-style"), (.autoChannelHistory, "channel-history"), (.autoStoryUnlock, "story-saving"),
+    (.autoTranslateChats, "translate-entire-chats"), (.actionShareLink, "share-link"),
+    (.protectionChatLock, "chat-lock"), (.protectionProxy, "proxy"), (.protectionForeign, "block-foreign"), (.protectionAutoDownload, "auto-download"),
+    (.appearanceAccent, "white-accent")
+]
+
+private func novagramSettingsSlug(_ id: NovagramEntryId) -> String? {
+    return novagramSettingsSlugs.first(where: { $0.0 == id })?.1
+}
+
+private func novagramSettingsEntryId(slug: String) -> NovagramEntryId? {
+    return novagramSettingsSlugs.first(where: { $0.1 == slug })?.0
+}
+
+func novagramShareSettingsLink(_ link: String, context: AccountContext) {
+    NSPasteboard.general.clearContents()
+    NSPasteboard.general.setString(link, forType: .string)
+    showModal(with: ShareModalController(ShareLinkObject(context, link: link)), for: context.window)
+}
+
+// Right-click on a row: a link straight to that setting (iOS: long press).
+private func novagramSettingsLinkMenu(_ id: NovagramEntryId, arguments: NovagramSettingsArguments) -> (() -> [ContextMenuItem])? {
+    guard let slug = novagramSettingsSlug(id) else {
+        return nil
+    }
+    let context = arguments.context
+    return {
+        let l10n = NovagramL10n.current
+        let link = NovagramSettingsLink.url(slug: slug)
+        return [
+            ContextMenuItem(l10n.settingsLink_copy, handler: {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(link, forType: .string)
+                showModalText(for: context.window, text: l10n.settingsLink_copied)
+            }, itemImage: MenuAnimation.menu_copy_link.value),
+            ContextMenuItem(l10n.settingsLink_share, handler: {
+                showModal(with: ShareModalController(ShareLinkObject(context, link: link)), for: context.window)
+            }, itemImage: MenuAnimation.menu_share.value)
+        ]
     }
 }
 

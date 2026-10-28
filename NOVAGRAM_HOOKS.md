@@ -364,3 +364,7 @@ New file `fork-patches/telegramcore/NovagramLocalPins.swift` (port of iOS `Teleg
 | `State/ManagedSynchronizePinnedChatsOperations.swift` | the same after the local/remote reconciliation |
 
 App: Interface → Unlimited Pins switch; turning it off runs `novagramTrimPinnedChatsToServerLimit(account:)` for every logged-in account (unpins exactly the stored ids), then `NovagramLocalPins.clearAllAccounts()`. Known limit, same as iOS: drag reordering does not update the stored tail.
+
+### Phase 7: Novagram Settings links
+
+No Telegram file changed (the `tg://settings/novagrampro` routing in `InAppLinks.swift` already existed). Ours: `NovagramSettingsLinks.swift` takes the iOS kebab-case slugs (old underscore forms still work) and the `?f=<slug>` alias; a slug that is not a sub-screen scrolls to its row and highlights it (`NovagramSettingsController.focusSlug`). Every Novagram Settings row with a slug has a right-click menu: Copy link (toast) and Share link (`ShareModalController`). New row "Share Novagram Settings link" at the end of Automation, hint in its footer. The slug table (`novagramSettingsSlugs`) matches iOS `NovagramSettingsFeature`; Mac-only rows: `ghost-button`, `send-confirm-sticker`, `unlimited-folders`. The developer rows have no link, as on iOS.
