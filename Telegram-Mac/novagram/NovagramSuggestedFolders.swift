@@ -13,6 +13,7 @@ import TelegramCore
 import SwiftSignalKit
 import TGUIKit
 import Localization
+import NovagramCore
 
 final class NovagramSuggestedFolders {
 
@@ -28,6 +29,26 @@ final class NovagramSuggestedFolders {
             excludePeers: [],
             color: nil
         )
+    }
+
+    // iOS "Suggest folders after login": the "Add folders?" alert shows once per install,
+    // only while the switch is on. Turning the switch on later still shows it once.
+    static func presentFirstLaunchPromptIfNeeded(context: AccountContext) {
+        guard NovagramSettingsKey.bool("fenix_features_folders_prompt_enabled") else {
+            return
+        }
+        let defaults = UserDefaults(suiteName: NovagramSettingsKey.suite)
+        let doneKey = "fenix_features_firstrun_done"
+        guard defaults?.bool(forKey: doneKey) != true else {
+            return
+        }
+        defaults?.set(true, forKey: doneKey)
+        let l10n = NovagramL10n.current
+        Queue.mainQueue().after(2.5, {
+            verifyAlert(for: context.window, header: l10n.foldersPrompt_alertTitle, information: l10n.foldersPrompt_alertText, ok: l10n.foldersPrompt_alertConfirm, cancel: l10n.askSend_cancel, successHandler: { _ in
+                createSuggestedFolders(context: context, completion: {})
+            })
+        })
     }
 
     /// Feature #36: Create default recommended folders (Personal, Groups, Channels, Bots, Unread)

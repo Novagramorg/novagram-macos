@@ -63,6 +63,14 @@ private enum NovagramDefaultsKey {
     static let autoApproveJoinRequests    = "auto_approve_join_requests"
     static let unlimitedFolders           = "unlimited_folders"
     static let adminFolders               = "fenix_admin_folders"
+    static let editedHistoryEnabled       = "edited_history_enabled"
+    static let roundVideoFromGallery      = "round_video_from_gallery"
+    static let forwardHideNames           = "forward_hide_names"
+    static let autoStickerEnabled         = "auto_sticker_enabled"
+    static let heartEffectEnabled         = "heart_effect_enabled"
+    static let foldersPromptEnabled       = "fenix_features_folders_prompt_enabled"
+    static let storyUnlockEnabled         = "fenix_story_unlock_enabled"
+    static let translateChatsUnlock       = "fenix_translate_chats_unlock"
 }
 
 private struct NovagramSettingsState: Equatable {
@@ -87,6 +95,14 @@ private struct NovagramSettingsState: Equatable {
     var autoApproveJoinRequests: Bool
     var unlimitedFolders: Bool
     var adminFolders: Bool
+    var editedHistoryEnabled: Bool
+    var roundVideoFromGallery: Bool
+    var forwardHideNames: Bool
+    var autoStickerEnabled: Bool
+    var heartEffectEnabled: Bool
+    var foldersPromptEnabled: Bool
+    var storyUnlockEnabled: Bool
+    var translateChatsUnlock: Bool
     // Feature #46: derived from the keychain (source of truth), NOT novagramDefaults.
     var chatLockMasterEnabled: Bool
     // NovagramProxy opt-in — derived from NovagramAutoProxyManager (owns the "pro_messager" key).
@@ -123,6 +139,14 @@ private struct NovagramSettingsState: Equatable {
             autoApproveJoinRequests: d?.bool(forKey: NovagramDefaultsKey.autoApproveJoinRequests) ?? false,
             unlimitedFolders: d?.bool(forKey: NovagramDefaultsKey.unlimitedFolders) ?? false,
             adminFolders: NovagramAdminFoldersManager.isEnabled,
+            editedHistoryEnabled: d?.object(forKey: NovagramDefaultsKey.editedHistoryEnabled) as? Bool ?? true,
+            roundVideoFromGallery: d?.bool(forKey: NovagramDefaultsKey.roundVideoFromGallery) ?? false,
+            forwardHideNames: d?.bool(forKey: NovagramDefaultsKey.forwardHideNames) ?? false,
+            autoStickerEnabled: d?.bool(forKey: NovagramDefaultsKey.autoStickerEnabled) ?? false,
+            heartEffectEnabled: d?.bool(forKey: NovagramDefaultsKey.heartEffectEnabled) ?? false,
+            foldersPromptEnabled: d?.bool(forKey: NovagramDefaultsKey.foldersPromptEnabled) ?? false,
+            storyUnlockEnabled: d?.bool(forKey: NovagramDefaultsKey.storyUnlockEnabled) ?? false,
+            translateChatsUnlock: d?.bool(forKey: NovagramDefaultsKey.translateChatsUnlock) ?? false,
             chatLockMasterEnabled: NovagramChatPincodeManager.shared.isMasterEnabled(),
             novagramProxyEnabled: NovagramAutoProxyManager.shared.isEnabled
         )
@@ -165,11 +189,11 @@ private enum NovagramEntryId: Hashable {
     case topAbout
     case topBots
     case interfaceHideFolders, interfaceStories, interfaceMutual, interfaceFooter
-    case chatDeleted, chatFirstMessage, chatGhostActive, chatGhost, chatCamera, chatFooter
-    case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingAskVoice, messagingAskSticker, messagingFooter
+    case chatDeleted, chatEditedHistory, chatFirstMessage, chatGhostActive, chatGhost, chatCamera, chatRoundVideo, chatForwardHideNames, chatFooter
+    case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingAskVoice, messagingAskSticker, messagingAutoSticker, messagingHeartEffect, messagingFooter
     case sttEnabled, sttLanguage
     case protectionChatLock, protectionProxy, protectionForeign, protectionFooter
-    case remindersUnread, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, actionAdminFolder, autoFooter
+    case remindersUnread, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoStoryUnlock, autoTranslateChats, autoFooter
     case adsRemoveAll, devCurrencyRates, devAdsPanel, devStickerPackSave, devFooter
 }
 
@@ -188,6 +212,14 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .chatGhostActive:          map = ("eye.slash.fill", .gray)
     case .chatGhost:                map = ("eye.slash", .gray)
     case .chatCamera:               map = ("camera.rotate.fill", .orange)
+    case .chatEditedHistory:        map = ("clock.arrow.circlepath", .blue)
+    case .chatRoundVideo:           map = ("video.circle.fill", .violet)
+    case .chatForwardHideNames:     map = ("arrowshape.turn.up.right.fill", .teal)
+    case .messagingAutoSticker:     map = ("face.smiling", .orange)
+    case .messagingHeartEffect:     map = ("heart.fill", .red)
+    case .autoFoldersPrompt:        map = ("folder.badge.questionmark", .lightBlue)
+    case .autoStoryUnlock:          map = ("arrow.down.circle.fill", .violet)
+    case .autoTranslateChats:       map = ("character.bubble", .pink)
     case .messagingTextStyle:       map = ("textformat", .purple)
     case .messagingAutoText:        map = ("text.append", .teal)
     case .messagingAutoTranslate:   map = ("globe", .pink)
@@ -305,7 +337,9 @@ private enum NovagramEntry: Comparable, Identifiable {
                 viewType: viewType,
                 action: {
                     arguments.updateBool(key, !value)
-                }
+                },
+                // Story saving asks first, so its switch must not flip before the user confirms.
+                autoswitch: key != NovagramDefaultsKey.storyUnlockEnabled
             )
         case let .chatLockToggle(_, entryId, title, subtitle, value, viewType):
             return GeneralInteractedRowItem(
@@ -431,10 +465,13 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.section(sectionId)); sectionId += 1
     entries.append(.header(next(), .header(2), l10n.settings_section_chat))
     entries.append(.toggle(next(), .chatDeleted, l10n.settings_chat_deletedMessages_title, nil, state.showDeletedMessages, .firstItem, NovagramDefaultsKey.showDeletedMessages))
+    entries.append(.toggle(next(), .chatEditedHistory, l10n.settings_chat_editedHistory_title, l10n.settings_chat_editedHistory_subtitle, state.editedHistoryEnabled, .innerItem, NovagramDefaultsKey.editedHistoryEnabled))
     entries.append(.toggle(next(), .chatFirstMessage, l10n.settings_chat_firstMessage_title, nil, state.showViewFirstMessage, .innerItem, NovagramDefaultsKey.showViewFirstMessage))
     entries.append(.toggle(next(), .chatGhostActive, l10n.settings_chat_ghostActive_title, l10n.settings_chat_ghostActive_subtitle, state.ghostModeActive, .innerItem, NovagramDefaultsKey.ghostModeActive))
     entries.append(.toggle(next(), .chatGhost, l10n.settings_chat_ghost_title, nil, state.showGhostMode, .innerItem, NovagramDefaultsKey.showGhostMode))
-    entries.append(.toggle(next(), .chatCamera, l10n.settings_chat_camera_title, l10n.settings_chat_camera_subtitle, state.longPressCameraSelection, .lastItem, NovagramDefaultsKey.longPressCameraSelection))
+    entries.append(.toggle(next(), .chatCamera, l10n.settings_chat_camera_title, l10n.settings_chat_camera_subtitle, state.longPressCameraSelection, .innerItem, NovagramDefaultsKey.longPressCameraSelection))
+    entries.append(.toggle(next(), .chatRoundVideo, l10n.settings_chat_roundVideo_title, l10n.settings_chat_roundVideo_subtitle, state.roundVideoFromGallery, .innerItem, NovagramDefaultsKey.roundVideoFromGallery))
+    entries.append(.toggle(next(), .chatForwardHideNames, l10n.settings_chat_forwardHideNames_title, l10n.settings_chat_forwardHideNames_subtitle, state.forwardHideNames, .lastItem, NovagramDefaultsKey.forwardHideNames))
     entries.append(.footer(next(), .chatFooter, l10n.settings_chat_footer))
 
     // ─── MESSAGES ───
@@ -448,7 +485,9 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.toggle(next(), .messagingTranslateToggle, l10n.settings_messaging_translateToggle_title, l10n.settings_messaging_translateToggle_subtitle, state.showTranslateMessages, .innerItem, NovagramDefaultsKey.showTranslateMessages))
     entries.append(.disclosurePlaceholder(next(), .messagingTranslateLang, l10n.settings_messaging_translateLanguage_title, "", .innerItem, "translate_language"))
     entries.append(.toggle(next(), .messagingAskVoice, l10n.settings_askVoice_title, l10n.settings_askVoice_subtitle, state.askBeforeSendVoice, .innerItem, NovagramDefaultsKey.askBeforeSendVoice))
-    entries.append(.toggle(next(), .messagingAskSticker, l10n.settings_askSticker_title, l10n.settings_askSticker_subtitle, state.askBeforeSendSticker, .lastItem, NovagramDefaultsKey.askBeforeSendSticker))
+    entries.append(.toggle(next(), .messagingAskSticker, l10n.settings_askSticker_title, l10n.settings_askSticker_subtitle, state.askBeforeSendSticker, .innerItem, NovagramDefaultsKey.askBeforeSendSticker))
+    entries.append(.toggle(next(), .messagingAutoSticker, l10n.settings_autoSticker_title, l10n.settings_autoSticker_subtitle, state.autoStickerEnabled, .innerItem, NovagramDefaultsKey.autoStickerEnabled))
+    entries.append(.toggle(next(), .messagingHeartEffect, l10n.settings_heartEffect_title, l10n.settings_heartEffect_subtitle, state.heartEffectEnabled, .lastItem, NovagramDefaultsKey.heartEffectEnabled))
     entries.append(.footer(next(), .messagingFooter, l10n.settings_messaging_footer))
 
     // ─── VOICE → TEXT ───
@@ -470,7 +509,10 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
             }
         })
     }))
-    entries.append(.toggle(next(), .actionAdminFolder, NovagramAdminFoldersStrings.toggleTitle(langCode: NovagramAdminFoldersManager.langCode), NovagramAdminFoldersStrings.toggleSubtitle(langCode: NovagramAdminFoldersManager.langCode), state.adminFolders, .lastItem, NovagramDefaultsKey.adminFolders))
+    entries.append(.toggle(next(), .autoFoldersPrompt, l10n.settings_foldersPrompt_title, l10n.settings_foldersPrompt_subtitle, state.foldersPromptEnabled, .innerItem, NovagramDefaultsKey.foldersPromptEnabled))
+    entries.append(.toggle(next(), .actionAdminFolder, NovagramAdminFoldersStrings.toggleTitle(langCode: NovagramAdminFoldersManager.langCode), NovagramAdminFoldersStrings.toggleSubtitle(langCode: NovagramAdminFoldersManager.langCode), state.adminFolders, .innerItem, NovagramDefaultsKey.adminFolders))
+    entries.append(.toggle(next(), .autoStoryUnlock, l10n.settings_storyUnlock_title, l10n.settings_storyUnlock_subtitle, state.storyUnlockEnabled, .innerItem, NovagramDefaultsKey.storyUnlockEnabled))
+    entries.append(.toggle(next(), .autoTranslateChats, l10n.settings_translateUnlock_title, l10n.settings_translateUnlock_subtitle, state.translateChatsUnlock, .lastItem, NovagramDefaultsKey.translateChatsUnlock))
     entries.append(.footer(next(), .autoFooter, l10n.settings_automationFooter))
 
     // ─── PROTECTION ───
@@ -554,8 +596,18 @@ class NovagramSettingsController: TableViewController {
                     } else {
                         NovagramAdminFoldersManager.disable(context: context)
                     }
+                } else if key == NovagramDefaultsKey.storyUnlockEnabled && value {
+                    let l10n = NovagramL10n.current
+                    verifyAlert(for: window, header: l10n.settings_storyUnlock_warningTitle, information: l10n.settings_storyUnlock_warningText, ok: l10n.settings_storyUnlock_warningConfirm, cancel: l10n.askSend_cancel, successHandler: { _ in
+                        novagramDefaults?.set(true, forKey: key)
+                        updateState { $0.storyUnlockEnabled = true }
+                    })
+                    return
                 } else {
                     novagramDefaults?.set(value, forKey: key)
+                    if key == NovagramDefaultsKey.autoStickerEnabled && !value {
+                        NovagramOutgoing.clearAutoSticker()
+                    }
                 }
                 updateState { state in
                     switch key {
@@ -572,6 +624,14 @@ class NovagramSettingsController: TableViewController {
                     case NovagramDefaultsKey.blockForeignUsers: state.blockForeignUsers = value
                     case NovagramDefaultsKey.unlimitedFolders: state.unlimitedFolders = value
                     case NovagramDefaultsKey.adminFolders: state.adminFolders = value
+                    case NovagramDefaultsKey.editedHistoryEnabled: state.editedHistoryEnabled = value
+                    case NovagramDefaultsKey.roundVideoFromGallery: state.roundVideoFromGallery = value
+                    case NovagramDefaultsKey.forwardHideNames: state.forwardHideNames = value
+                    case NovagramDefaultsKey.autoStickerEnabled: state.autoStickerEnabled = value
+                    case NovagramDefaultsKey.heartEffectEnabled: state.heartEffectEnabled = value
+                    case NovagramDefaultsKey.foldersPromptEnabled: state.foldersPromptEnabled = value
+                    case NovagramDefaultsKey.storyUnlockEnabled: state.storyUnlockEnabled = value
+                    case NovagramDefaultsKey.translateChatsUnlock: state.translateChatsUnlock = value
                     default: break
                     }
                 }

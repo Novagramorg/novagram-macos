@@ -9,10 +9,24 @@ public enum NovagramOutgoing {
     // Telegram's built-in heart message effect.
     public static let heartEffectId: Int64 = 5159385139981059251
 
-    private static let lastSentSticker = Atomic<TelegramMediaFile?>(value: nil)
+    private static let autoStickerDataKey = "auto_sticker_data"
+    private static let lastSentSticker = Atomic<TelegramMediaFile?>(value: savedAutoSticker())
 
     private static var defaults: UserDefaults? {
         return UserDefaults(suiteName: "pro_messager")
+    }
+
+    // iOS keeps the sticker as a base64 PostboxEncoder blob, so it survives a relaunch.
+    private static func savedAutoSticker() -> TelegramMediaFile? {
+        guard let string = defaults?.string(forKey: autoStickerDataKey), let data = Data(base64Encoded: string) else {
+            return nil
+        }
+        return PostboxDecoder(buffer: MemoryBuffer(data: data)).decodeRootObject() as? TelegramMediaFile
+    }
+
+    public static func clearAutoSticker() {
+        _ = lastSentSticker.swap(nil)
+        defaults?.removeObject(forKey: autoStickerDataKey)
     }
 
     // The text with the user's suffix appended, or nil when auto text is off or the text is empty.
@@ -58,17 +72,26 @@ public enum NovagramOutgoing {
         return [MessageTextEntity(range: 0 ..< length, type: type)]
     }
 
-    public static func effectId(_ selected: Int64?) -> Int64? {
+    // The user's own effect wins. Like iOS, the heart goes only on text messages in private chats.
+    public static func effectId(_ selected: Int64?, peerId: PeerId, isText: Bool) -> Int64? {
         if let selected {
             return selected
         }
-        return defaults?.bool(forKey: "heart_effect_enabled") == true ? heartEffectId : nil
+        guard isText, peerId.namespace == Namespaces.Peer.CloudUser, defaults?.bool(forKey: "heart_effect_enabled") == true else {
+            return nil
+        }
+        return heartEffectId
     }
 
     public static func recordSent(_ media: [Media]) {
         for item in media {
             if let file = item as? TelegramMediaFile, file.isSticker {
                 _ = lastSentSticker.swap(file)
+                if defaults?.bool(forKey: "auto_sticker_enabled") == true {
+                    let encoder = PostboxEncoder()
+                    encoder.encodeRootObject(file)
+                    defaults?.set(encoder.makeData().base64EncodedString(), forKey: autoStickerDataKey)
+                }
             }
         }
     }

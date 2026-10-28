@@ -306,3 +306,17 @@ Commit the copy only when the scan exits 0.
 
 - `AuthUI/.../Auth_BotToken.swift` (ours): the token field is one scrolling line (`maximumNumberOfLines = 1`, `cell.wraps = false`, `isScrollable`); a 45+ character token used to wrap and get clipped.
 - `NovagramL10n.botlogin_error_invalid`: shortened (`LoginErrorStateView` is a single line and cut the long text at both ends); `botlogin_info` and the NovagramProxy strings say Novagram instead of Telegram.
+
+## iOS parity (branch `feature/ios-parity`, 2026-10-28)
+
+iOS features that never reached the Mac, ported with the iOS `pro_messager` keys and iOS defaults. Plan: switches for features that were always on on Mac default to off, as on iOS.
+
+### Phase 1: switches for code that already existed
+
+| File | Change |
+| --- | --- |
+| `packages/ChatHistoryModel/.../SenderController.swift` | both heart-effect lines call `NovagramOutgoing.effectId(messageEffect?.id, peerId: peerId, isText: true/false)`: the heart goes only on text messages in private chats (iOS #34) |
+| `packages/ChatUI/.../ChatMessageMenuItems.swift` | edited-history item: `if let item = novagramEditedHistoryMenuItem(...) { sevenBlock.append(item) }` (the item is nil while `edited_history_enabled` is off) |
+| `Telegram-Mac/app/ApplicationContext.swift` | `NovagramSuggestedFolders.presentFirstLaunchPromptIfNeeded(context:)` after the admin folders monitor start |
+
+Ours: `NovagramL10nParity.swift` (strings), `NovagramPremiumUnlock` (`wholeChatTranslate` = `fenix_translate_chats_unlock`, `storiesSaveAndHD` = `fenix_story_unlock_enabled`, both off by default), `NovagramOutgoing` (auto sticker kept in `auto_sticker_data`), `NovagramMessageMenuItems` (`forward_hide_names` gates "Forward without Quotes" only, `edited_history_enabled` default on), `NovagramRoundVideo` (`round_video_from_gallery`), `NovagramSuggestedFolders` (`fenix_features_folders_prompt_enabled`, once per install via `fenix_features_firstrun_done`), Novagram Settings rows.

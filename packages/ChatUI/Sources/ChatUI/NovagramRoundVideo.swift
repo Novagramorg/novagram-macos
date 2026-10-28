@@ -15,6 +15,9 @@ import NovagramCore
 
 // Round video from a file (attach menu): picks a video and sends it as an instant round video message.
 func novagramRoundVideoMenuItem(chatInteraction: ChatInteraction) -> ContextMenuItem? {
+    guard NovagramSettingsKey.bool("round_video_from_gallery") else {
+        return nil
+    }
     if let channel = chatInteraction.peer as? TelegramChannel, permissionText(from: channel, for: .banSendInstantVideos) != nil {
         return nil
     }

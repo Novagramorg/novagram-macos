@@ -1606,7 +1606,7 @@ public func chatMenuItems(for message: Message, entry: ChatHistoryEntry?, textLa
                 result = strings().chatContextEditedAt(string)
             }
             sevenBlock.append(ContextMenuItem(result, itemImage: MenuAnimation.menu_edited.value))
-            sevenBlock.append(novagramEditedHistoryMenuItem(message: message, chatInteraction: data.chatInteraction)) // Novagram
+            if let item = novagramEditedHistoryMenuItem(message: message, chatInteraction: data.chatInteraction) { sevenBlock.append(item) } // Novagram
         }
         
         

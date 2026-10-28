@@ -240,7 +240,7 @@ public class Sender: NSObject {
             if let sendAsPeerId = sendAsPeerId {
                 attributes.append(SendAsMessageAttribute(peerId: sendAsPeerId))
             }
-            if let effectId = NovagramOutgoing.effectId(messageEffect?.id) { // Novagram
+            if let effectId = NovagramOutgoing.effectId(messageEffect?.id, peerId: peerId, isText: true) { // Novagram
                 attributes.append(EffectMessageAttribute(id: effectId)) // Novagram
             }
             if let sendPaidMessageStars {
@@ -708,7 +708,7 @@ public class Sender: NSObject {
         if isSpoiler {
             attributes.append(MediaSpoilerMessageAttribute())
         }
-        if let effectId = NovagramOutgoing.effectId(messageEffect?.id) { // Novagram
+        if let effectId = NovagramOutgoing.effectId(messageEffect?.id, peerId: peerId, isText: false) { // Novagram
             attributes.append(EffectMessageAttribute(id: effectId)) // Novagram
         }
         NovagramOutgoing.recordSent(media) // Novagram
