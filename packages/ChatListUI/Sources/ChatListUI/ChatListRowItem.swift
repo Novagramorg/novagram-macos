@@ -2382,7 +2382,7 @@ public class ChatListRowItem: TableRowItem {
                 }, itemImage: MenuAnimation.menu_unarchive.value))
             }
             
-            thirdGroup.append(contentsOf: novagramChatListMenuItems(peerId: peerId, accountPeerId: context.peerId, savedMessages: mode.savedMessages, window: context.window)) // Novagram
+            thirdGroup.append(contentsOf: novagramChatListMenuItems(peerId: peerId, peer: peer, accountPeerId: context.peerId, savedMessages: mode.savedMessages, context: context)) // Novagram
             let blocks:[[ContextMenuItem]] = [headGroup, zeroGroup, firstGroup,
                                               secondGroup,
                                               thirdGroup].filter { !$0.isEmpty }

@@ -2,15 +2,28 @@ import Cocoa
 import TGUIKit
 import Postbox
 import LocalAnimations
+import TelegramCore
+import Localization
+import TelegramContext
 import NovagramCore
 
-// Chat list row menu items added by Novagram: chat lock (only once a master PIN exists) and hidden chats.
-func novagramChatListMenuItems(peerId: PeerId?, accountPeerId: PeerId, savedMessages: Bool, window: Window) -> [ContextMenuItem] {
+// Chat list row menu items added by Novagram: recent actions (iOS channel history button), chat lock
+// (only once a master PIN exists) and hidden chats.
+func novagramChatListMenuItems(peerId: PeerId?, peer: Peer?, accountPeerId: PeerId, savedMessages: Bool, context: any AccountContextProtocol) -> [ContextMenuItem] {
     guard let peerId, peerId != accountPeerId, !savedMessages else {
         return []
     }
+    let window = context.window
     let l10n = NovagramL10n.current
     var items: [ContextMenuItem] = []
+
+    if NovagramSettingsKey.bool("fenix_channel_history_button"), let channel = peer as? TelegramChannel, channel.adminRights != nil || channel.flags.contains(.isCreator) {
+        items.append(ContextMenuItem(strings().peerInfoRecentActions, handler: { [weak context] in
+            if let context {
+                NovagramHooks.shared.openRecentActions(context, channel)
+            }
+        }, itemImage: MenuAnimation.menu_list.value))
+    }
 
     let pincode = NovagramChatPincodeManager.shared
     if pincode.isMasterEnabled() {

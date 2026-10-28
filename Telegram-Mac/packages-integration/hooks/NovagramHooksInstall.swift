@@ -1,6 +1,7 @@
 import Cocoa
 import TGUIKit
 import Postbox
+import TelegramCore
 import NovagramCore
 
 func installNovagramHooks() {
@@ -14,6 +15,12 @@ func installNovagramHooks() {
     }
     hooks.accountWillLogOut = { accountId in
         NovagramAnalyticsManager.shared.accountWillLogOut(accountId: accountId)
+    }
+    hooks.openRecentActions = { context, peer in
+        guard let context = context as? AccountContext else {
+            return
+        }
+        context.bindings.rootNavigation().push(ChannelEventLogController(context, peer: EnginePeer(peer)))
     }
     NovagramHooks.install(hooks)
     installNovagramSettingsHooks()

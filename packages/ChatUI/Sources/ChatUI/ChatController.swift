@@ -10733,6 +10733,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        NovagramAutoApproveManager.shared.autoApproveIfNeeded(context: context, peer: chatInteraction.peer) // Novagram
 
         isPushedGlobalBackground = true
         updateBubblesBackButton()

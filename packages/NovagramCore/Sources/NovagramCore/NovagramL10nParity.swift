@@ -63,5 +63,15 @@ public extension NovagramL10n {
     var settings_lightAccent_title: String { pick(en: "Brand accent in light theme", uz: "Yorqin temada brand rangi", ru: "Акцент бренда в светлой теме") }
     var settings_lightAccent_subtitle: String { pick(en: "Applies Novagram blue as the accent color in the light theme", uz: "Yorqin (oq) temada Novagram ko'k rangini accent sifatida qo'llaydi", ru: "Применяет фирменный синий Novagram в качестве акцента в светлой теме") }
     var settings_lightAccent_footer: String { pick(en: "Affects the light theme only. Takes effect without restarting.", uz: "Faqat yorqin (oq) temaga ta'sir qiladi. Qayta ishga tushirmasdan kuchga kiradi.", ru: "Влияет только на светлую тему. Применяется без перезапуска.") }
+    var settings_folderStyle_title: String { pick(en: "Folder display style", uz: "Papka ko'rinishi", ru: "Стиль папок") }
+    func settings_folderStyle_label(_ style: String) -> String {
+        switch style {
+        case "icon": return pick(en: "Icons", uz: "Ikonkalar", ru: "Иконки")
+        case "text": return pick(en: "Text", uz: "Matn", ru: "Текст")
+        default: return pick(en: "Automatic", uz: "Avtomatik", ru: "Авто")
+        }
+    }
+    var settings_channelHistory_title: String { pick(en: "Channel history button", uz: "Kanal tarixi tugmasi", ru: "Кнопка истории канала") }
+    var settings_channelHistory_subtitle: String { pick(en: "Adds “Recent Actions” to the chat list menu of channels and groups you admin", uz: "Siz admin bo'lgan kanal va guruhlar menyusiga «So'nggi amallar» bandini qo'shadi", ru: "Добавляет «Недавние действия» в меню каналов и групп, где вы администратор") }
     var settings_voiceTranslate_subtitle: String { pick(en: "When dictation ends, the text is translated into the auto-translate language. Works when “Ask to translate on send” is off", uz: "Diktovka tugagach matn avto-tarjima tiliga tarjima qilinadi. «Yuborishda tarjima so'rovi» o'chiq bo'lsa ishlaydi", ru: "После диктовки текст переводится на язык автоперевода. Работает, когда «Запрос перевода при отправке» выключен") }
 }

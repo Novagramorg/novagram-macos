@@ -340,3 +340,14 @@ No Telegram file changed. Ours: `NovagramUnreadReminderManager` reads the iOS ke
 | `Telegram-Mac/app/ApplicationContext.swift` | `NovagramAutoDownload.applyIfNeeded(context:)` after the folders prompt (keeps a newly started account's auto-download off) |
 
 Ours: `NovagramSettingsController.swift` `NovagramAutoDownload` (`auto_download_disabled` sets `AutomaticMediaDownloadSettings.automaticDownload` for every logged-in account; Mac has one switch for all networks) and `NovagramWhiteThemeAccent` (`white_theme_accent_enabled`: `LocalAccentColor` #0A9BF5 for `.day` and `.dayClassic`, re-applied with `installDefaultAccent()` when a light builtin theme is active; off removes only our accent). `NovagramBrandColors` now uses the iOS blue palette (was the old green, unused).
+
+### Phase 5: chat list and folders
+
+| File | Change |
+| --- | --- |
+| `packages/ChatListUI/.../ChatListRevealItem.swift` | `import NovagramCore`; folder tab `title` = `NovagramFolderStyle.tabTitle(tab.title, emoticon: tab.emoticon)`; tab entities dropped while the emoji is shown (3 lines) |
+| `packages/ChatListUI/.../ChatListRowItem.swift` | menu call is now `novagramChatListMenuItems(peerId:peer:accountPeerId:savedMessages:context:)` |
+| `packages/ChatUI/.../ChatController.swift` | `viewDidAppear`: `NovagramAutoApproveManager.shared.autoApproveIfNeeded(context:peer:)` |
+| `Telegram-Mac/app/ApplicationContext.swift` | `NovagramAutoApproveManager.shared.start(context:)` after `applyIfNeeded`, `.stop()` after the reminder stop |
+
+Ours: `NovagramFolderStyle` (`fenix_folder_display_style`: icon / text / auto, the header rebuilds the folders item on `novagramSettingsRevision`), "Recent actions" chat list menu item (`fenix_channel_history_button`, admin or creator of a channel / supergroup, `NovagramHooks.openRecentActions` → `ChannelEventLogController`), `NovagramAutoApproveManager` rewritten after iOS `NovagramAutoAcceptManager`: key `fenix_autoaccept_global` (old Mac key `auto_approve_join_requests` copied once), chat open + peer info + 60 s scan of the first 300 chats, 15 s cooldown per chat, importer contexts kept 30 s so `updateAll(.approve)` finishes.

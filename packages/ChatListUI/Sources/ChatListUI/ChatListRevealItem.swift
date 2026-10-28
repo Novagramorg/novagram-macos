@@ -11,6 +11,7 @@ import TelegramUtils
 import GeneralRows
 import StoriesUI
 import InlineStickerLayer
+import NovagramCore // Novagram
 
 public class ChatListRevealItem: TableStickItem {
     fileprivate let action:((ChatListFilter)->Void)?
@@ -267,14 +268,14 @@ public final class ChatListRevealView : TableStickView {
         for tab in item.tabs {
             let unreadCount = item.counters.count(for: tab)
             let icon: CGImage? = generateIcon(tab)
-            let title: String = tab.title
+            let title: String = NovagramFolderStyle.tabTitle(tab.title, emoticon: tab.emoticon) // Novagram
             let selected = item.selected == tab
 
             let segmentItem = ScrollableSegmentItem(title: title, index: index, uniqueId: Int64(ChatListUIHooks.shared.chatListFilterId(tab)), selected: selected, insets: insets, icon: icon, theme: segmentTheme, equatable: UIEquatable(unreadCount), customTextView: {
                 
                 let attr = NSMutableAttributedString()
                 attr.append(string: title, color: selected ? segmentTheme.activeText : segmentTheme.inactiveText, font: segmentTheme.textFont)
-                InlineStickerItem.apply(to: attr, associatedMedia: [:], entities: tab.entities, isPremium: context.isPremium, playPolicy: tab.enableAnimations ? nil : .framesCount(1))
+                InlineStickerItem.apply(to: attr, associatedMedia: [:], entities: NovagramFolderStyle.showsEmoji(tab.emoticon) ? [] : tab.entities, isPremium: context.isPremium, playPolicy: tab.enableAnimations ? nil : .framesCount(1)) // Novagram
 
                 let layout = TextViewLayout(attr)
                 layout.measure(width: .greatestFiniteMagnitude)

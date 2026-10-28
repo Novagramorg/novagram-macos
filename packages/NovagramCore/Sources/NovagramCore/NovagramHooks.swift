@@ -10,6 +10,8 @@ public struct NovagramHooks {
     public var presentEditedHistory: (_ context: any AccountContextProtocol, _ peerId: PeerId, _ messageId: Int32, _ currentText: String) -> Void = { _, _, _, _ in }
     // Statistics: the user confirmed a logout of this account (called right before logoutFromAccount).
     public var accountWillLogOut: (_ accountId: AccountRecordId) -> Void = { _ in }
+    // Chat list menu → Recent actions (admin log) of a channel or supergroup.
+    public var openRecentActions: (_ context: any AccountContextProtocol, _ peer: Peer) -> Void = { _, _ in }
 
     public init() {}
 

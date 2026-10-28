@@ -62,7 +62,7 @@ private enum NovagramDefaultsKey {
     static let askBeforeSendVoice         = "ask_before_send_voice"
     static let askBeforeSendSticker       = "ask_before_send_sticker"
     static let unreadReminderEnabled      = "unread_reminder_enabled"
-    static let autoApproveJoinRequests    = "auto_approve_join_requests"
+    static let autoApproveJoinRequests    = NovagramAutoApproveManager.defaultsKey
     static let unlimitedFolders           = "unlimited_folders"
     static let adminFolders               = "fenix_admin_folders"
     static let editedHistoryEnabled       = "edited_history_enabled"
@@ -77,6 +77,7 @@ private enum NovagramDefaultsKey {
     static let voiceTranslateEnabled      = "voice_translate_enabled"
     static let autoDownloadDisabled       = "auto_download_disabled"
     static let whiteThemeAccentEnabled    = "white_theme_accent_enabled"
+    static let channelHistoryButton       = "fenix_channel_history_button"
 }
 
 private struct NovagramSettingsState: Equatable {
@@ -115,6 +116,8 @@ private struct NovagramSettingsState: Equatable {
     var reminderSound: String
     var autoDownloadDisabled: Bool
     var whiteThemeAccentEnabled: Bool
+    var folderStyle: String
+    var channelHistoryButton: Bool
     // Feature #46: derived from the keychain (source of truth), NOT novagramDefaults.
     var chatLockMasterEnabled: Bool
     // NovagramProxy opt-in — derived from NovagramAutoProxyManager (owns the "pro_messager" key).
@@ -148,7 +151,7 @@ private struct NovagramSettingsState: Equatable {
             askBeforeSendVoice: d?.bool(forKey: NovagramDefaultsKey.askBeforeSendVoice) ?? false,
             askBeforeSendSticker: d?.bool(forKey: NovagramDefaultsKey.askBeforeSendSticker) ?? false,
             unreadReminderEnabled: d?.bool(forKey: NovagramDefaultsKey.unreadReminderEnabled) ?? false,
-            autoApproveJoinRequests: d?.bool(forKey: NovagramDefaultsKey.autoApproveJoinRequests) ?? false,
+            autoApproveJoinRequests: NovagramAutoApproveManager.shared.isEnabled,
             unlimitedFolders: d?.bool(forKey: NovagramDefaultsKey.unlimitedFolders) ?? false,
             adminFolders: NovagramAdminFoldersManager.isEnabled,
             editedHistoryEnabled: d?.object(forKey: NovagramDefaultsKey.editedHistoryEnabled) as? Bool ?? true,
@@ -165,6 +168,8 @@ private struct NovagramSettingsState: Equatable {
             reminderSound: NovagramUnreadReminderManager.shared.soundKey,
             autoDownloadDisabled: d?.bool(forKey: NovagramDefaultsKey.autoDownloadDisabled) ?? false,
             whiteThemeAccentEnabled: d?.bool(forKey: NovagramDefaultsKey.whiteThemeAccentEnabled) ?? false,
+            folderStyle: NovagramFolderStyle.current,
+            channelHistoryButton: d?.bool(forKey: NovagramDefaultsKey.channelHistoryButton) ?? false,
             chatLockMasterEnabled: NovagramChatPincodeManager.shared.isMasterEnabled(),
             novagramProxyEnabled: NovagramAutoProxyManager.shared.isEnabled
         )
@@ -212,7 +217,7 @@ private enum NovagramEntryId: Hashable {
     case sttEnabled, sttLanguage, sttVoiceTranslate
     case protectionChatLock, protectionProxy, protectionForeign, protectionAutoDownload, protectionFooter
     case appearanceAccent, appearanceFooter
-    case remindersUnread, remindersTime, remindersSound, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoStoryUnlock, autoTranslateChats, autoFooter
+    case remindersUnread, remindersTime, remindersSound, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoFolderStyle, autoChannelHistory, autoStoryUnlock, autoTranslateChats, autoFooter
     case adsRemoveAll, devCurrencyRates, devAdsPanel, devStickerPackSave, devFooter
 }
 
@@ -240,6 +245,8 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .sttVoiceTranslate:        map = ("waveform.badge.plus", .teal)
     case .autoFoldersPrompt:        map = ("folder.badge.questionmark", .lightBlue)
     case .autoStoryUnlock:          map = ("arrow.down.circle.fill", .violet)
+    case .autoFolderStyle:          map = ("square.grid.2x2.fill", .teal)
+    case .autoChannelHistory:       map = ("list.bullet.rectangle.fill", .orange)
     case .autoTranslateChats:       map = ("character.bubble", .pink)
     case .messagingTextStyle:       map = ("textformat", .purple)
     case .messagingAutoText:        map = ("text.append", .teal)
@@ -540,6 +547,8 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     }))
     entries.append(.toggle(next(), .autoFoldersPrompt, l10n.settings_foldersPrompt_title, l10n.settings_foldersPrompt_subtitle, state.foldersPromptEnabled, .innerItem, NovagramDefaultsKey.foldersPromptEnabled))
     entries.append(.toggle(next(), .actionAdminFolder, NovagramAdminFoldersStrings.toggleTitle(langCode: NovagramAdminFoldersManager.langCode), NovagramAdminFoldersStrings.toggleSubtitle(langCode: NovagramAdminFoldersManager.langCode), state.adminFolders, .innerItem, NovagramDefaultsKey.adminFolders))
+    entries.append(.disclosurePlaceholder(next(), .autoFolderStyle, l10n.settings_folderStyle_title, l10n.settings_folderStyle_label(state.folderStyle), .innerItem, "folder_style"))
+    entries.append(.toggle(next(), .autoChannelHistory, l10n.settings_channelHistory_title, l10n.settings_channelHistory_subtitle, state.channelHistoryButton, .innerItem, NovagramDefaultsKey.channelHistoryButton))
     entries.append(.toggle(next(), .autoStoryUnlock, l10n.settings_storyUnlock_title, l10n.settings_storyUnlock_subtitle, state.storyUnlockEnabled, .innerItem, NovagramDefaultsKey.storyUnlockEnabled))
     entries.append(.toggle(next(), .autoTranslateChats, l10n.settings_translateUnlock_title, l10n.settings_translateUnlock_subtitle, state.translateChatsUnlock, .lastItem, NovagramDefaultsKey.translateChatsUnlock))
     entries.append(.footer(next(), .autoFooter, l10n.settings_automationFooter))
@@ -685,6 +694,7 @@ class NovagramSettingsController: TableViewController {
                     case NovagramDefaultsKey.voiceTranslateEnabled: state.voiceTranslateEnabled = value
                     case NovagramDefaultsKey.autoDownloadDisabled: state.autoDownloadDisabled = value
                     case NovagramDefaultsKey.whiteThemeAccentEnabled: state.whiteThemeAccentEnabled = value
+                    case NovagramDefaultsKey.channelHistoryButton: state.channelHistoryButton = value
                     default: break
                     }
                 }
@@ -721,6 +731,15 @@ class NovagramSettingsController: TableViewController {
                     nav?.push(NovagramAutoTranslateController(context))
                 case "translate_language":
                     nav?.push(NovagramTranslationLanguageController(context))
+                case "folder_style":
+                    let l10n = NovagramL10n.current
+                    let current = self.stateValue.with { $0.folderStyle }
+                    self.presentChoicePicker(NovagramFolderStyle.options.map { style in
+                        (l10n.settings_folderStyle_label(style), style == current, {
+                            NovagramFolderStyle.set(style)
+                            updateState { $0.folderStyle = style }
+                        })
+                    }, window: window)
                 case "reminder_time":
                     let l10n = NovagramL10n.current
                     let current = self.stateValue.with { $0.reminderMinutes }
