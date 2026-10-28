@@ -4,8 +4,13 @@
 #   ./novagram-publish.sh                      preflight checks, archive, archive checks
 #   ./novagram-publish.sh --preflight          build-setting checks only (no build)
 #   ./novagram-publish.sh --check <path.xcarchive>   checks on an existing archive only
+#   ./novagram-publish.sh --export <path.xcarchive>  App Store .pkg from an existing archive (for Transporter)
 #
-# Env: NOVAGRAM_DD (DerivedData, default /tmp/tgmac13-dd-publish), NOVAGRAM_LOG (default /tmp/novagram13-publish.log).
+# A full run also exports the App Store .pkg into build/export/ (upload it with Transporter).
+#
+# Env: NOVAGRAM_VERSION (store version, e.g. 2.0.16; the Mac version follows the iOS one 1:1. It goes on the
+# xcodebuild command line, so project.pbxproj keeps Telegram's MARKETING_VERSION and upstream merges stay clean),
+# NOVAGRAM_DD (DerivedData, default /tmp/tgmac13-dd-publish), NOVAGRAM_LOG (default /tmp/novagram13-publish.log).
 #
 # APP_STORE goes on the xcodebuild command line on purpose: only command-line build settings reach
 # the Swift packages, the xcconfig flag reaches the app target only (see AGENTS.md).
@@ -24,6 +29,11 @@ SANDBOX_ENTITLEMENTS="Telegram-Mac/Telegram-Sandbox.entitlements"
 DD="${NOVAGRAM_DD:-/tmp/tgmac13-dd-publish}"
 LOG="${NOVAGRAM_LOG:-/tmp/novagram13-publish.log}"
 APP_STORE_CONDITIONS='$(inherited) APP_STORE'
+STORE_VERSION="${NOVAGRAM_VERSION:-}"
+VERSION_SETTINGS=()
+if [ -n "$STORE_VERSION" ]; then
+    VERSION_SETTINGS=("MARKETING_VERSION=$STORE_VERSION")
+fi
 
 FAILURES=0
 
@@ -45,7 +55,7 @@ preflight() {
     dump="$(mktemp -t novagram-publish-settings)"
     if ! xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration "$CONFIGURATION" \
         -derivedDataPath "$DD" -showBuildSettings \
-        "SWIFT_ACTIVE_COMPILATION_CONDITIONS=$APP_STORE_CONDITIONS" > "$dump" 2>/dev/null; then
+        "SWIFT_ACTIVE_COMPILATION_CONDITIONS=$APP_STORE_CONDITIONS" ${VERSION_SETTINGS[@]+"${VERSION_SETTINGS[@]}"} > "$dump" 2>/dev/null; then
         fail "xcodebuild -showBuildSettings failed"
         rm -f "$dump"
         return
@@ -82,6 +92,11 @@ preflight() {
 
     MARKETING_VERSION="$(setting "$dump" MARKETING_VERSION)"
     BUILD_NUMBER="$(setting "$dump" CURRENT_PROJECT_VERSION)"
+    if [ -n "$STORE_VERSION" ]; then
+        [ "$MARKETING_VERSION" = "$STORE_VERSION" ] && pass "store version: $MARKETING_VERSION" || fail "store version: '$MARKETING_VERSION' (want $STORE_VERSION)"
+    else
+        warn "NOVAGRAM_VERSION not set, the project's $MARKETING_VERSION is used (the Mac version should match iOS)"
+    fi
     rm -f "$dump"
 }
 
@@ -100,6 +115,16 @@ check_archive() {
     local value
     value="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist" 2>/dev/null)"
     [ "$value" = "$BUNDLE_ID" ] && pass "bundle id: $value" || fail "bundle id: '$value' (want $BUNDLE_ID)"
+    local shortVersion
+    shortVersion="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$plist" 2>/dev/null)"
+    if [ -n "$STORE_VERSION" ] && [ "$shortVersion" != "$STORE_VERSION" ]; then
+        fail "version: $shortVersion (want $STORE_VERSION)"
+    else
+        pass "version: $shortVersion ($(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$plist" 2>/dev/null))"
+    fi
+    local appexVersion
+    appexVersion="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/PlugIns/TelegramShare.appex/Contents/Info.plist" 2>/dev/null)"
+    [ "$appexVersion" = "$shortVersion" ] && pass "share extension version: $appexVersion" || fail "share extension version: '$appexVersion' (app: $shortVersion)"
 
     for key in SUFeedURL SUPublicDSAKeyFile SUPublicEDKey SUEnableAutomaticChecks; do
         if /usr/libexec/PlistBuddy -c "Print :$key" "$plist" >/dev/null 2>&1; then
@@ -162,6 +187,54 @@ check_archive() {
     fi
 }
 
+# App Store .pkg (app and installer signed by Xcode's automatic signing) for Transporter. Uploads nothing.
+export_pkg() {
+    local archive="$1"
+    local exportPath="build/export/$(basename "$archive" .xcarchive)"
+    local options
+    options="$(mktemp -t novagram-export-options).plist"
+    cat > "$options" <<OPTIONS
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>method</key>
+    <string>app-store-connect</string>
+    <key>destination</key>
+    <string>export</string>
+    <key>teamID</key>
+    <string>$TEAM_ID</string>
+    <key>signingStyle</key>
+    <string>automatic</string>
+    <key>uploadSymbols</key>
+    <true/>
+</dict>
+</plist>
+OPTIONS
+    echo "Exporting the App Store .pkg into $exportPath $(date +%H:%M:%S)"
+    rm -rf "$exportPath"
+    if xcodebuild -exportArchive -archivePath "$archive" -exportPath "$exportPath" \
+        -exportOptionsPlist "$options" -allowProvisioningUpdates >> "$LOG" 2>&1; then
+        local pkg
+        pkg="$(find "$exportPath" -maxdepth 1 -name "*.pkg" | head -1)"
+        if [ -n "$pkg" ]; then
+            pass "pkg: $pkg"
+            local signer
+            signer="$(pkgutil --check-signature "$pkg" 2>/dev/null | grep -m1 -E '^ +1\. ' | sed 's/^ *1\. //')"
+            case "$signer" in
+                "3rd Party Mac Developer Installer"*|"Mac Installer Distribution"*|"Apple Distribution"*) pass "pkg signed by: $signer" ;;
+                *) fail "pkg signed by: '$signer' (not an App Store installer certificate)" ;;
+            esac
+        else
+            fail "export finished but there is no .pkg in $exportPath"
+        fi
+    else
+        fail "export failed (log: $LOG)"
+        grep -E "error:" "$LOG" | sort -u | tail -10
+    fi
+    rm -f "$options"
+}
+
 finish() {
     echo
     if [ "$FAILURES" -eq 0 ]; then
@@ -182,10 +255,15 @@ case "${1:-}" in
         check_archive "$2"
         finish
         ;;
+    --export)
+        [ -n "${2:-}" ] || { echo "usage: $0 --export <path.xcarchive>"; exit 2; }
+        export_pkg "$2"
+        finish
+        ;;
     "")
         ;;
     *)
-        echo "usage: $0 [--preflight | --check <path.xcarchive>]"
+        echo "usage: $0 [--preflight | --check <path.xcarchive> | --export <path.xcarchive>]"
         exit 2
         ;;
 esac
@@ -202,7 +280,7 @@ echo
 echo "Archiving $ARCHIVE $(date +%H:%M:%S) (log: $LOG)"
 if xcodebuild archive -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration "$CONFIGURATION" \
     -derivedDataPath "$DD" -archivePath "$ARCHIVE" \
-    "SWIFT_ACTIVE_COMPILATION_CONDITIONS=$APP_STORE_CONDITIONS" > "$LOG" 2>&1; then
+    "SWIFT_ACTIVE_COMPILATION_CONDITIONS=$APP_STORE_CONDITIONS" ${VERSION_SETTINGS[@]+"${VERSION_SETTINGS[@]}"} > "$LOG" 2>&1; then
     echo "ARCHIVE SUCCEEDED ($(date +%H:%M:%S))"
 else
     echo "ARCHIVE FAILED - errors:"
@@ -212,6 +290,10 @@ fi
 
 echo
 check_archive "$ARCHIVE"
+if [ "$FAILURES" -eq 0 ]; then
+    echo
+    export_pkg "$ARCHIVE"
+fi
 echo
-echo "Next (manual): Xcode Organizer > Distribute App > App Store Connect. This script uploads nothing."
+echo "Next (manual): upload the .pkg from build/export/ with Transporter. This script uploads nothing."
 finish
