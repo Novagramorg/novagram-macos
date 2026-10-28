@@ -107,6 +107,8 @@ private struct NovagramSettingsState: Equatable {
     var translateChatsUnlock: Bool
     var translateConfirmEnabled: Bool
     var voiceTranslateEnabled: Bool
+    var reminderMinutes: Int
+    var reminderSound: String
     // Feature #46: derived from the keychain (source of truth), NOT novagramDefaults.
     var chatLockMasterEnabled: Bool
     // NovagramProxy opt-in — derived from NovagramAutoProxyManager (owns the "pro_messager" key).
@@ -153,6 +155,8 @@ private struct NovagramSettingsState: Equatable {
             translateChatsUnlock: d?.bool(forKey: NovagramDefaultsKey.translateChatsUnlock) ?? false,
             translateConfirmEnabled: d?.bool(forKey: NovagramDefaultsKey.translateConfirmEnabled) ?? false,
             voiceTranslateEnabled: d?.bool(forKey: NovagramDefaultsKey.voiceTranslateEnabled) ?? false,
+            reminderMinutes: NovagramUnreadReminderManager.shared.intervalMinutes,
+            reminderSound: NovagramUnreadReminderManager.shared.soundKey,
             chatLockMasterEnabled: NovagramChatPincodeManager.shared.isMasterEnabled(),
             novagramProxyEnabled: NovagramAutoProxyManager.shared.isEnabled
         )
@@ -199,7 +203,7 @@ private enum NovagramEntryId: Hashable {
     case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingTranslateConfirm, messagingAskVoice, messagingAskSticker, messagingAutoSticker, messagingHeartEffect, messagingFooter
     case sttEnabled, sttLanguage, sttVoiceTranslate
     case protectionChatLock, protectionProxy, protectionForeign, protectionFooter
-    case remindersUnread, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoStoryUnlock, autoTranslateChats, autoFooter
+    case remindersUnread, remindersTime, remindersSound, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoStoryUnlock, autoTranslateChats, autoFooter
     case adsRemoveAll, devCurrencyRates, devAdsPanel, devStickerPackSave, devFooter
 }
 
@@ -241,6 +245,8 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .protectionProxy:          map = ("network.badge.shield.half.filled", .green)
     case .protectionForeign:        map = ("person.crop.circle.badge.xmark", .orange)
     case .remindersUnread:          map = ("bell.badge.fill", .red)
+    case .remindersTime:            map = ("clock.fill", .blue)
+    case .remindersSound:           map = ("speaker.wave.2.fill", .pink)
     case .autoApproveJoin:          map = ("person.crop.circle.badge.checkmark", .green)
     case .autoUnlimitedFolders:     map = ("infinity", .purple)
     case .actionSuggestedFolders:   map = ("folder.badge.plus", .blue)
@@ -510,6 +516,8 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.section(sectionId)); sectionId += 1
     entries.append(.header(next(), .header(5), l10n.settings_section_automation))
     entries.append(.toggle(next(), .remindersUnread, l10n.settings_unreadReminder_title, l10n.settings_unreadReminder_subtitle, state.unreadReminderEnabled, .firstItem, NovagramDefaultsKey.unreadReminderEnabled))
+    entries.append(.disclosurePlaceholder(next(), .remindersTime, l10n.reminder_time_title, l10n.reminder_minutesLabel(state.reminderMinutes), .innerItem, "reminder_time"))
+    entries.append(.disclosurePlaceholder(next(), .remindersSound, l10n.reminder_sound_title, l10n.reminder_soundName(state.reminderSound), .innerItem, "reminder_sound"))
     entries.append(.toggle(next(), .autoApproveJoin, l10n.settings_autoApprove_title, l10n.settings_autoApprove_subtitle, state.autoApproveJoinRequests, .innerItem, NovagramDefaultsKey.autoApproveJoinRequests))
     entries.append(.toggle(next(), .autoUnlimitedFolders, l10n.settings_unlimitedFolders_title, l10n.settings_unlimitedFolders_subtitle, state.unlimitedFolders, .innerItem, NovagramDefaultsKey.unlimitedFolders))
     entries.append(.action(next(), .actionSuggestedFolders, l10n.settings_suggestedFolders_title, l10n.settings_suggestedFolders_subtitle, .innerItem, {
@@ -688,6 +696,25 @@ class NovagramSettingsController: TableViewController {
                     nav?.push(NovagramAutoTranslateController(context))
                 case "translate_language":
                     nav?.push(NovagramTranslationLanguageController(context))
+                case "reminder_time":
+                    let l10n = NovagramL10n.current
+                    let current = self.stateValue.with { $0.reminderMinutes }
+                    self.presentChoicePicker(NovagramUnreadReminderManager.minuteOptions.map { minutes in
+                        (l10n.reminder_minutesLabel(minutes), minutes == current, {
+                            NovagramUnreadReminderManager.shared.setIntervalMinutes(minutes)
+                            updateState { $0.reminderMinutes = minutes }
+                        })
+                    }, window: window)
+                case "reminder_sound":
+                    let l10n = NovagramL10n.current
+                    let current = self.stateValue.with { $0.reminderSound }
+                    self.presentChoicePicker(NovagramReminderSounds.options.map { key in
+                        (l10n.reminder_soundName(key), key == current, {
+                            NovagramUnreadReminderManager.shared.setSound(key)
+                            NovagramReminderSounds.play(key)
+                            updateState { $0.reminderSound = key }
+                        })
+                    }, window: window)
                 default:
                     let l10n = NovagramL10n.current
                     alert(for: window, header: l10n.sub_comingSoon_title, info: l10n.sub_comingSoon_message)
@@ -754,12 +781,17 @@ class NovagramSettingsController: TableViewController {
 
     // STT language picker — minimal NSMenu (avoids pulling in extra ActionSheet machinery).
     private func presentSTTLanguagePicker(currentId: String, window: Window, apply: @escaping (String) -> Void) {
+        presentChoicePicker(NovagramL10n.sttSupportedLanguages.map { id, name in
+            (name, id == currentId, { apply(id) })
+        }, window: window)
+    }
+
+    // A menu of choices with a check mark on the selected one, shown at the click.
+    private func presentChoicePicker(_ choices: [(title: String, selected: Bool, apply: () -> Void)], window: Window) {
         var items: [ContextMenuItem] = []
-        for (id, name) in NovagramL10n.sttSupportedLanguages {
-            let title = id == currentId ? "✓ \(name)" : "    \(name)"
-            items.append(ContextMenuItem(title, handler: {
-                apply(id)
-            }))
+        for choice in choices {
+            let title = choice.selected ? "✓ \(choice.title)" : "    \(choice.title)"
+            items.append(ContextMenuItem(title, handler: choice.apply))
         }
         let event = NSApp.currentEvent ?? NSEvent.mouseEvent(
             with: .leftMouseDown,

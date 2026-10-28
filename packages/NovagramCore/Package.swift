@@ -53,6 +53,7 @@ let package = Package(
                 .target(name: "NovagramServices"),
                 .target(name: "NovagramServicesUI")
             ],
-            path: "Sources/NovagramCore")
+            path: "Sources/NovagramCore",
+            resources: [.copy("Resources/ReminderSounds")])
     ]
 )

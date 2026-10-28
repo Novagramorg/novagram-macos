@@ -14,10 +14,13 @@ import TelegramCore
 import Postbox
 import SwiftSignalKit
 import InAppSettings
+import NovagramCore
 
 private let kReminderSuite = "pro_messager"
 private let kReminderEnabled = "unread_reminder_enabled"
-private let kReminderInterval = "unread_reminder_interval" // in minutes (5, 10, 15, 30, 60)
+private let kReminderMinutes = "unread_reminder_minutes"
+// The Mac key before 2026-10; copied into the iOS key once.
+private let kReminderLegacyInterval = "unread_reminder_interval"
 private let kReminderSound = "unread_reminder_sound"
 
 final class NovagramUnreadReminderManager {
@@ -27,15 +30,33 @@ final class NovagramUnreadReminderManager {
     private var timer: SwiftSignalKit.Timer?
     private weak var currentContext: AccountContext?
 
-    private init() {}
+    static let minuteOptions = [1, 2, 3, 5, 10, 15, 20, 30, 45, 60]
+
+    private init() {
+        NotificationCenter.default.addObserver(forName: NSNotification.Name("NovagramSettingsChanged"), object: nil, queue: .main, using: { [weak self] _ in
+            self?.updateTimer()
+        })
+    }
 
     var isEnabled: Bool {
         return defaults?.bool(forKey: kReminderEnabled) ?? false
     }
 
     var intervalMinutes: Int {
-        let val = defaults?.integer(forKey: kReminderInterval) ?? 15
-        return val > 0 ? val : 15
+        if defaults?.object(forKey: kReminderMinutes) == nil, let legacy = defaults?.object(forKey: kReminderLegacyInterval) as? Int, legacy > 0 {
+            defaults?.set(legacy, forKey: kReminderMinutes)
+            defaults?.removeObject(forKey: kReminderLegacyInterval)
+        }
+        let value = defaults?.integer(forKey: kReminderMinutes) ?? 0
+        return value > 0 ? value : 5
+    }
+
+    var soundKey: String {
+        return defaults?.string(forKey: kReminderSound) ?? "default"
+    }
+
+    func setSound(_ key: String) {
+        defaults?.set(key, forKey: kReminderSound)
     }
 
     func setEnabled(_ enabled: Bool) {
@@ -45,7 +66,7 @@ final class NovagramUnreadReminderManager {
     }
 
     func setIntervalMinutes(_ minutes: Int) {
-        defaults?.set(minutes, forKey: kReminderInterval)
+        defaults?.set(minutes, forKey: kReminderMinutes)
         updateTimer()
         NotificationCenter.default.post(name: NSNotification.Name("NovagramSettingsChanged"), object: nil)
     }
@@ -95,10 +116,20 @@ final class NovagramUnreadReminderManager {
     }
 
     private func sendReminderNotification(unreadCount: Int) {
+        let l10n = NovagramL10n.current
         let content = UNMutableNotificationContent()
-        content.title = "Novagram"
-        content.body = "Sizda \(unreadCount) ta o'qilmagan xabar bor"
-        content.sound = UNNotificationSound.default
+        content.title = l10n.reminder_notificationTitle
+        content.body = l10n.reminder_notificationBody(unreadCount)
+        // A custom tone is played by the app itself: notification sounds only come from the app bundle root or ~/Library/Sounds.
+        switch soundKey {
+        case "default":
+            content.sound = UNNotificationSound.default
+        case "none":
+            content.sound = nil
+        default:
+            content.sound = nil
+            NovagramReminderSounds.play(soundKey)
+        }
 
         let request = UNNotificationRequest(identifier: "fenixuz_unread_reminder", content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)

@@ -34,5 +34,28 @@ public extension NovagramL10n {
     var translateConfirm_translate: String { pick(en: "Translate & Send", uz: "Tarjima qilib yuborish", ru: "Перевести и отправить") }
     var translateConfirm_original: String { pick(en: "Send Original", uz: "Original yuborish", ru: "Отправить оригинал") }
     var settings_voiceTranslate_title: String { pick(en: "Translate dictated text", uz: "Diktovka matnini tarjima qilish", ru: "Переводить надиктованный текст") }
+    var reminder_time_title: String { pick(en: "Reminder time", uz: "Eslatma vaqti", ru: "Время напоминания") }
+    var reminder_sound_title: String { pick(en: "Reminder sound", uz: "Eslatma ovozi", ru: "Звук напоминания") }
+    var reminder_notificationTitle: String { pick(en: "Unread messages", uz: "O'qilmagan xabarlar", ru: "Непрочитанные сообщения") }
+    func reminder_minutesLabel(_ minutes: Int) -> String { pick(en: "\(minutes) min", uz: "\(minutes) daqiqa", ru: "\(minutes) мин") }
+    func reminder_notificationBody(_ count: Int) -> String { pick(en: "You have \(count) unread messages. Don't forget to check them.", uz: "Sizda \(count) ta o'qilmagan xabar bor. Ularni ko'rishni unutmang.", ru: "У вас \(count) непрочитанных сообщений. Не забудьте их просмотреть.") }
+    func reminder_soundName(_ key: String) -> String {
+        switch key {
+        case "none": return pick(en: "None", uz: "Yo'q", ru: "Нет")
+        case "chime": return pick(en: "Chime", uz: "Jarang", ru: "Перезвон")
+        case "glass": return pick(en: "Glass", uz: "Shisha", ru: "Стекло")
+        case "bell": return pick(en: "Bell", uz: "Qo'ng'iroq", ru: "Колокол")
+        case "note": return pick(en: "Note", uz: "Nota", ru: "Нота")
+        case "tritone": return pick(en: "Tri-tone", uz: "Uch ohang", ru: "Три-тон")
+        case "marimba": return pick(en: "Marimba", uz: "Marimba", ru: "Маримба")
+        case "crystal": return pick(en: "Crystal", uz: "Kristall", ru: "Кристалл")
+        case "droplet": return pick(en: "Droplet", uz: "Tomchi", ru: "Капля")
+        case "ping": return pick(en: "Ping", uz: "Ping", ru: "Пинг")
+        case "pulse": return pick(en: "Pulse", uz: "Puls", ru: "Пульс")
+        case "harp": return pick(en: "Harp", uz: "Arfa", ru: "Арфа")
+        case "signal": return pick(en: "Signal", uz: "Signal", ru: "Сигнал")
+        default: return pick(en: "Default notification sound", uz: "Bildirishnoma ovozi", ru: "Звук уведомления по умолчанию")
+        }
+    }
     var settings_voiceTranslate_subtitle: String { pick(en: "When dictation ends, the text is translated into the auto-translate language. Works when “Ask to translate on send” is off", uz: "Diktovka tugagach matn avto-tarjima tiliga tarjima qilinadi. «Yuborishda tarjima so'rovi» o'chiq bo'lsa ishlaydi", ru: "После диктовки текст переводится на язык автоперевода. Работает, когда «Запрос перевода при отправке» выключен") }
 }
