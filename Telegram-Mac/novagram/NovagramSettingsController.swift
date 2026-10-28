@@ -78,6 +78,7 @@ private enum NovagramDefaultsKey {
     static let autoDownloadDisabled       = "auto_download_disabled"
     static let whiteThemeAccentEnabled    = "white_theme_accent_enabled"
     static let channelHistoryButton       = "fenix_channel_history_button"
+    static let unlimitedPins              = "unlimited_pins"
 }
 
 private struct NovagramSettingsState: Equatable {
@@ -118,6 +119,7 @@ private struct NovagramSettingsState: Equatable {
     var whiteThemeAccentEnabled: Bool
     var folderStyle: String
     var channelHistoryButton: Bool
+    var unlimitedPins: Bool
     // Feature #46: derived from the keychain (source of truth), NOT novagramDefaults.
     var chatLockMasterEnabled: Bool
     // NovagramProxy opt-in — derived from NovagramAutoProxyManager (owns the "pro_messager" key).
@@ -170,6 +172,7 @@ private struct NovagramSettingsState: Equatable {
             whiteThemeAccentEnabled: d?.bool(forKey: NovagramDefaultsKey.whiteThemeAccentEnabled) ?? false,
             folderStyle: NovagramFolderStyle.current,
             channelHistoryButton: d?.bool(forKey: NovagramDefaultsKey.channelHistoryButton) ?? false,
+            unlimitedPins: d?.bool(forKey: NovagramDefaultsKey.unlimitedPins) ?? false,
             chatLockMasterEnabled: NovagramChatPincodeManager.shared.isMasterEnabled(),
             novagramProxyEnabled: NovagramAutoProxyManager.shared.isEnabled
         )
@@ -211,7 +214,7 @@ private enum NovagramEntryId: Hashable {
     case topTips
     case topAbout
     case topBots
-    case interfaceHideFolders, interfaceStories, interfaceMutual, interfaceFooter
+    case interfaceHideFolders, interfaceStories, interfaceMutual, interfaceUnlimitedPins, interfaceFooter
     case chatDeleted, chatEditedHistory, chatFirstMessage, chatGhostActive, chatGhost, chatCamera, chatRoundVideo, chatForwardHideNames, chatFooter
     case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingTranslateConfirm, messagingAskVoice, messagingAskSticker, messagingAutoSticker, messagingHeartEffect, messagingFooter
     case sttEnabled, sttLanguage, sttVoiceTranslate
@@ -231,6 +234,7 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .interfaceHideFolders:     map = ("folder.badge.minus", .lightBlue)
     case .interfaceStories:         map = ("circle.dashed", .violet)
     case .interfaceMutual:          map = ("person.2.fill", .blue)
+    case .interfaceUnlimitedPins:   map = ("pin.fill", .orange)
     case .chatDeleted:              map = ("trash.fill", .red)
     case .chatFirstMessage:         map = ("arrow.up.to.line", .blue)
     case .chatGhostActive:          map = ("eye.slash.fill", .gray)
@@ -490,7 +494,8 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.header(next(), .header(1), l10n.settings_section_interface))
     entries.append(.toggle(next(), .interfaceHideFolders, l10n.settings_interface_hideFolders_title, l10n.settings_interface_hideFolders_subtitle, state.hideFolders, .firstItem, NovagramDefaultsKey.hideFolders))
     entries.append(.toggle(next(), .interfaceStories, l10n.settings_interface_stories_title, l10n.settings_interface_stories_subtitle, state.showStories, .innerItem, NovagramDefaultsKey.showStories))
-    entries.append(.toggle(next(), .interfaceMutual, l10n.settings_interface_mutualSymbol_title, l10n.settings_interface_mutualSymbol_subtitle, state.showMutualContactSymbol, .lastItem, NovagramDefaultsKey.showMutualContactSymbol))
+    entries.append(.toggle(next(), .interfaceMutual, l10n.settings_interface_mutualSymbol_title, l10n.settings_interface_mutualSymbol_subtitle, state.showMutualContactSymbol, .innerItem, NovagramDefaultsKey.showMutualContactSymbol))
+    entries.append(.toggle(next(), .interfaceUnlimitedPins, l10n.settings_unlimitedPins_title, l10n.settings_unlimitedPins_subtitle, state.unlimitedPins, .lastItem, NovagramDefaultsKey.unlimitedPins))
     entries.append(.footer(next(), .interfaceFooter, l10n.settings_interface_footer))
 
     // ─── CHAT ───
@@ -653,6 +658,9 @@ class NovagramSettingsController: TableViewController {
                     if key == NovagramDefaultsKey.autoStickerEnabled && !value {
                         NovagramOutgoing.clearAutoSticker()
                     }
+                    if key == NovagramDefaultsKey.unlimitedPins && !value {
+                        NovagramUnlimitedPins.unpinLocalPins(sharedContext: context.sharedContext)
+                    }
                     if key == NovagramDefaultsKey.autoDownloadDisabled {
                         NovagramAutoDownload.apply(disabled: value, sharedContext: context.sharedContext)
                     } else if key == NovagramDefaultsKey.whiteThemeAccentEnabled {
@@ -695,6 +703,7 @@ class NovagramSettingsController: TableViewController {
                     case NovagramDefaultsKey.autoDownloadDisabled: state.autoDownloadDisabled = value
                     case NovagramDefaultsKey.whiteThemeAccentEnabled: state.whiteThemeAccentEnabled = value
                     case NovagramDefaultsKey.channelHistoryButton: state.channelHistoryButton = value
+                    case NovagramDefaultsKey.unlimitedPins: state.unlimitedPins = value
                     default: break
                     }
                 }
@@ -888,6 +897,26 @@ enum NovagramAutoDownload {
         _ = updateMediaDownloadSettingsInteractively(postbox: context.account.postbox, {
             $0.withUpdatedAutomaticDownload(false)
         }).start()
+    }
+}
+
+// iOS "Unlimited Pins" off: unpin the chats that were pinned only on this Mac, in every logged-in
+// account, then forget them (TelegramCore `NovagramLocalPins`).
+enum NovagramUnlimitedPins {
+    static func unpinLocalPins(sharedContext: SharedAccountContext) {
+        _ = (sharedContext.activeAccounts |> take(1) |> deliverOnMainQueue).start(next: { accounts in
+            var remaining = accounts.accounts.count
+            for (_, account, _) in accounts.accounts {
+                _ = novagramTrimPinnedChatsToServerLimit(account: account).start(completed: {
+                    DispatchQueue.main.async {
+                        remaining -= 1
+                        if remaining == 0 {
+                            NovagramLocalPins.clearAllAccounts()
+                        }
+                    }
+                })
+            }
+        })
     }
 }
 

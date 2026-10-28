@@ -351,3 +351,16 @@ Ours: `NovagramSettingsController.swift` `NovagramAutoDownload` (`auto_download_
 | `Telegram-Mac/app/ApplicationContext.swift` | `NovagramAutoApproveManager.shared.start(context:)` after `applyIfNeeded`, `.stop()` after the reminder stop |
 
 Ours: `NovagramFolderStyle` (`fenix_folder_display_style`: icon / text / auto, the header rebuilds the folders item on `novagramSettingsRevision`), "Recent actions" chat list menu item (`fenix_channel_history_button`, admin or creator of a channel / supergroup, `NovagramHooks.openRecentActions` → `ChannelEventLogController`), `NovagramAutoApproveManager` rewritten after iOS `NovagramAutoAcceptManager`: key `fenix_autoaccept_global` (old Mac key `auto_approve_join_requests` copied once), chat open + peer info + 60 s scan of the first 300 chats, 15 s cooldown per chat, importer contexts kept 30 s so `updateAll(.approve)` finishes.
+
+### Phase 6: unlimited pins (TelegramCore)
+
+New file `fork-patches/telegramcore/NovagramLocalPins.swift` (port of iOS `TelegramCore/Sources/Novagram/NovagramLocalPins.swift`, copied into `TelegramCore/Sources` by `apply-telegramcore-patches.sh`). Hooks, kept in `fork-patches/telegramcore-hooks.patch` (regenerated with `git -C submodules/telegram-ios diff -- submodules/TelegramCore/Sources/`):
+
+| File (TelegramCore) | Change |
+| --- | --- |
+| `TelegramEngine/Peers/TogglePeerChatPinned.swift` | `var limitCount` (was `let`), `novagramServerLimit`, `limitCount = NovagramLocalPins.pinLimit(serverLimit:)` (1000 while `unlimited_pins` is on), `NovagramLocalPins.recordOverflow(...)` before the sync operation (4 lines) |
+| `State/Holes.swift` | chat list hole: `setPinnedItemIds(... NovagramLocalPins.merged(serverItemIds:accountPeerId:groupId:))` |
+| `State/ResetState.swift` | the same for `.root` after a state reset |
+| `State/ManagedSynchronizePinnedChatsOperations.swift` | the same after the local/remote reconciliation |
+
+App: Interface → Unlimited Pins switch; turning it off runs `novagramTrimPinnedChatsToServerLimit(account:)` for every logged-in account (unpins exactly the stored ids), then `NovagramLocalPins.clearAllAccounts()`. Known limit, same as iOS: drag reordering does not update the stored tail.

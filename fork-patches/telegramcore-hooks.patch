@@ -1,5 +1,5 @@
 diff --git a/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift b/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift
-index 3d99e59..49a1b24 100644
+index 3d99e59d34..380c460330 100644
 --- a/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift
 +++ b/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift
 @@ -4119,6 +4119,7 @@ func replayFinalState(
@@ -20,8 +20,21 @@ index 3d99e59..49a1b24 100644
                  if case .UpperHistoryBlock = location {
                      for message in messages {
                          let chatPeerId = message.id.peerId
+diff --git a/submodules/TelegramCore/Sources/State/Holes.swift b/submodules/TelegramCore/Sources/State/Holes.swift
+index 5137a035d3..4ab0308663 100644
+--- a/submodules/TelegramCore/Sources/State/Holes.swift
++++ b/submodules/TelegramCore/Sources/State/Holes.swift
+@@ -1377,7 +1377,7 @@ func fetchChatListHole(postbox: Postbox, network: Network, accountPeerId: PeerId
+             }
+             
+             if let replacePinnedItemIds = fetchedChats.pinnedItemIds {
+-                transaction.setPinnedItemIds(groupId: groupId, itemIds: replacePinnedItemIds.map(PinnedItemId.peer))
++                transaction.setPinnedItemIds(groupId: groupId, itemIds: NovagramLocalPins.merged(serverItemIds: replacePinnedItemIds.map(PinnedItemId.peer), accountPeerId: accountPeerId, groupId: groupId)) // Novagram
+             }
+             
+             for (peerId, summary) in fetchedChats.mentionTagSummaries {
 diff --git a/submodules/TelegramCore/Sources/State/ManagedChatListHoles.swift b/submodules/TelegramCore/Sources/State/ManagedChatListHoles.swift
-index a7249d6..f467906 100644
+index a7249d6fcd..628ca73c0d 100644
 --- a/submodules/TelegramCore/Sources/State/ManagedChatListHoles.swift
 +++ b/submodules/TelegramCore/Sources/State/ManagedChatListHoles.swift
 @@ -76,7 +76,7 @@ func managedChatListHoles(network: Network, postbox: Postbox, accountPeerId: Pee
@@ -34,7 +47,7 @@ index a7249d6..f467906 100644
          })
          
 diff --git a/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift b/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift
-index efe3ecc..d5281d4 100644
+index efe3ecc81f..9aa2e16fce 100644
 --- a/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift
 +++ b/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift
 @@ -192,11 +192,11 @@ private final class ManagedMessageHistoryHolesContext {
@@ -53,7 +66,7 @@ index efe3ecc..d5281d4 100644
                      guard let self = self else {
                          return
 diff --git a/submodules/TelegramCore/Sources/State/ManagedPendingPeerNotificationSettings.swift b/submodules/TelegramCore/Sources/State/ManagedPendingPeerNotificationSettings.swift
-index 214c08f..9b6e831 100644
+index 214c08f035..2b4d48e931 100644
 --- a/submodules/TelegramCore/Sources/State/ManagedPendingPeerNotificationSettings.swift
 +++ b/submodules/TelegramCore/Sources/State/ManagedPendingPeerNotificationSettings.swift
 @@ -251,6 +251,7 @@ func pushPeerNotificationSettings(postbox: Postbox, network: Network, peerId: Pe
@@ -72,8 +85,34 @@ index 214c08f..9b6e831 100644
              if let pending = transaction.getPendingPeerNotificationSettings(peerId), pending.isEqual(to: settings) {
                  transaction.updatePendingPeerNotificationSettings(peerId: peerId, settings: nil)
              }
+diff --git a/submodules/TelegramCore/Sources/State/ManagedSynchronizePinnedChatsOperations.swift b/submodules/TelegramCore/Sources/State/ManagedSynchronizePinnedChatsOperations.swift
+index 90b23e6167..751537f2f3 100644
+--- a/submodules/TelegramCore/Sources/State/ManagedSynchronizePinnedChatsOperations.swift
++++ b/submodules/TelegramCore/Sources/State/ManagedSynchronizePinnedChatsOperations.swift
+@@ -225,7 +225,7 @@ private func synchronizePinnedChats(transaction: Transaction, postbox: Postbox,
+             return postbox.transaction { transaction -> Signal<Void, NoError> in
+                 updatePeers(transaction: transaction, accountPeerId: accountPeerId, peers: parsedPeers)
+                 
+-                transaction.setPinnedItemIds(groupId: groupId, itemIds: resultingItemIds)
++                transaction.setPinnedItemIds(groupId: groupId, itemIds: NovagramLocalPins.merged(serverItemIds: resultingItemIds, accountPeerId: accountPeerId, groupId: groupId)) // Novagram
+                 
+                 transaction.updateCurrentPeerNotificationSettings(notificationSettings)
+                 
+diff --git a/submodules/TelegramCore/Sources/State/ResetState.swift b/submodules/TelegramCore/Sources/State/ResetState.swift
+index e7f2209780..b86c8ec6c1 100644
+--- a/submodules/TelegramCore/Sources/State/ResetState.swift
++++ b/submodules/TelegramCore/Sources/State/ResetState.swift
+@@ -123,7 +123,7 @@ func _internal_resetAccountState(postbox: Postbox, network: Network, accountPeer
+                 }
+                 
+                 if let replacePinnedItemIds = fetchedChats.pinnedItemIds {
+-                    transaction.setPinnedItemIds(groupId: .root, itemIds: replacePinnedItemIds.map(PinnedItemId.peer))
++                    transaction.setPinnedItemIds(groupId: .root, itemIds: NovagramLocalPins.merged(serverItemIds: replacePinnedItemIds.map(PinnedItemId.peer), accountPeerId: accountPeerId, groupId: .root)) // Novagram
+                 }
+                 
+                 for (peerId, summary) in fetchedChats.mentionTagSummaries {
 diff --git a/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift b/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift
-index f8aacb5..9d0ce2f 100644
+index f8aacb5a3c..efc0d7d57e 100644
 --- a/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift
 +++ b/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift
 @@ -1123,7 +1123,8 @@ func _internal_updateChatListFiltersInteractively(postbox: Postbox, _ f: @escapi
@@ -86,3 +125,31 @@ index f8aacb5..9d0ce2f 100644
              if updatedFilters != state.filters {
                  state.filters = updatedFilters
                  hasUpdates = true
+diff --git a/submodules/TelegramCore/Sources/TelegramEngine/Peers/TogglePeerChatPinned.swift b/submodules/TelegramCore/Sources/TelegramEngine/Peers/TogglePeerChatPinned.swift
+index aa11e5220c..feb598544f 100644
+--- a/submodules/TelegramCore/Sources/TelegramEngine/Peers/TogglePeerChatPinned.swift
++++ b/submodules/TelegramCore/Sources/TelegramEngine/Peers/TogglePeerChatPinned.swift
+@@ -49,12 +49,14 @@ func _internal_toggleItemPinned(postbox: Postbox, accountPeerId: PeerId, locatio
+                 additionalCount = 1
+             }
+             
+-            let limitCount: Int
++            var limitCount: Int // Novagram
+             if case .root = groupId {
+                 limitCount = Int(userLimitsConfiguration.maxPinnedChatCount)
+             } else {
+                 limitCount = Int(userLimitsConfiguration.maxArchivedPinnedChatCount)
+             }
++            let novagramServerLimit = limitCount // Novagram
++            limitCount = NovagramLocalPins.pinLimit(serverLimit: limitCount) // Novagram
+             
+             let count = sameKind.count + additionalCount
+             if count > limitCount, itemIds.firstIndex(of: itemId) == nil {
+@@ -65,6 +67,7 @@ func _internal_toggleItemPinned(postbox: Postbox, accountPeerId: PeerId, locatio
+                 } else {
+                     itemIds.insert(itemId, at: 0)
+                 }
++                NovagramLocalPins.recordOverflow(itemIds: itemIds, serverLimit: novagramServerLimit, toggled: itemId, accountPeerId: accountPeerId, groupId: groupId) // Novagram
+                 addSynchronizePinnedChatsOperation(transaction: transaction, groupId: groupId)
+                 transaction.setPinnedItemIds(groupId: groupId, itemIds: itemIds)
+                 return .done

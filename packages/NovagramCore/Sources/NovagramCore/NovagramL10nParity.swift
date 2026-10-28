@@ -63,6 +63,8 @@ public extension NovagramL10n {
     var settings_lightAccent_title: String { pick(en: "Brand accent in light theme", uz: "Yorqin temada brand rangi", ru: "Акцент бренда в светлой теме") }
     var settings_lightAccent_subtitle: String { pick(en: "Applies Novagram blue as the accent color in the light theme", uz: "Yorqin (oq) temada Novagram ko'k rangini accent sifatida qo'llaydi", ru: "Применяет фирменный синий Novagram в качестве акцента в светлой теме") }
     var settings_lightAccent_footer: String { pick(en: "Affects the light theme only. Takes effect without restarting.", uz: "Faqat yorqin (oq) temaga ta'sir qiladi. Qayta ishga tushirmasdan kuchga kiradi.", ru: "Влияет только на светлую тему. Применяется без перезапуска.") }
+    var settings_unlimitedPins_title: String { pick(en: "Unlimited Pins", uz: "Cheksiz pin", ru: "Безлимитные закрепы") }
+    var settings_unlimitedPins_subtitle: String { pick(en: "Pin up to 1000 chats. Only the first few sync to Telegram, the rest live on this Mac only. Turning this off unpins them.", uz: "1000 tagacha chat pin qiling. Faqat dastlabki bir nechtasi Telegram bilan sinxronlanadi, qolganlari faqat shu Mac'da. O'chirsangiz ular pindan olinadi.", ru: "Закрепляйте до 1000 чатов. С Telegram синхронизируются только первые несколько, остальные только на этом Mac. При отключении они открепляются.") }
     var settings_folderStyle_title: String { pick(en: "Folder display style", uz: "Papka ko'rinishi", ru: "Стиль папок") }
     func settings_folderStyle_label(_ style: String) -> String {
         switch style {
