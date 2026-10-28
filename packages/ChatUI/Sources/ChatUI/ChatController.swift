@@ -4699,6 +4699,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                 return
             }
             #endif
+            if let strongSelf = self, novagramTranslateConfirmIntercepts(chatInteraction: strongSelf.chatInteraction, resend: { [weak strongSelf] in strongSelf?.chatInteraction.sendMessage(silent, atDate, messageEffect) }) { return } // Novagram
             // Flush the live inline editor (if any) into the stored draft / composer text first, so this send
             // posts the current edited content (we don't continuously sync — that loops).
             self?.chatInteraction.flushRichTextDraft?()

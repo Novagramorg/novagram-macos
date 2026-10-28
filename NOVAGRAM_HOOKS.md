@@ -320,3 +320,11 @@ iOS features that never reached the Mac, ported with the iOS `pro_messager` keys
 | `Telegram-Mac/app/ApplicationContext.swift` | `NovagramSuggestedFolders.presentFirstLaunchPromptIfNeeded(context:)` after the admin folders monitor start |
 
 Ours: `NovagramL10nParity.swift` (strings), `NovagramPremiumUnlock` (`wholeChatTranslate` = `fenix_translate_chats_unlock`, `storiesSaveAndHD` = `fenix_story_unlock_enabled`, both off by default), `NovagramOutgoing` (auto sticker kept in `auto_sticker_data`), `NovagramMessageMenuItems` (`forward_hide_names` gates "Forward without Quotes" only, `edited_history_enabled` default on), `NovagramRoundVideo` (`round_video_from_gallery`), `NovagramSuggestedFolders` (`fenix_features_folders_prompt_enabled`, once per install via `fenix_features_firstrun_done`), Novagram Settings rows.
+
+### Phase 2: translation
+
+| File | Change |
+| --- | --- |
+| `packages/ChatUI/.../ChatController.swift` | first line of `chatInteraction.sendMessage` (after the DEBUG block): `if let strongSelf = self, novagramTranslateConfirmIntercepts(chatInteraction:resend:) { return }` |
+
+Ours: `NovagramTranslateConfirm.swift` ("Ask to translate on send", `translate_confirm_enabled`: three-button alert, Translate & Send / Send Original, Esc cancels; the answer re-runs the send once), `NovagramOutgoing.autoTranslateLanguage` is nil while that switch is on (iOS: the prompt wins over auto-translate), `NovagramSpeechToTextButton` translates the finished dictation (`voice_translate_enabled`, target `auto_translate_lang`, default `en`, skipped when the user edited the text). The two switches turn each other off.

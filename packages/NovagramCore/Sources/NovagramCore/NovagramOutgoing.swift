@@ -40,7 +40,11 @@ public enum NovagramOutgoing {
         return text + "\n" + suffix
     }
 
+    // Off while "Ask to translate on send" is on: that prompt translates the message itself, as on iOS.
     public static var autoTranslateLanguage: String? {
+        guard defaults?.bool(forKey: "translate_confirm_enabled") != true else {
+            return nil
+        }
         guard defaults?.bool(forKey: "auto_translate_enabled") == true, let lang = defaults?.string(forKey: "auto_translate_lang"), !lang.isEmpty else {
             return nil
         }

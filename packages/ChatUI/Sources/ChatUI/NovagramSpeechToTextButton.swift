@@ -3,6 +3,8 @@ import TGUIKit
 import TelegramTheme
 import InputView
 import AlertsUI
+import SwiftSignalKit
+import TelegramCore
 import NovagramCore
 
 // Speech-to-text button inside the message field, left of the emoji/actions buttons
@@ -25,6 +27,8 @@ final class NovagramSpeechToTextButton {
     private var button: ImageButton?
     private var manager: NovagramSpeechToTextManager?
     private var lastDictatedText: String?
+    // Text dictated before the user clicked the button to stop; translated once the recognizer stops.
+    private var translateOnStop: String?
 
     init(chatInteraction: ChatInteraction) {
         self.chatInteraction = chatInteraction
@@ -94,8 +98,16 @@ final class NovagramSpeechToTextButton {
             }
             manager.onStop = { [weak self] in
                 DispatchQueue.main.async {
-                    self?.lastDictatedText = nil
-                    self?.updateAppearance()
+                    guard let self else {
+                        return
+                    }
+                    let dictated = self.translateOnStop ?? self.lastDictatedText
+                    self.translateOnStop = nil
+                    self.lastDictatedText = nil
+                    self.updateAppearance()
+                    if let dictated {
+                        self.translateDictated(dictated)
+                    }
                 }
             }
             manager.onError = { [weak self] text in
@@ -110,15 +122,40 @@ final class NovagramSpeechToTextButton {
         } else if let manager, !manager.isRecording {
             manager.updateLocale(UserDefaults(suiteName: "pro_messager")?.string(forKey: "stt_language") ?? "en-US")
         }
+        translateOnStop = manager?.isRecording == true ? lastDictatedText : nil
         lastDictatedText = nil
         manager?.toggleRecording()
         updateAppearance()
     }
 
     private func stop() {
+        translateOnStop = nil
         manager?.stopRecording()
         lastDictatedText = nil
         updateAppearance()
+    }
+
+    // iOS "Translate voice messages" (`voice_translate_enabled`): the finished dictation is translated
+    // into the auto-translate language, unless the user changed the text meanwhile.
+    private func translateDictated(_ text: String) {
+        guard let chatInteraction, !text.isEmpty, NovagramSettingsKey.bool("voice_translate_enabled"), !NovagramSettingsKey.bool("translate_confirm_enabled") else {
+            return
+        }
+        guard chatInteraction.presentation.effectiveInput.inputText == text else {
+            return
+        }
+        let saved = UserDefaults(suiteName: NovagramSettingsKey.suite)?.string(forKey: "auto_translate_lang") ?? ""
+        let lang = saved.isEmpty ? "en" : saved
+        _ = (chatInteraction.context.engine.messages.translate(text: text, toLang: lang)
+            |> `catch` { _ -> Signal<(String, [MessageTextEntity])?, NoError> in .single(nil) }
+            |> deliverOnMainQueue).start(next: { [weak chatInteraction] result in
+            guard let chatInteraction, let translated = result?.0, !translated.isEmpty, chatInteraction.presentation.effectiveInput.inputText == text else {
+                return
+            }
+            chatInteraction.update({
+                $0.withUpdatedEffectiveInputState(ChatTextInputState(inputText: translated))
+            })
+        })
     }
 
     private func apply(_ text: String) {

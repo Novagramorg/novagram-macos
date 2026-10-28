@@ -27,4 +27,12 @@ public extension NovagramL10n {
     var foldersPrompt_alertTitle: String { pick(en: "Add folders?", uz: "Papkalar qo'shilsinmi?", ru: "Добавить папки?") }
     var foldersPrompt_alertText: String { pick(en: "Suggested folders will be added: Personal, Groups, Channels, Bots and Unread.", uz: "Tavsiya etilgan papkalar qo'shiladi: Shaxsiy, Guruhlar, Kanallar, Botlar va O'qilmagan.", ru: "Будут добавлены рекомендуемые папки: Личные, Группы, Каналы, Боты и Непрочитанные.") }
     var foldersPrompt_alertConfirm: String { pick(en: "Add", uz: "Qo'shish", ru: "Добавить") }
+
+    var settings_translateConfirm_title: String { pick(en: "Ask to translate on send", uz: "Yuborishda tarjima so'rovi", ru: "Запрос перевода при отправке") }
+    var settings_translateConfirm_subtitle: String { pick(en: "Before sending, asks whether to translate or send the original. Turning it on turns off dictation translate", uz: "Yuborishdan oldin tarjima yoki original so'raladi. Yoqilsa diktovka tarjimasi o'chadi", ru: "Перед отправкой спрашивает: перевести или отправить оригинал. Включение отключает перевод диктовки") }
+    var translateConfirm_alertTitle: String { pick(en: "Send with translation?", uz: "Xabarni tarjima qilib yuborasizmi?", ru: "Отправить сообщение с переводом?") }
+    var translateConfirm_translate: String { pick(en: "Translate & Send", uz: "Tarjima qilib yuborish", ru: "Перевести и отправить") }
+    var translateConfirm_original: String { pick(en: "Send Original", uz: "Original yuborish", ru: "Отправить оригинал") }
+    var settings_voiceTranslate_title: String { pick(en: "Translate dictated text", uz: "Diktovka matnini tarjima qilish", ru: "Переводить надиктованный текст") }
+    var settings_voiceTranslate_subtitle: String { pick(en: "When dictation ends, the text is translated into the auto-translate language. Works when “Ask to translate on send” is off", uz: "Diktovka tugagach matn avto-tarjima tiliga tarjima qilinadi. «Yuborishda tarjima so'rovi» o'chiq bo'lsa ishlaydi", ru: "После диктовки текст переводится на язык автоперевода. Работает, когда «Запрос перевода при отправке» выключен") }
 }
