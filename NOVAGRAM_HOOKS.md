@@ -12,6 +12,22 @@ Old fork (overtake base, July 2025): removed on 2026-10-27, history in `~/Docume
 - Never push to `upstream` (push URL is disabled on purpose).
 - Upstream updates go through `scripts/novagram-upstream-update.sh` (header explains the steps). It counts the `// Novagram` lines per file before and after the merge: a file with fewer lines means a hook was lost in the merge, restore it from this document.
 
+## Easy upstream merges (owner's rules, 2026-10-28)
+
+1. Never reformat a Telegram file; change only the lines a hook needs. `~/.claude/scripts/auto-lint.sh` (swiftlint --fix after every Edit/Write) reads `.claude/auto-lint-only` at the repo root: one bash glob per line against the path from the repo root, `*` also matches `/`, a leading `!` excludes, the first match wins, a file no line matches is not linted. The file is local (`.claude/` is gitignored); recreate it on a new machine:
+
+   ```
+   !submodules/*
+   packages/NovagramCore/*.swift
+   Telegram-Mac/novagram/*.swift
+   fork-patches/*.swift
+   */Novagram*.swift
+   ```
+
+   The telegram-ios submodule is excluded so the `fork-patches/` copies stay byte-identical for `scripts/novagram-upstream-update.sh`.
+2. Thin hooks: a Telegram file gets an import and a 1–3 line call; the logic lives in NovagramCore or `Telegram-Mac/novagram/`. Whoever works on an existing fat hook thins it in the same change. On 2026-10-28 main had 83 Telegram Swift files with 389 added lines against the upstream merge base; the biggest: `ChatUI/ChatController.swift`, `ChatListUI/ChatListController.swift`, `AuthUI/AuthController.swift`, `ChatHistoryModel/SenderController.swift`.
+3. Weekly upstream check: `~/Library/Application Support/Novagram/novagram-upstream-weekly.sh`, launchd job `uz.novagram.upstream-weekly`, Mondays 10:00. It fetches GitHub's main of both forks (macOS, iOS) and Telegram's master into small blobless mirrors (`~/Library/Caches/novagram-upstream/`) and trial-merges refs only, so it never touches a working copy or branch. The result is a macOS notification and `~/Library/Logs/novagram-upstream-weekly.log`. The update itself stays `scripts/novagram-upstream-update.sh`.
+
 ## Branding (2026-10-26)
 
 ### New files (ours)

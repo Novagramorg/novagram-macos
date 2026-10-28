@@ -9,6 +9,8 @@ Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted 
 - Never put "Telegram" in the App Store name, subtitle or keywords (rejected under 4.1 Copycats twice). In-app the product is "Novagram"; strings are rebranded at runtime by `NovagramBranding.rebrand`.
 - Novagram code lives in our own files: `packages/NovagramCore` (products `NovagramCore` and the light `NovagramShare` for the share extension), `Telegram-Mac/novagram/`, `Telegram-Mac/packages-integration/hooks/Novagram*HooksInstall.swift`, and `Novagram*.swift` files inside Telegram packages. Telegram files get short call sites only.
 - Every line we change in a Telegram file ends with `// Novagram`, and every change is listed in `NOVAGRAM_HOOKS.md` in the same commit. Exact line edits only; never run a formatter over a Telegram file.
+- Thin hooks: a Telegram file gets an import and a 1–3 line call, the logic lives in NovagramCore or `Telegram-Mac/novagram/`. Thin an existing fat hook when you work on it anyway; never reformat the lines around a hook.
+- Auto-lint (swiftlint --fix after Edit/Write) only touches the files in `.claude/auto-lint-only` (local, gitignored: recreate it on a new machine from `NOVAGRAM_HOOKS.md`, "Easy upstream merges").
 - Packages that NovagramCore depends on (AlertsUI, GeneralRows, InputDataUI, InAppSettings, TelegramUtils, AvatarUI, ...) must never import NovagramCore (dependency cycle).
 - `APP_STORE` is false inside packages in Xcode builds. App Store archives must pass `SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) APP_STORE'` on the xcodebuild command line (`novagram-publish.sh` does).
 - `scripts/xcode27.sh apply` changes (deployment target 12.0, Metal, ImplicitStrongCapture) stay local: `scripts/xcode27.sh revert` before staging those files, `apply` after.
@@ -24,7 +26,7 @@ Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted 
 
 ## Upstream updates
 
-- `scripts/novagram-upstream-update.sh` merges the latest `upstream/master` on a new `feature/upstream-<date>` branch: reverts the local Xcode 27 changes, merges, updates moved submodules, re-applies the TelegramCore patches, checks that no `// Novagram` hook was lost, builds. `--check` only reports what upstream has; `--finish` continues after conflicts were resolved by hand. Never merge upstream on `main` by hand. Run it often (weekly): small merges rarely conflict.
+- `scripts/novagram-upstream-update.sh` merges the latest `upstream/master` on a new `feature/upstream-<date>` branch: reverts the local Xcode 27 changes, merges, updates moved submodules, re-applies the TelegramCore patches, checks that no `// Novagram` hook was lost, builds. `--check` only reports what upstream has; `--finish` continues after conflicts were resolved by hand. Never merge upstream on `main` by hand. Run it often (weekly): small merges rarely conflict. A launchd job (`uz.novagram.upstream-weekly`, Mondays 10:00) only trial-merges and reports in a macOS notification and `~/Library/Logs/novagram-upstream-weekly.log`.
 
 ## Build
 
