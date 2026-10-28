@@ -3747,6 +3747,7 @@
 				C232EA8E1E1D07E700C4D38C /* Frameworks */,
 				C232EA8F1E1D07E700C4D38C /* Resources */,
 				C232EAA91E1D080100C4D38C /* CopyFiles */,
+				FE40A0B1C2D3E4F500000002 /* Novagram: remove the Apple font (App Store) */,
 			);
 			buildRules = (
 			);
@@ -4666,6 +4667,28 @@
 
 
 /* Begin PBXShellScriptBuildPhase section */
+		FE40A0B1C2D3E4F500000002 /* Novagram: remove the Apple font (App Store) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+			);
+			name = "Novagram: remove the Apple font (App Store)";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/novagram-remove-apple-font.stamp",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"${CONFIGURATION}\" != \"Release\" ]; then\n  exit 0\nfi\n# Telegram bundles an Apple font (only used before macOS 10.15); App Store uploads reject it from 2027-10-01.\nrm -f \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SFCompactRounded-Semibold.otf\"\nrm -rf \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/fonts\"\n/usr/libexec/PlistBuddy -c \"Delete :ATSApplicationFontsPath\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || true\nmkdir -p \"${DERIVED_FILE_DIR}\"\ntouch \"${DERIVED_FILE_DIR}/novagram-remove-apple-font.stamp\"\n";
+			showEnvVarsInLog = 0;
+		};
 		FE40A0B1C2D3E4F500000001 /* Novagram: strip Sparkle (App Store) */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -4686,7 +4709,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"${CONFIGURATION}\" != \"Release\" ]; then\n  exit 0\nfi\nrm -rf \"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework\"\n/usr/libexec/PlistBuddy -c \"Delete :SUFeedURL\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || true\n/usr/libexec/PlistBuddy -c \"Delete :SUPublicDSAKeyFile\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || true\nmkdir -p \"${DERIVED_FILE_DIR}\"\ntouch \"${DERIVED_FILE_DIR}/novagram-strip-sparkle.stamp\"\n";
+			shellScript = "if [ \"${CONFIGURATION}\" != \"Release\" ]; then\n  exit 0\nfi\nrm -rf \"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework\"\n/usr/libexec/PlistBuddy -c \"Delete :SUFeedURL\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || true\n/usr/libexec/PlistBuddy -c \"Delete :SUPublicDSAKeyFile\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || true\nmkdir -p \"${DERIVED_FILE_DIR}\"\n# Telegram bundles an Apple font (only used before macOS 10.15); App Store uploads reject it from 2027-10-01.\nrm -f \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SFCompactRounded-Semibold.otf\"\n/usr/libexec/PlistBuddy -c \"Delete :UIAppFonts\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\" 2>/dev/null || true\ntouch \"${DERIVED_FILE_DIR}/novagram-strip-sparkle.stamp\"\n";
 			showEnvVarsInLog = 0;
 		};
 		161B8B778DC5A90FA234F9E6 /* Check Wallet Engine Bindings */ = {

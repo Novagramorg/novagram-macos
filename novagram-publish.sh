@@ -89,6 +89,11 @@ preflight() {
     else
         fail "Sparkle strip build phase missing"
     fi
+    if grep -q "Novagram: remove the Apple font (App Store)" Telegram.xcodeproj/project.pbxproj; then
+        pass "share extension font removal phase present"
+    else
+        fail "share extension font removal phase missing"
+    fi
 
     MARKETING_VERSION="$(setting "$dump" MARKETING_VERSION)"
     BUILD_NUMBER="$(setting "$dump" CURRENT_PROJECT_VERSION)"
@@ -171,6 +176,11 @@ check_archive() {
         *) warn "signed by: '$value' (Organizer re-signs with Apple Distribution on export)" ;;
     esac
 
+    if find "$app" -name "SFCompact*.otf" | grep -q .; then
+        fail "Apple font SFCompactRounded bundled (uploads rejected from 2027-10-01): $(find "$app" -name 'SFCompact*.otf' | sed "s|$app/||" | tr '\n' ' ')"
+    else
+        pass "no Apple-provided font files"
+    fi
     if [ -f "$app/Contents/Resources/PrivacyInfo.xcprivacy" ]; then
         pass "PrivacyInfo.xcprivacy present"
     else

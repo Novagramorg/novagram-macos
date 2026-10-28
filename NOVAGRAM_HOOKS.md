@@ -397,3 +397,12 @@ No Telegram file changed (the `tg://settings/novagrampro` routing in `InAppLinks
 Ours:
 - `NovagramSpotlightContacts` (NovagramCore): every contact of every account in Spotlight (name, @username, the cached small avatar), ids `novagram-profile:<accountId>:<peerId>`, domain `novagram.contacts.<accountId>` (deleted with the account). Hidden chats and locked chats are never indexed, and Telegram's own items for hidden chats are deleted. Opening a result shows the profile (another account: switches account and opens the chat).
 - `NovagramAppIntents.swift`: App Intents (macOS 14+) Open Chat, Open Profile, Send Message (always asks first, text only, refuses hidden / locked chats), Set Ghost Mode, Unread Messages, Open Novagram Settings; `NovagramContactEntity` searches the current account's contacts; `NovagramShortcuts` (7 App Shortcuts, Siri phrases with the app name, English + Russian in `AppShortcuts.xcstrings`; Siri has no Uzbek). `updateAppShortcutParameters()` runs at account start.
+
+## Apple font out of App Store builds (2026-10-28)
+
+Transporter warned on 2.0.16 (ITMS 91182): `SFCompactRounded-Semibold.otf` (Telegram's bundled copy, in the app and twice in the share extension) is an Apple-provided font; uploads with it are rejected from 2027-10-01. Telegram only uses it before macOS 10.15 (`TGFont.avatar` / `roundTimer`); on 10.15+ the system rounded design is used, our minimum is macOS 14. No Telegram line is removed, so an upstream removal of the font merges cleanly and our steps become no-ops:
+
+| File | Change |
+| --- | --- |
+| `Telegram.xcodeproj/project.pbxproj` | our app phase "Novagram: strip Sparkle (App Store)" (Release only) also deletes `Contents/Resources/SFCompactRounded-Semibold.otf` and the `UIAppFonts` key; new share-extension phase `FE40A0B1C2D3E4F500000002` "Novagram: remove the Apple font (App Store)" (Release only, after its fonts CopyFiles) deletes the font, the `fonts` folder and `ATSApplicationFontsPath` |
+| `novagram-publish.sh` (ours) | preflight checks the new phase; archive check fails on any `SFCompact*.otf` in the bundle |
