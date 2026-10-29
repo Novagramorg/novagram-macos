@@ -406,3 +406,16 @@ Transporter warned on 2.0.16 (ITMS 91182): `SFCompactRounded-Semibold.otf` (Tele
 | --- | --- |
 | `Telegram.xcodeproj/project.pbxproj` | our app phase "Novagram: strip Sparkle (App Store)" (Release only) also deletes `Contents/Resources/SFCompactRounded-Semibold.otf` and the `UIAppFonts` key; new share-extension phase `FE40A0B1C2D3E4F500000002` "Novagram: remove the Apple font (App Store)" (Release only, after its fonts CopyFiles) deletes the font, the `fonts` folder and `ATSApplicationFontsPath` |
 | `novagram-publish.sh` (ours) | preflight checks the new phase; archive check fails on any `SFCompact*.otf` in the bundle |
+
+## Package asset catalogs compiled (2026-10-29)
+
+2.0.16 crashed (EXC_BREAKPOINT in `EditImageControlsView.updateUserInterface`) when the photo editor opened: send a photo, right-click → Edit, 📎 → Edit. `ImageCanvasUI`, `CubeUI` and `PrivateCallScreen` declared `.copy("Resources/Assets.xcassets")`, so Xcode 27 copied the catalog as a raw folder (no `Assets.car`) and every `NSImage(resource:)` from those bundles trapped: the photo editor, the 1:1 call screen icons (`ic_microphoneoff` traps the same way), gift crafting. Checked outside the app: the shipped bundle traps, the same catalog compiled with `actool` loads.
+
+| File | Change |
+| --- | --- |
+| `packages/ImageCanvasUI/Package.swift` | `resources: [.process("Resources/Assets.xcassets")]` (was `.copy`) |
+| `packages/CubeUI/Package.swift` | the same |
+| `packages/PrivateCallScreen/Package.swift` | the same |
+| `novagram-publish.sh` (ours) | archive check: fails when a package bundle still holds a raw `.xcassets` folder (it fails on the 2.0.16 archive) |
+
+Manual repro for regressions: send a photo to Saved Messages, right-click it → Edit, click 📎 → Edit: the photo editor must open. Start a 1:1 call: the call screen must show its buttons.

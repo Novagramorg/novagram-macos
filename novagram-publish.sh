@@ -181,6 +181,13 @@ check_archive() {
     else
         pass "no Apple-provided font files"
     fi
+    # A package asset catalog copied as a raw folder is not compiled: NSImage(resource:) traps on it
+    # (2.0.16 crashed in the photo editor and the call screen).
+    if find "$app/Contents/Resources" -path "*.bundle/*" -name "*.xcassets" -type d | grep -q .; then
+        fail "uncompiled asset catalog in a package bundle (use .process in Package.swift): $(find "$app/Contents/Resources" -path '*.bundle/*' -name '*.xcassets' -type d | sed "s|$app/||" | tr '\n' ' ')"
+    else
+        pass "package asset catalogs compiled"
+    fi
     if [ -f "$app/Contents/Resources/PrivacyInfo.xcprivacy" ]; then
         pass "PrivacyInfo.xcprivacy present"
     else
