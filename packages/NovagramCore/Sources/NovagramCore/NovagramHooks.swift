@@ -2,6 +2,7 @@ import Foundation
 import Postbox
 import TelegramCore
 import TelegramContext
+import SwiftSignalKit
 
 // Novagram screens live in the app target (they use the concrete AccountContext and the app's
 // table rows). Telegram packages reach them through these closures; the app installs them in
@@ -12,6 +13,9 @@ public struct NovagramHooks {
     public var accountWillLogOut: (_ accountId: AccountRecordId) -> Void = { _ in }
     // Chat list menu → Recent actions (admin log) of a channel or supergroup.
     public var openRecentActions: (_ context: any AccountContextProtocol, _ peer: Peer) -> Void = { _, _ in }
+    public var openJobSearch: (_ context: any AccountContextProtocol, _ savedSearchId: String?) -> Void = { _, _ in }
+    public var jobSearchUnseenCount: (_ context: any AccountContextProtocol) -> Signal<Int, NoError> = { _ in .single(0) }
+    public var handleNotificationClick: (_ userInfo: [AnyHashable: Any]) -> Bool = { _ in false }
 
     public init() {}
 

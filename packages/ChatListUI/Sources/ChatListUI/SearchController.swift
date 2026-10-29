@@ -1751,7 +1751,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                     }
                 } |> deliverOnPrepareQueue
                 
-                return combineLatest(queue: prepareQueue, context.account.postbox.loadedPeerWithId(context.peerId), top, recently, statePromise, NovagramSavedSearches.signal(accountPeerId: context.peerId)) |> map { user, top, recent, state, novagramSearches -> ([ChatListSearchEntry], Bool) in // Novagram
+                return combineLatest(queue: prepareQueue, context.account.postbox.loadedPeerWithId(context.peerId), top, recently, statePromise, novagramSavedSearchSignal(context)) |> map { user, top, recent, state, novagramSearches -> ([ChatListSearchEntry], Bool) in // Novagram
                     var entries:[ChatListSearchEntry] = []
                     var i:Int = 0
                     var ids:[PeerId:PeerId] = [:]
@@ -2200,7 +2200,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
     
     
     public func selectionDidChange(row:Int, item:TableRowItem, byClick:Bool, isNew:Bool) -> Void {
-        if let query = novagramSavedSearchQuery(item) { novagramSetQuery?(query); return } // Novagram
+        if novagramSavedSearchSelect(item, context: self.context, setQuery: novagramSetQuery) { return } // Novagram
         var peer:Peer?
         var peerId:PeerId?
         var messageId:MessageId?

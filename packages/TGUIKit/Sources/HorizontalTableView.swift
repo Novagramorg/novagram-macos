@@ -132,9 +132,9 @@ open class HorizontalScrollView : ScrollView {
         let isInverted: Bool = System.isScrollInverted
         if event.scrollingDeltaY != 0 {
             if isInverted {
-                scrollPoint.x += -event.scrollingDeltaY
+                scrollPoint.x += -novagramWheelDeltaY(event) // Novagram
             } else {
-                scrollPoint.x -= event.scrollingDeltaY
+                scrollPoint.x -= novagramWheelDeltaY(event) // Novagram
             }
             scrollPoint.x = min(max(0, floorToScreenPixels(backingScaleFactor, scrollPoint.x)), documentView!.frame.width - frame.width)
             clipView.scroll(to: scrollPoint)

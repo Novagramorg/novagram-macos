@@ -2220,10 +2220,12 @@ private class SearchContainer : Control {
                 }
             }
                         
+            items = novagramJobsTabItems(items, state: state, context: arguments?.context, view: current, insets: insets, theme: presentation) // Novagram
             current.updateItems(items, animated: animated, autoscroll: previous?.selectedTag != state.selectedTag)
             current.theme = presentation
             
             current.didChangeSelectedItem = { [weak arguments] item in
+                if novagramJobsTabDidSelect(item, context: arguments?.context) { return } // Novagram
                 if let tag = PeerListState.SelectedSearchTag(rawValue: Int32(item.uniqueId)) {
                     arguments?.selectSearchTag(tag)
                 }

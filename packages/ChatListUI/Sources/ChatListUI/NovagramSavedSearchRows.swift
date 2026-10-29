@@ -14,6 +14,10 @@ struct NovagramSavedSearchRow: Equatable {
     }
 }
 
+func novagramSavedSearchSignal(_ context: any AccountContextProtocol) -> Signal<[NovagramSavedSearch], NoError> {
+    return NovagramSavedSearches.signal(accountPeerId: context.peerId)
+}
+
 func novagramSavedSearchRows(_ searches: [NovagramSavedSearch], after index: Int) -> (rows: [NovagramSavedSearchRow], next: Int) {
     guard !searches.isEmpty else {
         return ([], index)
@@ -25,11 +29,12 @@ func novagramSavedSearchRows(_ searches: [NovagramSavedSearch], after index: Int
     return (rows, index + 2 + searches.count)
 }
 
-func novagramSavedSearchQuery(_ item: TableRowItem) -> String? {
+func novagramSavedSearchSelect(_ item: TableRowItem, context: any AccountContextProtocol, setQuery: ((String) -> Void)?) -> Bool {
     guard let stableId = item.stableId.base as? ChatListSearchEntryStableId, case let .novagramSavedSearch(query) = stableId, !query.isEmpty else {
-        return nil
+        return false
     }
-    return query
+    setQuery?(query)
+    return true
 }
 
 func novagramSavedSearchRowItem(_ initialSize: NSSize, row: NovagramSavedSearchRow, stableId: AnyHashable, context: any AccountContextProtocol) -> TableRowItem {

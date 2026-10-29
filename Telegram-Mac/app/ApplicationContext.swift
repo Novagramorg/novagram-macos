@@ -512,6 +512,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
         closeAllModals(window: context.window)
         AppMenu.closeAll()
         NovagramUnreadReminderManager.shared.start(with: context) // Novagram
+        novagramJobSearchDidStart(context: context) // Novagram
         NovagramAdminFoldersManager.startGlobalMonitor(context: context) // Novagram
         NovagramSuggestedFolders.presentFirstLaunchPromptIfNeeded(context: context) // Novagram
         NovagramAutoDownload.applyIfNeeded(context: context) // Novagram
@@ -549,6 +550,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
                 let _ = logoutFromAccount(id: accountId, accountManager: context.sharedContext.accountManager, alreadyLoggedOutRemotely: false).start()
                 FastSettings.clear_uuid(context.account.id.int64)
                 NovagramSavedSearches.clear(accountRecordId: accountId) // Novagram
+                novagramJobSearchClear(accountRecordId: accountId) // Novagram
                 BrowserStateContext.cleanup(context.account.id)
                 closePipVideo(accountId: accountId)
                 if let groupCall = context.sharedContext.getCrossAccountGroupCall(), groupCall.call.account.id == accountId {
@@ -580,6 +582,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
 
                 alert.beginSheetModal(for: window, completionHandler: { result in
                     if result.rawValue == 1000 && text.isDropAuth {
+                        NovagramHooks.shared.accountWillLogOut(context.account.id) // Novagram
                         let _ = logoutFromAccount(id: context.account.id, accountManager: context.sharedContext.accountManager, alreadyLoggedOutRemotely: false).start()
                     }
                 })
@@ -1412,6 +1415,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
         tonConnectPresentationDisposable.dispose()
         tonConnectDismiss?()
         NovagramUnreadReminderManager.shared.stop() // Novagram
+        novagramJobSearchDidStop(context: context) // Novagram
         NovagramAutoApproveManager.shared.stop() // Novagram
         context.cleanup()
         NotificationCenter.default.removeObserver(self)

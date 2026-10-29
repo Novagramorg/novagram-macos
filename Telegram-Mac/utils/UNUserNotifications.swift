@@ -256,6 +256,7 @@ final class UNUserNotificationsNew : UNUserNotifications, UNUserNotificationCent
         case UNNotificationDismissActionIdentifier: // Notification was dismissed by user
             completionHandler()
         case UNNotificationDefaultActionIdentifier:
+            if NovagramHooks.shared.handleNotificationClick(response.notification.request.content.userInfo) { completionHandler(); return } // Novagram
             activateNotification(userInfo: response.notification.request.content.userInfo)
             if manager.requestUserAttention {
                 NSApp.requestUserAttention(.informationalRequest)

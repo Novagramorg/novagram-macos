@@ -954,6 +954,7 @@
 		D48F2B4F431948C6A001328C /* InactiveChannelsUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3DB8EBB382994860A7329BE8 /* InactiveChannelsUI */; };
 		1ADD8BCCDC6049B68CE86BFE /* SimilarPeersHooksInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4793112A0E44048B603D019 /* SimilarPeersHooksInstall.swift */; };
 		53C2655B791449A18A453BBD /* GroupsInCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = 8C849FFE3CF443CEAAFD9A65 /* GroupsInCommonUI */; };
+		C8C636C094148C77D2D1E3EF /* NovagramJobSearch in Frameworks */ = {isa = PBXBuildFile; productRef = 2BD80E82188DE55E12021328 /* NovagramJobSearch */; };
 		FE10DEC04E14C190FEFE0003 /* NovagramCore in Frameworks */ = {isa = PBXBuildFile; productRef = FE10DEC04E14C190FEFE0002 /* NovagramCore */; };
 		FE10DEC04E14C190FEFE0004 /* NovagramShare in Frameworks */ = {isa = PBXBuildFile; productRef = FE10DEC04E14C190FEFE0005 /* NovagramShare */; };
 		5105D43394A54BCB8773E53C /* QrStudioUI in Frameworks */ = {isa = PBXBuildFile; productRef = 019B2BAFB79C48F1A4A5666E /* QrStudioUI */; };
@@ -2024,6 +2025,7 @@
 		0F608853A24F468E98DBF2D8 /* InactiveChannelsUI */ = {isa = PBXFileReference; lastKnownFileType = folder; name = InactiveChannelsUI; path = packages/InactiveChannelsUI; sourceTree = "<group>"; };
 		C4793112A0E44048B603D019 /* SimilarPeersHooksInstall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimilarPeersHooksInstall.swift; sourceTree = "<group>"; };
 		2382F66FCB03472CB031B1D7 /* GroupsInCommonUI */ = {isa = PBXFileReference; lastKnownFileType = folder; name = GroupsInCommonUI; path = packages/GroupsInCommonUI; sourceTree = "<group>"; };
+		BF536E8579066F0FF1D2C175 /* NovagramJobSearch */ = {isa = PBXFileReference; lastKnownFileType = folder; name = NovagramJobSearch; path = packages/NovagramJobSearch; sourceTree = "<group>"; };
 		FE10DEC04E14C190FEFE0001 /* NovagramCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = NovagramCore; path = packages/NovagramCore; sourceTree = "<group>"; };
 		FE10DEC04E14C190FFFFFFF0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		3735CDD1DC42418CBDF358F5 /* QrStudioUI */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QrStudioUI; path = packages/QrStudioUI; sourceTree = "<group>"; };
@@ -2158,6 +2160,7 @@
 				07EDD2B662264351B2D102DE /* EditTagLabelUI in Frameworks */,
 				7BE4259A2C3D4D73BBBC2302 /* SelectCountryUI in Frameworks */,
 				53C2655B791449A18A453BBD /* GroupsInCommonUI in Frameworks */,
+				C8C636C094148C77D2D1E3EF /* NovagramJobSearch in Frameworks */,
 				FE10DEC04E14C190FEFE0003 /* NovagramCore in Frameworks */,
 				FE50AD500000000000000012 /* NovagramAds in Frameworks */,
 				FE50AD500000000000000013 /* NovagramInsights in Frameworks */,
@@ -2877,6 +2880,7 @@
 				F70986F290D0462F9CEF770F /* EditTagLabelUI */,
 				447E693028674930A9722A3F /* SelectCountryUI */,
 				2382F66FCB03472CB031B1D7 /* GroupsInCommonUI */,
+				BF536E8579066F0FF1D2C175 /* NovagramJobSearch */,
 				FE10DEC04E14C190FEFE0001 /* NovagramCore */,
 				3735CDD1DC42418CBDF358F5 /* QrStudioUI */,
 				7110771E0000000000000001 /* TLottie */,
@@ -3835,6 +3839,7 @@
 				7C9B791DE6E3430FADA989DF /* EditTagLabelUI */,
 				857E4375FE0F41E9A737B925 /* SelectCountryUI */,
 				8C849FFE3CF443CEAAFD9A65 /* GroupsInCommonUI */,
+				2BD80E82188DE55E12021328 /* NovagramJobSearch */,
 				FE10DEC04E14C190FEFE0002 /* NovagramCore */,
 				FE50AD500000000000000002 /* NovagramAds */,
 				FE50AD500000000000000003 /* NovagramInsights */,
@@ -6168,6 +6173,10 @@
 		8C849FFE3CF443CEAAFD9A65 /* GroupsInCommonUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = GroupsInCommonUI;
+		};
+		2BD80E82188DE55E12021328 /* NovagramJobSearch */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NovagramJobSearch;
 		};
 		FE10DEC04E14C190FEFE0002 /* NovagramCore */ = {
 			isa = XCSwiftPackageProductDependency;

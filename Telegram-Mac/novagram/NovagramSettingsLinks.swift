@@ -42,6 +42,12 @@ struct NovagramSettingsLink {
 }
 
 func openNovagramSettings(context: AccountContext, feature: String?) {
+    if feature == "jobs" {
+        if NovagramJobSearchAvailability.isEnabled {
+            NovagramHooks.shared.openJobSearch(context, nil)
+        }
+        return
+    }
     let navigation = context.bindings.rootNavigation()
     let controller = NovagramSettingsController(context)
     navigation.push(controller)
