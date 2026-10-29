@@ -76,7 +76,7 @@ public extension NovagramL10n {
     func search_toDateValue(_ date: String) -> String { pick(en: "To \(date)", uz: "\(date) gacha", ru: "По \(date)") }
     var search_clearDates: String { pick(en: "Clear dates", uz: "Sanalarni tozalash", ru: "Сбросить даты") }
     var search_unreadOnly: String { pick(en: "Unread only", uz: "Faqat o'qilmaganlar", ru: "Только непрочитанные") }
-    var about_searchHint: String { pick(en: "Inside a chat, search \"two words\" for the exact phrase or re: followed by a regular expression.", uz: "Chat ichida aniq ibora uchun \"ikki so'z\" yoki re: va undan keyin regular expression yozib qidiring.", ru: "В чате ищите \"два слова\" для точной фразы или re: с регулярным выражением.") }
+    var about_searchHint: String { pick(en: "Inside a chat, search \"two words\" for the exact phrase or lowercase re: followed by a regular expression.", uz: "Chat ichida aniq ibora uchun \"ikki so'z\" yoki kichik harflarda re: va undan keyin regular expression yozib qidiring.", ru: "В чате ищите \"два слова\" для точной фразы или re: строчными буквами с регулярным выражением.") }
     var search_mentionsOnly: String { pick(en: "Mentions only", uz: "Faqat mention'lar", ru: "Только упоминания") }
     func search_translatedTitle(_ text: String) -> String { pick(en: "Translated: \(text)", uz: "Tarjima: \(text)", ru: "Перевод: \(text)") }
     var search_savedTitle: String { pick(en: "Saved searches", uz: "Saqlangan qidiruvlar", ru: "Сохранённые поиски") }
