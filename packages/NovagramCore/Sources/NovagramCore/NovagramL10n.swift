@@ -160,18 +160,6 @@ public struct NovagramL10n {
         )
     }
 
-    public var settings_chat_camera_title: String {
-        pick(en: "Camera picker", uz: "Kamerani tanlash", ru: "Выбор камеры")
-    }
-
-    public var settings_chat_camera_subtitle: String {
-        pick(
-            en: "Long-press the video-message button to switch front/back camera",
-            uz: "Video xabar tugmasini uzun bosib old/orqa kamerani tanlash",
-            ru: "Долгое нажатие на кнопку видео-сообщения переключает камеру"
-        )
-    }
-
     // Interface section
     public var settings_interface_hideFolders_title: String {
         pick(en: "Hide folders", uz: "Jildlarni yashirish", ru: "Скрыть папки")

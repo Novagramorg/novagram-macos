@@ -419,3 +419,7 @@ Transporter warned on 2.0.16 (ITMS 91182): `SFCompactRounded-Semibold.otf` (Tele
 | `novagram-publish.sh` (ours) | archive check: fails when a package bundle still holds a raw `.xcassets` folder (it fails on the 2.0.16 archive) |
 
 Manual repro for regressions: send a photo to Saved Messages, right-click it → Edit, click 📎 → Edit: the photo editor must open. Start a 1:1 call: the call screen must show its buttons.
+
+## Camera picker removed (2026-10-29)
+
+The Novagram Settings "Camera picker" switch (`long_press_camera_selection`, iOS front/back camera on the video-message button) did nothing on the Mac: no Mac code read the key, and a Mac has one camera or none (Mac mini, Mac Studio). Removed the row, its link slug `camera-picker`, the About card and the strings. No Telegram file changed.

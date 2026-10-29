@@ -23,7 +23,7 @@
 //      "hide_folders" Bool, "show_stories" Bool (default true),
 //      "show_mutual_contact_symbol" Bool (default true),
 //      "show_deleted_messages" Bool, "show_view_first_message" Bool,
-//      "show_ghost_mode_button" Bool, "long_press_camera_selection" Bool (default true),
+//      "show_ghost_mode_button" Bool,
 //      "show_translate_messages" Bool (default true),
 //      "stt_enabled" Bool (default false), "stt_language" String (default "en-US"),
 //      "block_foreign_users" Bool, "block_apk_files" Bool
@@ -51,7 +51,6 @@ private enum NovagramDefaultsKey {
     static let showViewFirstMessage       = "show_view_first_message"
     static let showGhostMode              = "show_ghost_mode_button"
     static let ghostModeActive            = "is_ghost_mode_active"
-    static let longPressCameraSelection   = "long_press_camera_selection"
     static let showTranslateMessages      = "show_translate_messages"
     static let textStyle                  = "text_style"
     static let autoTextEnabled            = "auto_text_enabled"
@@ -89,7 +88,6 @@ private struct NovagramSettingsState: Equatable {
     var showViewFirstMessage: Bool
     var showGhostMode: Bool
     var ghostModeActive: Bool
-    var longPressCameraSelection: Bool
     var showTranslateMessages: Bool
     var textStyle: String
     var autoTextEnabled: Bool
@@ -142,7 +140,6 @@ private struct NovagramSettingsState: Equatable {
             showViewFirstMessage: d?.bool(forKey: NovagramDefaultsKey.showViewFirstMessage) ?? false,
             showGhostMode: d?.bool(forKey: NovagramDefaultsKey.showGhostMode) ?? false,
             ghostModeActive: d?.bool(forKey: NovagramDefaultsKey.ghostModeActive) ?? false,
-            longPressCameraSelection: d?.object(forKey: NovagramDefaultsKey.longPressCameraSelection) as? Bool ?? true,
             showTranslateMessages: d?.object(forKey: NovagramDefaultsKey.showTranslateMessages) as? Bool ?? true,
             textStyle: d?.string(forKey: NovagramDefaultsKey.textStyle) ?? "none",
             autoTextEnabled: d?.bool(forKey: NovagramDefaultsKey.autoTextEnabled) ?? false,
@@ -215,7 +212,7 @@ private enum NovagramEntryId: Hashable {
     case topAbout
     case topBots
     case interfaceHideFolders, interfaceStories, interfaceMutual, interfaceUnlimitedPins, interfaceFooter
-    case chatDeleted, chatEditedHistory, chatFirstMessage, chatGhostActive, chatGhost, chatCamera, chatRoundVideo, chatForwardHideNames, chatFooter
+    case chatDeleted, chatEditedHistory, chatFirstMessage, chatGhostActive, chatGhost, chatRoundVideo, chatForwardHideNames, chatFooter
     case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingTranslateConfirm, messagingAskVoice, messagingAskSticker, messagingAutoSticker, messagingHeartEffect, messagingFooter
     case sttEnabled, sttLanguage, sttVoiceTranslate
     case protectionChatLock, protectionProxy, protectionForeign, protectionAutoDownload, protectionFooter
@@ -239,7 +236,6 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .chatFirstMessage:         map = ("arrow.up.to.line", .blue)
     case .chatGhostActive:          map = ("eye.slash.fill", .gray)
     case .chatGhost:                map = ("eye.slash", .gray)
-    case .chatCamera:               map = ("camera.rotate.fill", .orange)
     case .chatEditedHistory:        map = ("clock.arrow.circlepath", .blue)
     case .chatRoundVideo:           map = ("video.circle.fill", .violet)
     case .chatForwardHideNames:     map = ("arrowshape.turn.up.right.fill", .teal)
@@ -513,7 +509,6 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.toggle(next(), .chatFirstMessage, l10n.settings_chat_firstMessage_title, nil, state.showViewFirstMessage, .innerItem, NovagramDefaultsKey.showViewFirstMessage))
     entries.append(.toggle(next(), .chatGhostActive, l10n.settings_chat_ghostActive_title, l10n.settings_chat_ghostActive_subtitle, state.ghostModeActive, .innerItem, NovagramDefaultsKey.ghostModeActive))
     entries.append(.toggle(next(), .chatGhost, l10n.settings_chat_ghost_title, nil, state.showGhostMode, .innerItem, NovagramDefaultsKey.showGhostMode))
-    entries.append(.toggle(next(), .chatCamera, l10n.settings_chat_camera_title, l10n.settings_chat_camera_subtitle, state.longPressCameraSelection, .innerItem, NovagramDefaultsKey.longPressCameraSelection))
     entries.append(.toggle(next(), .chatRoundVideo, l10n.settings_chat_roundVideo_title, l10n.settings_chat_roundVideo_subtitle, state.roundVideoFromGallery, .innerItem, NovagramDefaultsKey.roundVideoFromGallery))
     entries.append(.toggle(next(), .chatForwardHideNames, l10n.settings_chat_forwardHideNames_title, l10n.settings_chat_forwardHideNames_subtitle, state.forwardHideNames, .lastItem, NovagramDefaultsKey.forwardHideNames))
     entries.append(.footer(next(), .chatFooter, l10n.settings_chat_footer))
@@ -708,7 +703,6 @@ class NovagramSettingsController: TableViewController {
                     case NovagramDefaultsKey.showViewFirstMessage: state.showViewFirstMessage = value
                     case NovagramDefaultsKey.showGhostMode: state.showGhostMode = value
                     case NovagramDefaultsKey.ghostModeActive: state.ghostModeActive = value
-                    case NovagramDefaultsKey.longPressCameraSelection: state.longPressCameraSelection = value
                     case NovagramDefaultsKey.showTranslateMessages: state.showTranslateMessages = value
                     case NovagramDefaultsKey.sttEnabled: state.sttEnabled = value
                     case NovagramDefaultsKey.blockForeignUsers: state.blockForeignUsers = value
@@ -905,7 +899,7 @@ private let novagramSettingsSlugs: [(NovagramEntryId, String)] = [
     (.topAbout, "about"), (.topBots, "bots"),
     (.interfaceHideFolders, "hide-folders"), (.interfaceStories, "stories"), (.interfaceMutual, "mutual-contacts"), (.interfaceUnlimitedPins, "unlimited-pins"),
     (.chatDeleted, "deleted-messages"), (.chatEditedHistory, "edited-history"), (.chatFirstMessage, "first-message"), (.chatGhostActive, "ghost-mode"), (.chatGhost, "ghost-button"),
-    (.chatCamera, "camera-picker"), (.chatRoundVideo, "round-video"), (.chatForwardHideNames, "forward-hide-names"),
+    (.chatRoundVideo, "round-video"), (.chatForwardHideNames, "forward-hide-names"),
     (.messagingTextStyle, "text-style"), (.messagingAutoText, "auto-text"), (.messagingAutoTranslate, "auto-translate"), (.messagingTranslateToggle, "translate-button"),
     (.messagingTranslateLang, "translate-language"), (.messagingTranslateConfirm, "translate-on-send"), (.messagingAskVoice, "send-confirm"), (.messagingAskSticker, "send-confirm-sticker"),
     (.messagingAutoSticker, "auto-sticker"), (.messagingHeartEffect, "heart-effect"),

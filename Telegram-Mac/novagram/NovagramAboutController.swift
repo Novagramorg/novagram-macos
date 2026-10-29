@@ -603,29 +603,6 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "关闭同一开关即可移除该菜单项。"
             )
         ),
-        // 24. Camera Picker (long-press)
-        FeatureSpec(
-            symbol: "camera.rotate.fill", color: .orange,
-            title: L3(en: "Camera Picker", uz: "Kamerani tanlash", ru: "Выбор камеры", zh: "选择摄像头"),
-            enable: L3(
-                en: "Settings → Novagram → Chat → turn on “Camera picker”.",
-                uz: "Sozlamalar → Novagram → Chat → \"Kamerani tanlash\"ni yoqing.",
-                ru: "Настройки → Novagram → Чат → включите «Выбор камеры».",
-                zh: "设置 → Novagram → 聊天 → 开启“选择摄像头”。"
-            ),
-            works: L3(
-                en: "Long-press the video-message (circular camera) button in a chat to quickly switch between the front and back camera before recording, instead of only being able to flip mid-recording.",
-                uz: "Video-xabar (dumaloq kamera) tugmasini uzun bosib, yozishni boshlashdan oldin old/orqa kamerani tezkor almashtirishingiz mumkin — faqat yozish jarayonida emas.",
-                ru: "Зажмите кнопку видео-сообщения (круглая камера) в чате, чтобы быстро переключиться между передней и задней камерой перед записью, а не только во время неё.",
-                zh: "在聊天中长按视频消息（圆形相机）按钮，即可在录制前快速切换前置或后置摄像头，而不必等到录制过程中才能切换。"
-            ),
-            disable: L3(
-                en: "Turn the same switch off. Long-press stops offering the camera-selection menu.",
-                uz: "Shu switchni o'chiring. Uzoq bosish kamera tanlash menyusini taklif qilmaydi.",
-                ru: "Выключите тот же переключатель. Долгое нажатие перестанет предлагать меню выбора камеры.",
-                zh: "关闭同一开关后，长按将不再弹出摄像头选择菜单。"
-            )
-        ),
         // 25. Mutual Contact Badge
         FeatureSpec(
             symbol: "person.2.fill", color: .lightBlue,
