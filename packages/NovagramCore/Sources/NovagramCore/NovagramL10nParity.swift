@@ -79,6 +79,11 @@ public extension NovagramL10n {
     var about_searchHint: String { pick(en: "Inside a chat, search \"two words\" for the exact phrase or re: followed by a regular expression.", uz: "Chat ichida aniq ibora uchun \"ikki so'z\" yoki re: va undan keyin regular expression yozib qidiring.", ru: "В чате ищите \"два слова\" для точной фразы или re: с регулярным выражением.") }
     var search_mentionsOnly: String { pick(en: "Mentions only", uz: "Faqat mention'lar", ru: "Только упоминания") }
     func search_translatedTitle(_ text: String) -> String { pick(en: "Translated: \(text)", uz: "Tarjima: \(text)", ru: "Перевод: \(text)") }
+    var search_savedTitle: String { pick(en: "Saved searches", uz: "Saqlangan qidiruvlar", ru: "Сохранённые поиски") }
+    var search_savedPinned: String { pick(en: "Pinned", uz: "Qadalgan", ru: "Закреплён") }
+    var search_savedPin: String { pick(en: "Pin", uz: "Qadash", ru: "Закрепить") }
+    var search_savedUnpin: String { pick(en: "Unpin", uz: "Qadashni olish", ru: "Открепить") }
+    var search_savedRemove: String { pick(en: "Remove", uz: "O'chirish", ru: "Удалить") }
     var settings_searchTranslate_title: String { pick(en: "Search the translated query too", uz: "Tarjima qilingan so'rov bo'yicha ham qidirish", ru: "Искать и по переводу запроса") }
     var settings_searchTranslate_subtitle: String { pick(en: "Messages search also looks for the query translated into your translation language. The query is sent to Telegram's translation service.", uz: "Xabarlar qidiruvi so'rovni tarjima tilingizga tarjima qilib ham qidiradi. So'rov Telegram'ning tarjima xizmatiga yuboriladi.", ru: "Поиск по сообщениям также ищет запрос, переведённый на ваш язык перевода. Запрос отправляется в сервис перевода Telegram.") }
     var editedHistory_file: String { pick(en: "File", uz: "Fayl", ru: "Файл") }

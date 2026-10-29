@@ -91,6 +91,7 @@ public enum ChatListSearchEntryStableId: Hashable {
     case foundStories
     case disclaimer
     case novagramAdPeerId(PeerId) // Novagram
+    case novagramSavedSearch(String) // Novagram
     public func hash(into hasher: inout Hasher) {
         switch self {
         case let .localPeerId(peerId):
@@ -133,6 +134,7 @@ public enum ChatListSearchEntryStableId: Hashable {
         case .disclaimer:
             hasher.combine("disclaimer")
         case let .novagramAdPeerId(peerId): hasher.combine("novagramAdPeerId"); hasher.combine(peerId.hashValue) // Novagram
+        case let .novagramSavedSearch(query): hasher.combine("novagramSavedSearch"); hasher.combine(query) // Novagram
         }
     }
 }
@@ -157,6 +159,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
     case emptyList(listType: SearchTags.ListType, postState: TelegramGlobalPostSearchState?, isPremium: Bool, query: String)
     case disclaimer(String)
     case novagramAdPeer(Peer, String, Int) // Novagram
+    case novagramSavedSearch(NovagramSavedSearchRow) // Novagram
     var stableId: ChatListSearchEntryStableId {
         switch self {
         case let .localPeer(peer, _, secretChat, _, _, _, _):
@@ -192,6 +195,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
         case .disclaimer:
             return .disclaimer
         case let .novagramAdPeer(peer, _, _): return .novagramAdPeerId(peer.id) // Novagram
+        case let .novagramSavedSearch(row): return .novagramSavedSearch(row.stableKey) // Novagram
         }
     }
     
@@ -224,6 +228,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
         case .disclaimer:
             return 100000000
         case let .novagramAdPeer(_, _, index): return index // Novagram
+        case let .novagramSavedSearch(row): return row.index // Novagram
         }
     }
     
@@ -336,6 +341,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
                 return false
             }
         case let .novagramAdPeer(peer, token, index): if case let .novagramAdPeer(rhsPeer, rhsToken, rhsIndex) = rhs { return peer.isEqual(rhsPeer) && token == rhsToken && index == rhsIndex } else { return false } // Novagram
+        case let .novagramSavedSearch(row): if case .novagramSavedSearch(row) = rhs { return true } else { return false } // Novagram
         }
     }
     
@@ -637,6 +643,7 @@ fileprivate func prepareEntries(from:[AppearanceWrapperEntry<ChatListSearchEntry
                 arguments.openStorySearch(state)
             })
         case let .novagramAdPeer(peer, token, _): return novagramSearchAdRow(initialSize, peer: peer, token: token, context: arguments.context, stableId: entry.stableId, contextMenuItems: { peerContextMenuItems(peer: peer, pinnedItems: pinnedItems, arguments: arguments, isRecent: false) }) // Novagram
+        case let .novagramSavedSearch(row): return novagramSavedSearchRowItem(initialSize, row: row, stableId: entry.stableId, context: arguments.context) // Novagram
         case let .disclaimer(text):
             return GeneralTextRowItem(initialSize, stableId: entry.stableId, height: 50, text: .markdown(text, linkHandler: { link in
                 if link == "grossing" {
@@ -871,6 +878,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
 
     
     public var setPeerAsTag: ((Peer?)->Void)? = nil
+    public var novagramSetQuery: ((String) -> Void)? // Novagram
     
     public var pinnedItems:[PinnedItemId] = [] {
         didSet {
@@ -1743,7 +1751,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                     }
                 } |> deliverOnPrepareQueue
                 
-                return combineLatest(queue: prepareQueue, context.account.postbox.loadedPeerWithId(context.peerId), top, recently, statePromise) |> map { user, top, recent, state -> ([ChatListSearchEntry], Bool) in
+                return combineLatest(queue: prepareQueue, context.account.postbox.loadedPeerWithId(context.peerId), top, recently, statePromise, NovagramSavedSearches.signal(accountPeerId: context.peerId)) |> map { user, top, recent, state, novagramSearches -> ([ChatListSearchEntry], Bool) in // Novagram
                     var entries:[ChatListSearchEntry] = []
                     var i:Int = 0
                     var ids:[PeerId:PeerId] = [:]
@@ -1752,6 +1760,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                     
                     
                     entries.append(ChatListSearchEntry.topPeers(i, articlesEnabled: false, unreadArticles: 0, selfPeer: user, peers: top.0, unread: top.1, online: top.2))
+                    let novagramSaved = novagramSavedSearchRows(novagramSearches, after: i); entries += novagramSaved.rows.map { .novagramSavedSearch($0) }; i = novagramSaved.next // Novagram
                     
                     if recent.0.count > 0 {
                         entries.append(.separator(text: strings().searchSeparatorRecent, index: i, state: .clear))
@@ -2191,6 +2200,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
     
     
     public func selectionDidChange(row:Int, item:TableRowItem, byClick:Bool, isNew:Bool) -> Void {
+        if let query = novagramSavedSearchQuery(item) { novagramSetQuery?(query); return } // Novagram
         var peer:Peer?
         var peerId:PeerId?
         var messageId:MessageId?
@@ -2383,6 +2393,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
         }
         if let item = item as? RecentPeerRowItem, let token = item.novagramAdToken { NovagramAdsHooks.shared.searchRecordClick(token) } // Novagram
         
+        if id != nil { NovagramSavedSearches.record(self.query, accountPeerId: context.peerId, accountRecordId: context.account.id) } // Novagram
         if let id = id {
             self.open(id, messageId, close)
         }
