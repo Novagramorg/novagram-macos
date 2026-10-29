@@ -539,7 +539,7 @@ public class ChatControllerView : View, ChatInputDelegate {
             case let .thread(data):
                 location = .peer(peerId: data.peerId, fromId: fromId, tags: nil, reactions: tags.map { $0.tag.reaction }, threadId: data.threadId, minDate: nil, maxDate: nil)
             }
-            return context.engine.messages.searchMessages(location: location, query: query, state: state) |> map {($0.0.messages.filter({ !($0.extendedMedia is TelegramMediaAction) }), $0.1, $0.0.totalCount)}
+            return NovagramChatSearchFilter.wrap(query: query, state: state, search: { context.engine.messages.searchMessages(location: location, query: $0, state: $1) }) |> map {($0.0.messages.filter({ !($0.extendedMedia is TelegramMediaAction) }), $0.1, $0.0.totalCount)} // Novagram
         })
         
         
