@@ -83,9 +83,9 @@ enum NovagramInsightsEntry {
             return
         }
         isPrompting = true
-        NovagramAdsAdminAuth.presentPrompt(window: window) { granted in
+        NovagramAdsAdminAuth.presentPrompt(window: window) { role in
             isPrompting = false
-            if granted {
+            if role != nil {
                 setRevealed(true)
             }
         }

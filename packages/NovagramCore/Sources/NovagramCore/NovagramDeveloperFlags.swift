@@ -88,6 +88,80 @@ public enum NovagramDeveloperFlags {
     }
 }
 
+/// Who passed the developer login on this device, like iOS (NovagramDeveloperSection.swift). The login
+/// decides the role, and the role decides which Developer switches show. A switch a role cannot see is
+/// turned off when that role logs in, so it never stays on unseen.
+public enum NovagramDeveloperRole: String {
+    case developer
+    case director
+
+    /// The switches in the Developer section.
+    public enum Switch {
+        case removeAllAds
+        case adEventsOff
+        case currencyRatesView
+        case adsPanel
+        case stickerPackSave
+    }
+
+    private static let udSuite = "pro_messager"
+    private static let roleKey = "novagram_developer_role"
+
+    /// The developer sees every switch; the director only the ones they use.
+    public func canUse(_ item: Switch) -> Bool {
+        switch self {
+        case .developer:
+            return true
+        case .director:
+            switch item {
+            case .adEventsOff, .adsPanel:
+                return true
+            case .removeAllAds, .currencyRatesView, .stickerPackSave:
+                return false
+            }
+        }
+    }
+
+    /// The role of the last login. A device opened before roles existed was opened by the developer.
+    public static var current: NovagramDeveloperRole {
+        let stored = UserDefaults(suiteName: self.udSuite)?.string(forKey: self.roleKey)
+        return stored.flatMap(NovagramDeveloperRole.init(rawValue:)) ?? .developer
+    }
+
+    /// Emits the current role, then again whenever a Developer switch flips or a role logs in. Main queue.
+    public static var currentSignal: Signal<NovagramDeveloperRole, NoError> {
+        return Signal { subscriber in
+            subscriber.putNext(self.current)
+            let observer = NotificationCenter.default.addObserver(forName: .novagramDeveloperFlagsChanged, object: nil, queue: .main) { _ in
+                subscriber.putNext(self.current)
+            }
+            return ActionDisposable {
+                NotificationCenter.default.removeObserver(observer)
+            }
+        }
+        |> distinctUntilChanged
+    }
+
+    /// Stores the role that just logged in and turns off the switches it cannot see. "Remove all ads"
+    /// lives in the app (NovagramAdsGate), which turns it off right after this call.
+    public static func didLogIn(_ role: NovagramDeveloperRole) {
+        UserDefaults(suiteName: self.udSuite)?.set(role.rawValue, forKey: self.roleKey)
+        if !role.canUse(.adEventsOff) && NovagramDeveloperFlags.isAdEventsOff {
+            NovagramDeveloperFlags.isAdEventsOff = false
+        }
+        if !role.canUse(.currencyRatesView) && NovagramDeveloperFlags.isCurrencyRatesViewEnabled {
+            NovagramDeveloperFlags.isCurrencyRatesViewEnabled = false
+        }
+        if !role.canUse(.adsPanel) && NovagramDeveloperFlags.isAdsPanelEnabled {
+            NovagramDeveloperFlags.isAdsPanelEnabled = false
+        }
+        if !role.canUse(.stickerPackSave) && NovagramDeveloperFlags.isStickerPackSaveEnabled {
+            NovagramDeveloperFlags.isStickerPackSaveEnabled = false
+        }
+        NotificationCenter.default.post(name: .novagramDeveloperFlagsChanged, object: nil)
+    }
+}
+
 /// Holding the app version line at the bottom of Settings for `revealDuration` seconds toggles the
 /// Developer section (iOS: a 20 s long press). Settings rows act on mouse up, so the hold is measured
 /// from the last left mouse down to the mouse up that runs the row's action.

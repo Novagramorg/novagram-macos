@@ -96,14 +96,23 @@ final class NovagramAdsGate {
             return true
         }
         isPrompting = true
-        NovagramAdsAdminAuth.presentPrompt(window: window) { granted in
+        NovagramAdsAdminAuth.presentPrompt(window: window) { role in
             isPrompting = false
-            if granted {
+            if let role {
+                logIn(as: role)
                 setRevealed(true, window: window)
                 onUnlocked?()
             }
         }
         return true
+    }
+
+    /// Stores the role that just logged in and turns off every switch it cannot see, "Remove all ads" included.
+    private static func logIn(as role: NovagramDeveloperRole) {
+        NovagramDeveloperRole.didLogIn(role)
+        if !role.canUse(.removeAllAds) && !memoShowAds {
+            setShowAds(true)
+        }
     }
 
     private static func setRevealed(_ revealed: Bool, window: Window) {
