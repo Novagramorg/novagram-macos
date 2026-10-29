@@ -210,7 +210,6 @@ private enum NovagramEntryId: Hashable {
     case header(Int)
     case topTips
     case topAbout
-    case topBots
     case interfaceHideFolders, interfaceStories, interfaceMutual, interfaceUnlimitedPins, interfaceFooter
     case chatDeleted, chatEditedHistory, chatFirstMessage, chatGhostActive, chatGhost, chatRoundVideo, chatForwardHideNames, chatFooter
     case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingTranslateConfirm, messagingAskVoice, messagingAskSticker, messagingAutoSticker, messagingHeartEffect, messagingFooter
@@ -226,7 +225,6 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     let map: (String, NovagramIconColor)?
     switch id {
     case .topAbout:                 map = ("info.circle.fill", .blue)
-    case .topBots:                  map = ("bolt.fill", .teal)
     case .topTips:                  map = ("sparkles", .gold)
     case .interfaceHideFolders:     map = ("folder.badge.minus", .lightBlue)
     case .interfaceStories:         map = ("circle.dashed", .violet)
@@ -489,8 +487,8 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
 
     // ─── FENIX PRO (top) ───
     entries.append(.section(sectionId)); sectionId += 1
-    entries.append(.disclosurePlaceholder(next(), .topAbout, l10n.about_rowTitle, "", .firstItem, "about"))
-    entries.append(.disclosurePlaceholder(next(), .topBots, l10n.bots_rowTitle, "", .lastItem, "bots"))
+    // Novagram Bots lives in the main Settings list (as on iOS), not here.
+    entries.append(.disclosurePlaceholder(next(), .topAbout, l10n.about_rowTitle, "", .singleItem, "about"))
 
     // ─── INTERFACE ───
     entries.append(.section(sectionId)); sectionId += 1
@@ -746,8 +744,6 @@ class NovagramSettingsController: TableViewController {
                 switch subKey {
                 case "about":
                     nav?.push(NovagramAboutController(context))
-                case "bots":
-                    nav?.push(NovagramBotsController(context))
                 case "tips":
                     nav?.push(NovagramTipsController(context))
                 case "text_style":
@@ -896,7 +892,7 @@ class NovagramSettingsController: TableViewController {
 // MARK: - Settings links (iOS NovagramSettingsFeature slugs, same kebab-case values)
 
 private let novagramSettingsSlugs: [(NovagramEntryId, String)] = [
-    (.topAbout, "about"), (.topBots, "bots"),
+    (.topAbout, "about"),
     (.interfaceHideFolders, "hide-folders"), (.interfaceStories, "stories"), (.interfaceMutual, "mutual-contacts"), (.interfaceUnlimitedPins, "unlimited-pins"),
     (.chatDeleted, "deleted-messages"), (.chatEditedHistory, "edited-history"), (.chatFirstMessage, "first-message"), (.chatGhostActive, "ghost-mode"), (.chatGhost, "ghost-button"),
     (.chatRoundVideo, "round-video"), (.chatForwardHideNames, "forward-hide-names"),

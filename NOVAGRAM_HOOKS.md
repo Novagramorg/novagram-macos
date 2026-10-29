@@ -423,3 +423,7 @@ Manual repro for regressions: send a photo to Saved Messages, right-click it →
 ## Camera picker removed (2026-10-29)
 
 The Novagram Settings "Camera picker" switch (`long_press_camera_selection`, iOS front/back camera on the video-message button) did nothing on the Mac: no Mac code read the key, and a Mac has one camera or none (Mac mini, Mac Studio). Removed the row, its link slug `camera-picker`, the About card and the strings. No Telegram file changed.
+
+## Novagram Bots row only in the main Settings (2026-10-29)
+
+Novagram Bots showed twice: in the main Settings list (`NovagramSettingsHooksInstall.swift`) and at the top of Novagram Settings. iOS has it only in the main Settings, so the Novagram Settings row is gone (About stays alone at the top). `tg://settings/novagrampro/bots` still opens the Bots screen. No Telegram file changed.
