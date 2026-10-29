@@ -1325,8 +1325,8 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                     hashtagSearch = .single(([], false, nil))
                 }
                 
-                return combineLatest(queue: prepareQueue, foundLocalPeers, foundRemotePeers, foundRemoteMessages, isRevealed, globalStorySearchState, hashtagSearch, messagesSourceValue, NovagramAdsHooks.shared.promotedSearchPeer(context, query), novagramSearchFilter.get(), novagramForeignPeerSearch(context, query: query, target: target, tags: globalTags, options: options)) // Novagram
-                    |> map { localPeers, remotePeers, remoteMessages, isRevealed, storySearchState, hashtagSearch, messagesSourceValue, promoted, novagramFilter, novagramForeignPeers -> ([ChatListSearchEntry], Bool, SearchMessagesState?, SearchMessagesResult?) in // Novagram
+                return combineLatest(queue: prepareQueue, foundLocalPeers, foundRemotePeers, foundRemoteMessages, isRevealed, globalStorySearchState, hashtagSearch, messagesSourceValue, NovagramAdsHooks.shared.promotedSearchPeer(context, query), novagramSearchFilter.get(), novagramForeignPeerSearch(context, query: query, target: target, tags: globalTags, options: options), novagramTranslatedSearch(context, scope: .init(query: query, target: target, tags: globalTags, options: options), location: location, source: messagesSourceValue, filter: novagramSearchFilter.get())) // Novagram
+                    |> map { localPeers, remotePeers, remoteMessages, isRevealed, storySearchState, hashtagSearch, messagesSourceValue, promoted, novagramFilter, novagramForeignPeers, novagramTranslated -> ([ChatListSearchEntry], Bool, SearchMessagesState?, SearchMessagesResult?) in // Novagram
                         
                         assertUniqueSearchEntries(remotePeers.0)
                         assertUniqueSearchEntries(remotePeers.1)
@@ -1389,6 +1389,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                         }
                         
                         
+                        if let novagramTranslated = novagramTranslatedRows(novagramTranslated, shown: remoteMessages.0.map { $0.stableId }) { entries.append(.separator(text: novagramTranslated.title, index: 19000, state: .none)); entries += novagramTranslated.messages.enumerated().map { .message($0.element, novagramTranslated.text, novagramTranslated.readStates[$0.element.id.peerId], novagramTranslated.threadInfo[$0.element.id], 19001 + $0.offset) } } // Novagram
                         if !remoteMessages.0.isEmpty || novagramFilter.isActive { // Novagram
                             let blockState: SeparatorBlockState
                             if globalTags.publicPosts || globalTags.myMessages {

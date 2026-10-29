@@ -79,6 +79,7 @@ private enum NovagramDefaultsKey {
     static let channelHistoryButton       = "fenix_channel_history_button"
     static let unlimitedPins              = "unlimited_pins"
     static let searchAllAccounts          = NovagramCrossAccountSearch.defaultsKey
+    static let searchTranslate            = NovagramQueryTranslator.defaultsKey
 }
 
 private struct NovagramSettingsState: Equatable {
@@ -120,6 +121,7 @@ private struct NovagramSettingsState: Equatable {
     var channelHistoryButton: Bool
     var unlimitedPins: Bool
     var searchAllAccounts: Bool
+    var searchTranslate: Bool
     // Feature #46: derived from the keychain (source of truth), NOT novagramDefaults.
     var chatLockMasterEnabled: Bool
     // NovagramProxy opt-in — derived from NovagramAutoProxyManager (owns the "pro_messager" key).
@@ -174,6 +176,7 @@ private struct NovagramSettingsState: Equatable {
             channelHistoryButton: d?.bool(forKey: NovagramDefaultsKey.channelHistoryButton) ?? false,
             unlimitedPins: d?.bool(forKey: NovagramDefaultsKey.unlimitedPins) ?? false,
             searchAllAccounts: NovagramCrossAccountSearch.isEnabled,
+            searchTranslate: NovagramQueryTranslator.isEnabled,
             chatLockMasterEnabled: NovagramChatPincodeManager.shared.isMasterEnabled(),
             novagramProxyEnabled: NovagramAutoProxyManager.shared.isEnabled
         )
@@ -214,7 +217,7 @@ private enum NovagramEntryId: Hashable {
     case header(Int)
     case topTips
     case topAbout
-    case interfaceHideFolders, interfaceStories, interfaceMutual, interfaceUnlimitedPins, interfaceSearchAllAccounts, interfaceFooter
+    case interfaceHideFolders, interfaceStories, interfaceMutual, interfaceUnlimitedPins, interfaceSearchAllAccounts, interfaceSearchTranslate, interfaceFooter
     case chatDeleted, chatEditedHistory, chatFirstMessage, chatGhostActive, chatGhost, chatRoundVideo, chatForwardHideNames, chatFooter
     case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingTranslateConfirm, messagingAskVoice, messagingAskSticker, messagingAutoSticker, messagingHeartEffect, messagingFooter
     case sttEnabled, sttLanguage, sttVoiceTranslate
@@ -235,6 +238,7 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .interfaceMutual:          map = ("person.2.fill", .blue)
     case .interfaceUnlimitedPins:   map = ("pin.fill", .orange)
     case .interfaceSearchAllAccounts: map = ("magnifyingglass.circle.fill", .teal)
+    case .interfaceSearchTranslate: map = ("text.magnifyingglass", .pink)
     case .chatDeleted:              map = ("trash.fill", .red)
     case .chatFirstMessage:         map = ("arrow.up.to.line", .blue)
     case .chatGhostActive:          map = ("eye.slash.fill", .gray)
@@ -505,7 +509,8 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.toggle(next(), .interfaceStories, l10n.settings_interface_stories_title, l10n.settings_interface_stories_subtitle, state.showStories, .innerItem, NovagramDefaultsKey.showStories))
     entries.append(.toggle(next(), .interfaceMutual, l10n.settings_interface_mutualSymbol_title, l10n.settings_interface_mutualSymbol_subtitle, state.showMutualContactSymbol, .innerItem, NovagramDefaultsKey.showMutualContactSymbol))
     entries.append(.toggle(next(), .interfaceUnlimitedPins, l10n.settings_unlimitedPins_title, l10n.settings_unlimitedPins_subtitle, state.unlimitedPins, .innerItem, NovagramDefaultsKey.unlimitedPins))
-    entries.append(.toggle(next(), .interfaceSearchAllAccounts, l10n.settings_searchAllAccounts_title, l10n.settings_searchAllAccounts_footer, state.searchAllAccounts, .lastItem, NovagramDefaultsKey.searchAllAccounts))
+    entries.append(.toggle(next(), .interfaceSearchAllAccounts, l10n.settings_searchAllAccounts_title, l10n.settings_searchAllAccounts_footer, state.searchAllAccounts, .innerItem, NovagramDefaultsKey.searchAllAccounts))
+    entries.append(.toggle(next(), .interfaceSearchTranslate, l10n.settings_searchTranslate_title, l10n.settings_searchTranslate_subtitle, state.searchTranslate, .lastItem, NovagramDefaultsKey.searchTranslate))
     entries.append(.footer(next(), .interfaceFooter, l10n.settings_interface_footer))
 
     // ─── CHAT ───
@@ -731,6 +736,7 @@ class NovagramSettingsController: TableViewController {
                     case NovagramDefaultsKey.channelHistoryButton: state.channelHistoryButton = value
                     case NovagramDefaultsKey.unlimitedPins: state.unlimitedPins = value
                     case NovagramDefaultsKey.searchAllAccounts: state.searchAllAccounts = value
+                    case NovagramDefaultsKey.searchTranslate: state.searchTranslate = value
                     default: break
                     }
                 }
@@ -905,7 +911,7 @@ class NovagramSettingsController: TableViewController {
 
 private let novagramSettingsSlugs: [(NovagramEntryId, String)] = [
     (.topAbout, "about"),
-    (.interfaceHideFolders, "hide-folders"), (.interfaceStories, "stories"), (.interfaceMutual, "mutual-contacts"), (.interfaceUnlimitedPins, "unlimited-pins"), (.interfaceSearchAllAccounts, "search-all-accounts"),
+    (.interfaceHideFolders, "hide-folders"), (.interfaceStories, "stories"), (.interfaceMutual, "mutual-contacts"), (.interfaceUnlimitedPins, "unlimited-pins"), (.interfaceSearchAllAccounts, "search-all-accounts"), (.interfaceSearchTranslate, "search-translate"),
     (.chatDeleted, "deleted-messages"), (.chatEditedHistory, "edited-history"), (.chatFirstMessage, "first-message"), (.chatGhostActive, "ghost-mode"), (.chatGhost, "ghost-button"),
     (.chatRoundVideo, "round-video"), (.chatForwardHideNames, "forward-hide-names"),
     (.messagingTextStyle, "text-style"), (.messagingAutoText, "auto-text"), (.messagingAutoTranslate, "auto-translate"), (.messagingTranslateToggle, "translate-button"),
