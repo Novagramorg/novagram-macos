@@ -4,6 +4,7 @@ import Postbox
 import TelegramCore
 import NovagramCore
 import PrivateCallScreen
+import CallsUI
 
 func installNovagramHooks() {
     var hooks = NovagramHooks()
@@ -27,6 +28,7 @@ func installNovagramHooks() {
     installNovagramSettingsHooks()
     installNovagramAdsHooks()
     installNovagramCallRecordHooks()
+    installNovagramCallExtrasHooks()
 }
 
 private func installNovagramCallRecordHooks() {
@@ -46,8 +48,32 @@ private func installNovagramCallRecordHooks() {
     hooks.toggle = { request in
         NovagramCallRecording.shared.toggle(window: request.window, engine: request.engine, peerId: request.peerId, hasVideo: request.hasVideo)
     }
+    hooks.autoStart = { request in
+        NovagramCallRecording.shared.autoStart(window: request.window, engine: request.engine, peerId: request.peerId, hasVideo: request.hasVideo)
+    }
     hooks.callDidUpdate = { window, state in
         NovagramCallRecording.shared.callDidUpdate(window: window, isEnded: state.isEnded, isMuted: state.isMuted)
     }
     NovagramCallRecordHooks.install(hooks)
+}
+
+private func installNovagramCallExtrasHooks() {
+    var hooks = NovagramCallExtrasHooks()
+    hooks.showDeviceMenu = { view, event in
+        guard let sharedContext = appDelegate?.sharedApplicationContextValue?.sharedContext else {
+            return
+        }
+        let l10n = NovagramL10n.current
+        novagramPresentCallDeviceMenu(sharedContext: sharedContext, view: view, event: event, strings: NovagramCallDeviceMenuStrings(microphone: l10n.callDevices_microphone, speaker: l10n.callDevices_speaker, systemDefault: l10n.callDevices_default))
+    }
+    hooks.isWeakNetworkBannerEnabled = {
+        true
+    }
+    hooks.weakConnectionText = {
+        NovagramL10n.current.callWeakNetwork_text
+    }
+    hooks.turnOffVideoText = {
+        NovagramL10n.current.callWeakNetwork_turnOffVideo
+    }
+    NovagramCallExtrasHooks.install(hooks)
 }

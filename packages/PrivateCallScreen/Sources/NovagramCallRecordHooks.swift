@@ -24,6 +24,7 @@ public struct NovagramCallRecordHooks {
     public var recordingSignal: () -> Signal<Bool, NoError> = { .single(false) }
     public var title: (_ isRecording: Bool) -> String = { _ in "" }
     public var toggle: (NovagramCallRecordRequest) -> Void = { _ in }
+    public var autoStart: (NovagramCallRecordRequest) -> Void = { _ in }
     public var callDidUpdate: (_ window: Window?, _ state: NovagramCallRecordCallState) -> Void = { _, _ in }
 
     public init() {}
@@ -79,10 +80,30 @@ func novagramToggleCallRecording(_ window: Window?, _ arguments: PeerCallArgumen
     NovagramCallRecordHooks.shared.toggle(NovagramCallRecordRequest(window: window, engine: arguments.engine, peerId: arguments.peerId, hasVideo: novagramCallHasVideo(external)))
 }
 
-func novagramCallRecordState(_ signal: Signal<ExternalPeerCallState, NoError>, window: Window?) -> Signal<ExternalPeerCallState, NoError> {
+func novagramCallCanAutoRecord(_ external: ExternalPeerCallState) -> Bool {
+    guard !external.canBeRemoved, external.conferenceReference == nil else {
+        return false
+    }
+    switch external.state {
+    case .requesting(ringing: true), .connecting, .active, .reconnecting:
+        return true
+    default:
+        return false
+    }
+}
+
+func novagramCallRecordState(_ signal: Signal<ExternalPeerCallState, NoError>, window: Window?, arguments: @escaping () -> PeerCallArguments?) -> Signal<ExternalPeerCallState, NoError> {
     let hooks = NovagramCallRecordHooks.shared
     return combineLatest(signal, hooks.recordingSignal()) |> map { [weak window] external, _ in
         hooks.callDidUpdate(window, NovagramCallRecordCallState(isEnded: novagramCallIsEnded(external), isMuted: external.isMuted))
+        if let window, let arguments = arguments() {
+            if novagramCallCanAutoRecord(external) {
+                hooks.autoStart(NovagramCallRecordRequest(window: window, engine: arguments.engine, peerId: arguments.peerId, hasVideo: novagramCallHasVideo(external)))
+            }
+            NovagramCallWeakNetwork.shared.update(window: window, external: external, turnOffVideo: { [weak arguments] in
+                arguments?.toggleCamera(external)
+            })
+        }
         return external
     }
 }

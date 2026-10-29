@@ -106,4 +106,13 @@ public extension NovagramL10n {
     var callRecording_showInFinder: String { pick(en: "Show in Finder", uz: "Finder'da ko'rsatish", ru: "Показать в Finder") }
     var callRecording_failed: String { pick(en: "Call recording failed", uz: "Qo'ng'iroqni yozib bo'lmadi", ru: "Не удалось записать звонок") }
     var callRecording_saveFailed: String { pick(en: "Couldn't save the call recording", uz: "Qo'ng'iroq yozuvini saqlab bo'lmadi", ru: "Не удалось сохранить запись звонка") }
+    var callRecording_auto_title: String { pick(en: "Record every call automatically", uz: "Har bir qo'ng'iroqni avtomatik yozib olish", ru: "Записывать каждый звонок автоматически") }
+    var callRecording_auto_subtitle: String { pick(en: "Recording starts as soon as the call screen opens", uz: "Qo'ng'iroq oynasi ochilishi bilan yozish boshlanadi", ru: "Запись начинается сразу при открытии окна звонка") }
+    var callDataSaving_title: String { pick(en: "Use less data for calls", uz: "Qo'ng'iroqlarda kamroq trafik", ru: "Экономия трафика в звонках") }
+    var callDataSaving_subtitle: String { pick(en: "Lower audio and video quality; applies to new calls", uz: "Ovoz va video sifati pasayadi; yangi qo'ng'iroqlarga ta'sir qiladi", ru: "Ниже качество звука и видео; действует для новых звонков") }
+    var callDevices_microphone: String { pick(en: "Microphone", uz: "Mikrofon", ru: "Микрофон") }
+    var callDevices_speaker: String { pick(en: "Speaker", uz: "Karnay", ru: "Динамик") }
+    var callDevices_default: String { pick(en: "System Default", uz: "Tizim bo'yicha", ru: "Системное по умолчанию") }
+    var callWeakNetwork_text: String { pick(en: "Weak connection", uz: "Aloqa sust", ru: "Слабое соединение") }
+    var callWeakNetwork_turnOffVideo: String { pick(en: "Turn off my video", uz: "Videomni o'chirish", ru: "Выключить моё видео") }
 }

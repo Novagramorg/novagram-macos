@@ -6,6 +6,8 @@ import AlertsUI
 public enum NovagramCallRecordingSettings {
     public static let enabledKey = "novagram_call_recording"
     public static let folderKey = "novagram_call_recording_folder"
+    public static let autoKey = "novagram_call_recording_auto"
+    public static let dataSavingKey = "novagram_call_data_saving"
     static let warnedKey = "novagram_call_recording_warned"
 
     private static var defaults: UserDefaults? {
@@ -25,6 +27,22 @@ public enum NovagramCallRecordingSettings {
 
     public static func setEnabled(_ value: Bool) {
         defaults?.set(value, forKey: enabledKey)
+    }
+
+    public static var isAutoStored: Bool {
+        return defaults?.bool(forKey: autoKey) ?? false
+    }
+
+    public static var isAutoEnabled: Bool {
+        return isEnabled && isAutoStored
+    }
+
+    public static func setAutoEnabled(_ value: Bool) {
+        defaults?.set(value, forKey: autoKey)
+    }
+
+    public static var isDataSavingEnabled: Bool {
+        return defaults?.bool(forKey: dataSavingKey) ?? false
     }
 
     static var wasWarned: Bool {

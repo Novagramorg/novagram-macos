@@ -98,7 +98,7 @@ public final class PeerCallScreen : ViewController {
     }
     
     public func setState(_ signal: Signal<ExternalPeerCallState, NoError>) {
-        let signal = novagramCallRecordState(signal, window: self.window) // Novagram
+        let signal = novagramCallRecordState(signal, window: self.window, arguments: { [weak self] in self?.external }) // Novagram
         stateDisposable.set((signal |> deliverOnMainQueue).start(next: { [weak self] external in
             
             let actions: [PeerCallAction] = peerCallActionSpecs(external).map { spec in

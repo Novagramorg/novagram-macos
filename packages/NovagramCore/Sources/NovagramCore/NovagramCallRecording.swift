@@ -28,6 +28,8 @@ public final class NovagramCallRecording {
     private var isMuted = false
     private var fileName = ""
     private weak var window: Window?
+    private weak var autoWindow: Window?
+    private var permissionAlertShown = false
     private var badge: NovagramCallRecordBadgeView?
     private var closeObserver: NSObjectProtocol?
     private let peerDisposable = MetaDisposable()
@@ -44,16 +46,35 @@ public final class NovagramCallRecording {
         guard #available(macOS 14.0, *), !isStarting else {
             return
         }
-        confirmConsent(window: window) { [weak self, weak window] in
+        confirmConsent(window: window, proceed: { [weak self, weak window] in
             guard let self, let window, self.ensurePermission(window: window) else {
                 return
             }
             self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo)
+        })
+    }
+
+    public func autoStart(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool) {
+        guard #available(macOS 14.0, *), NovagramCallRecordingSettings.isAutoEnabled, window.isVisible, autoWindow !== window, recorder == nil, !isStarting else {
+            return
         }
+        autoWindow = window
+        confirmConsent(window: window, proceed: { [weak self, weak window] in
+            guard let self, let window, self.autoWindow === window, self.recorder == nil, !self.isStarting, self.ensurePermission(window: window, isAuto: true) else {
+                return
+            }
+            self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo)
+        }, cancel: {
+            NovagramCallRecordingSettings.setAutoEnabled(false)
+            NotificationCenter.default.post(name: NSNotification.Name("NovagramSettingsChanged"), object: nil)
+        })
     }
 
     public func callDidUpdate(window: Window?, isEnded: Bool, isMuted: Bool) {
         self.isMuted = isMuted
+        if isEnded, let window, window === autoWindow {
+            autoWindow = nil
+        }
         if #available(macOS 14.0, *), let recorder = recorder as? NovagramCallRecorder {
             recorder.setMicMuted(isMuted)
         }
@@ -74,7 +95,7 @@ public final class NovagramCallRecording {
         return TelegramThemeHooks.shared.darkAppearance()
     }
 
-    private func confirmConsent(window: Window, proceed: @escaping () -> Void) {
+    private func confirmConsent(window: Window, proceed: @escaping () -> Void, cancel: @escaping () -> Void = {}) {
         guard !NovagramCallRecordingSettings.wasWarned else {
             proceed()
             return
@@ -83,13 +104,17 @@ public final class NovagramCallRecording {
         verifyAlert(for: window, header: l10n.callRecording_warningTitle, information: l10n.callRecording_warningText, ok: l10n.callRecording_continue, cancel: l10n.callRecording_cancel, successHandler: { _ in
             NovagramCallRecordingSettings.wasWarned = true
             proceed()
-        }, presentation: darkTheme)
+        }, cancelHandler: cancel, presentation: darkTheme)
     }
 
-    private func ensurePermission(window: Window) -> Bool {
+    private func ensurePermission(window: Window, isAuto: Bool = false) -> Bool {
         if CGPreflightScreenCaptureAccess() || CGRequestScreenCaptureAccess() {
             return true
         }
+        if isAuto && permissionAlertShown {
+            return false
+        }
+        permissionAlertShown = true
         showPermissionAlert(window: window)
         return false
     }
