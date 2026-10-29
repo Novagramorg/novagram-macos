@@ -68,6 +68,8 @@ public extension NovagramL10n {
     var settingsLink_share: String { pick(en: "Share link", uz: "Havolani ulashish", ru: "Поделиться ссылкой") }
     var settingsLink_copied: String { pick(en: "Link copied", uz: "Havola nusxalandi", ru: "Ссылка скопирована") }
     var settingsLink_hint: String { pick(en: "Right-click any row to get a link straight to that setting.", uz: "Istalgan qatorni o'ng tugma bilan bosing: o'sha sozlamaning havolasini olasiz.", ru: "Нажмите правой кнопкой на любую строку, чтобы получить ссылку именно на эту настройку.") }
+    var editedHistory_file: String { pick(en: "File", uz: "Fayl", ru: "Файл") }
+    var editedHistory_media: String { pick(en: "Media", uz: "Media", ru: "Медиа") }
     var settings_unlimitedPins_title: String { pick(en: "Unlimited Pins", uz: "Cheksiz pin", ru: "Безлимитные закрепы") }
     var settings_unlimitedPins_subtitle: String { pick(en: "Pin up to 1000 chats. Only the first few sync to Telegram, the rest live on this Mac only. Turning this off unpins them.", uz: "1000 tagacha chat pin qiling. Faqat dastlabki bir nechtasi Telegram bilan sinxronlanadi, qolganlari faqat shu Mac'da. O'chirsangiz ular pindan olinadi.", ru: "Закрепляйте до 1000 чатов. С Telegram синхронизируются только первые несколько, остальные только на этом Mac. При отключении они открепляются.") }
     var settings_folderStyle_title: String { pick(en: "Folder display style", uz: "Papka ko'rinishi", ru: "Стиль папок") }

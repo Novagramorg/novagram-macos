@@ -30,10 +30,47 @@ import TelegramCore
 public struct NovagramEditedHistoryEntry: Codable, Equatable {
     public let text: String
     public let timestamp: Int32
+    // Media of that version (photo, video, file) as a base64 PostboxEncoder blob, like iOS keeps it in
+    // EditedMessageHistoryAttribute. nil for versions without media and for entries saved before 2026-10-29.
+    public let mediaData: String?
 
-    public init(text: String, timestamp: Int32) {
+    public init(text: String, timestamp: Int32, mediaData: String? = nil) {
         self.text = text
         self.timestamp = timestamp
+        self.mediaData = mediaData
+    }
+
+    public var media: [Media] {
+        guard let mediaData, let data = Data(base64Encoded: mediaData) else {
+            return []
+        }
+        let objects: [PostboxCoding] = PostboxDecoder(buffer: MemoryBuffer(data: data)).decodeObjectArrayForKey("m")
+        return objects.compactMap { $0 as? Media }
+    }
+
+    static func encode(_ media: [Media]) -> String? {
+        guard !media.isEmpty else {
+            return nil
+        }
+        let encoder = PostboxEncoder()
+        encoder.encodeGenericObjectArray(media.map { $0 as PostboxCoding }, forKey: "m")
+        return encoder.makeData().base64EncodedString()
+    }
+}
+
+// What a message looked like the last time the chat showed it.
+private struct NovagramSeenVersion {
+    let text: String
+    let media: [Media]
+    let timestamp: Int32
+
+    var mediaIds: [MediaId?] {
+        return media.map { $0.id }
+    }
+
+    // A photo or file still uploading: its cloud copy replaces it without any user edit.
+    var hasLocalMedia: Bool {
+        return media.contains(where: { $0.id?.namespace == Namespaces.Media.LocalImage || $0.id?.namespace == Namespaces.Media.LocalFile })
     }
 }
 
@@ -42,21 +79,26 @@ public final class NovagramEditedHistoryManager {
 
     private let defaults = UserDefaults(suiteName: "uz.fenixuz.app.editedHistory")
     private let lock = NSLock()
-    private var lastSeenTexts: [MessageId: String] = [:]
+    private var lastSeen: [MessageId: NovagramSeenVersion] = [:]
 
     private init() {}
 
     // MARK: - Public API
 
-    /// Process a batch of messages to observe and record edits.
+    /// Process a batch of messages to observe and record edits: a changed text or changed media
+    /// (iOS records both). The saved version keeps its own time, as on iOS.
     public func processMessages(_ messages: [Message]) {
         lock.lock(); defer { lock.unlock() }
         for message in messages {
             let msgId = message.id
-            if let lastText = lastSeenTexts[msgId] {
-                if lastText != message.text, let edited = message.attributes.compactMap({ $0 as? EditedMessageAttribute }).first {
+            let edited = message.attributes.compactMap({ $0 as? EditedMessageAttribute }).first
+            let current = NovagramSeenVersion(text: message.text, media: message.media.filter { !($0 is TelegramMediaWebpage) }, timestamp: edited?.date ?? message.timestamp)
+            if let previous = lastSeen[msgId], edited != nil {
+                let textChanged = previous.text != current.text
+                let mediaChanged = previous.mediaIds != current.mediaIds
+                if textChanged || (mediaChanged && !previous.hasLocalMedia) {
                     var existing = loadLocked(peerId: msgId.peerId, messageId: msgId.id)
-                    let entry = NovagramEditedHistoryEntry(text: lastText, timestamp: edited.date)
+                    let entry = NovagramEditedHistoryEntry(text: previous.text, timestamp: previous.timestamp, mediaData: NovagramEditedHistoryEntry.encode(previous.media))
                     if !existing.contains(entry) {
                         existing.append(entry)
                         if existing.count > 50 {
@@ -66,7 +108,7 @@ public final class NovagramEditedHistoryManager {
                     }
                 }
             }
-            lastSeenTexts[msgId] = message.text
+            lastSeen[msgId] = current
         }
     }
 
