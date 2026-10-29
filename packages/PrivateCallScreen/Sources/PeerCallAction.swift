@@ -336,6 +336,7 @@ final class PeerCallActionView : Control {
                 let layout = TextViewLayout(.initialize(string: text, color: .white, font: .roundTimer(12)), maximumNumberOfLines: 1)
                 layout.measure(width: 100)
                 current.update(layout)
+                needsLayout = true // Novagram
             }
         } else if let textView = self.textView {
             performSubviewRemoval(textView, animated: animated)

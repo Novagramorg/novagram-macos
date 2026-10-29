@@ -453,7 +453,7 @@ Owner: record 1:1 voice and video calls on the Mac, locally (Telegram has no 1:1
 
 | File | Change |
 | --- | --- |
-| `packages/PrivateCallScreen/Sources/PeerCallAction.swift` | `case record = 94` in `PeerCallActionType`; `.record` cases in `title` (`novagramCallRecordTitle()`), `resource` (`novagramCallRecordResource`) and the VoiceOver label switch (7 lines) |
+| `packages/PrivateCallScreen/Sources/PeerCallAction.swift` | `case record = 94` in `PeerCallActionType`; `.record` cases in `title` (`novagramCallRecordTitle()`), `resource` (`novagramCallRecordResource`) and the VoiceOver label switch (7 lines); `needsLayout = true` after the button's text layout changes, so a new title (Record → Stop) is centered again (Telegram's titles never change, so it never re-laid out the label) (1 line) |
 | `packages/PrivateCallScreen/Sources/PeerCallLogic.swift` | `specs.append(contentsOf: novagramCallRecordSpecs(external))` before the video specs (raw value 94 keeps the list sorted: Record comes first) |
 | `packages/PrivateCallScreen/Sources/PeerCallScreen.swift` | first line of `setState`: `let signal = novagramCallRecordState(signal, window: self.window)` (re-renders the actions when recording starts/stops, reports call end and mute); `.record` callback in the actions switch → `novagramToggleCallRecording(self.window, self.external, external)` (3 lines) |
 | `packages/PrivateCallScreen/Sources/Resources/Assets.xcassets/novagram_record.imageset` | new image: the Record button glyph (white, 1x/2x, same 30 pt size as `ic_video`) |
