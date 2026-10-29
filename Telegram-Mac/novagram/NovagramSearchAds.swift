@@ -32,12 +32,19 @@ enum NovagramSearchAds {
     }
 
     /// Telegram's sponsored peers by the product rule: only once our backend answered "no ad" for this
-    /// query, never for Premium users, none while "Remove all ads" is on. Emits [] at once.
+    /// query, never for Premium users, none while "Remove all ads" is on.
+    /// Emits exactly one value, after our backend answered (at most `fallbackWait` seconds): SearchController
+    /// dedupes the remote results across emissions (its `ids`), so a second value dropped the results it
+    /// had just shown and they vanished.
     static func telegramFallback(context: AccountContext, query: String, telegram: Signal<[AdPeer], NoError>) -> Signal<[AdPeer], NoError> {
-        return NovagramAdsCenter.oursFirst(context: context, surface: "SEARCH", ours: self.promotedPeer(context: context, query: query), fallback: telegram, empty: [], isEmpty: { $0.isEmpty }, map: { _ -> [AdPeer] in
+        return NovagramAdsCenter.oursFirst(context: context, surface: "SEARCH", ours: self.promotedPeer(context: context, query: query), fallback: telegram, empty: [], isEmpty: { $0.isEmpty }, waitForOurs: true, map: { _ -> [AdPeer] in
             return []
         })
+        |> take(1)
+        |> timeout(fallbackWait, queue: Queue.mainQueue(), alternate: .single([]))
     }
+
+    private static let fallbackWait: Double = 1.5
 
     /// The search row's pill text (uz "Reklama", ru "Реклама", en "Ad").
     static var adLabel: String {

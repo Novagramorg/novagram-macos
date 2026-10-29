@@ -94,10 +94,17 @@ enum NovagramAdsCenter {
     }
 
     /// Novagram ads first; Telegram's `fallback` only when our backend has no ad, never for Premium users;
-    /// both hidden while "Remove all ads" is on. Emits `empty` at once, so the caller never waits for us.
-    static func oursFirst<Ours, Value>(context: AccountContext, surface: String, ours: Signal<Ours?, NoError>, fallback: Signal<Value, NoError>, empty: Value, isEmpty: @escaping (Value) -> Bool, map transform: @escaping (Ours) -> Value) -> Signal<Value, NoError> {
+    /// both hidden while "Remove all ads" is on. Emits `empty` at once, so the caller never waits for us,
+    /// unless `waitForOurs` is set: then nothing is emitted while our backend is still asking.
+    static func oursFirst<Ours, Value>(context: AccountContext, surface: String, ours: Signal<Ours?, NoError>, fallback: Signal<Value, NoError>, empty: Value, isEmpty: @escaping (Value) -> Bool, waitForOurs: Bool = false, map transform: @escaping (Ours) -> Value) -> Signal<Value, NoError> {
         let lastSource = Atomic<String?>(value: nil)
         let combined = combineLatest(self.slot(ours), fallback, self.isPremium(context: context))
+        |> filter { ours, _, _ -> Bool in
+            if waitForOurs, case .pending = ours {
+                return false
+            }
+            return true
+        }
         |> map { ours, fallback, isPremium -> Value in
             let value: Value
             let source: String
