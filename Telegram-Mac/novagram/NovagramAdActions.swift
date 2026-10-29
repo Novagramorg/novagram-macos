@@ -13,6 +13,7 @@ import Foundation
 import SwiftSignalKit
 import Postbox
 import TelegramCore
+import NovagramCore
 import NovagramAds
 
 enum NovagramAdActions {
@@ -53,6 +54,11 @@ enum NovagramAdActions {
         |> timeout(remaining, queue: .mainQueue(), alternate: .single(false))
         |> deliverOnMainQueue).start(next: { didAct in
             if didAct {
+                // A watch started before "Don't send ad events" was turned on must not report either.
+                if NovagramDeveloperFlags.isAdEventsOff {
+                    NovagramAdsCenter.logger.debug("action -> not sent (developer: ad events off) \(NovagramAdsCenter.masked(token), privacy: .public)")
+                    return
+                }
                 NovagramAdsCenter.logger.debug("action -> novagram \(NovagramAdsCenter.masked(token), privacy: .public)")
                 Task {
                     await session.recordAction(served)
