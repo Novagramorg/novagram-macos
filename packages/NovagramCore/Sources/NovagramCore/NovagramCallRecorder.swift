@@ -27,6 +27,7 @@ final class NovagramCallRecorder: NSObject, SCStreamOutput, SCStreamDelegate, AV
     var onStreamStop: (() -> Void)?
 
     private let windowNumber: Int
+    private let micDeviceId: String?
     private let videoSize: CGSize
     private let queue = DispatchQueue(label: "uz.novagram.call-recorder", qos: .userInitiated)
     private let mixer = NovagramCallAudioMixer()
@@ -43,9 +44,10 @@ final class NovagramCallRecorder: NSObject, SCStreamOutput, SCStreamDelegate, AV
     private var isStopping = false
     private var micMuted = false
 
-    init(outputURL: URL, hasVideo: Bool, window: NSWindow) {
+    init(outputURL: URL, hasVideo: Bool, window: NSWindow, micDeviceId: String?) {
         self.outputURL = outputURL
         self.hasVideo = hasVideo
+        self.micDeviceId = NovagramCallRecorder.availableMicId(micDeviceId)
         self.windowNumber = window.windowNumber
         let scale = window.backingScaleFactor
         let pixelWidth = max(window.frame.width * scale, 1)
@@ -102,11 +104,27 @@ final class NovagramCallRecorder: NSObject, SCStreamOutput, SCStreamDelegate, AV
     }
 
     func stop(completion: @escaping (Result<URL, Error>) -> Void) {
-        let finish: (Result<URL, Error>) -> Void = { result in
+        stopCapture { result in
             DispatchQueue.main.async {
                 completion(result)
             }
         }
+    }
+
+    func stopAndWait(timeout: TimeInterval) -> URL? {
+        let done = DispatchSemaphore(value: 0)
+        var url: URL?
+        stopCapture { result in
+            url = try? result.get()
+            done.signal()
+        }
+        guard done.wait(timeout: .now() + timeout) == .success else {
+            return nil
+        }
+        return url
+    }
+
+    private func stopCapture(_ finish: @escaping (Result<URL, Error>) -> Void) {
         queue.async {
             guard !self.isStopping else {
                 return
@@ -211,6 +229,9 @@ final class NovagramCallRecorder: NSObject, SCStreamOutput, SCStreamDelegate, AV
         }
         if #available(macOS 15.0, *) {
             configuration.captureMicrophone = true
+            if let micDeviceId {
+                configuration.microphoneCaptureDeviceID = micDeviceId
+            }
         }
         let stream = SCStream(filter: filter, configuration: configuration, delegate: self)
         try stream.addStreamOutput(self, type: .screen, sampleHandlerQueue: queue)
@@ -224,7 +245,7 @@ final class NovagramCallRecorder: NSObject, SCStreamOutput, SCStreamDelegate, AV
     }
 
     private func startMicrophoneSession() {
-        guard let device = AVCaptureDevice.default(for: .audio), let input = try? AVCaptureDeviceInput(device: device) else {
+        guard let device = micDeviceId.flatMap(AVCaptureDevice.init(uniqueID:)) ?? AVCaptureDevice.default(for: .audio), let input = try? AVCaptureDeviceInput(device: device) else {
             return
         }
         let session = AVCaptureSession()
@@ -253,6 +274,13 @@ final class NovagramCallRecorder: NSObject, SCStreamOutput, SCStreamDelegate, AV
         let now = NovagramCallRecorder.hostSeconds()
         startSeconds = now
         writer?.startSession(atSourceTime: CMTime(seconds: now, preferredTimescale: CMTimeScale(NovagramCallAudioMixer.sampleRate)))
+    }
+
+    private static func availableMicId(_ id: String?) -> String? {
+        guard let id, let device = AVCaptureDevice(uniqueID: id), device.isConnected, !device.isSuspended else {
+            return nil
+        }
+        return device.uniqueID
     }
 
     private static func hostSeconds() -> Double {

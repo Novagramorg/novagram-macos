@@ -9,6 +9,7 @@ public enum NovagramCallRecordingSettings {
     public static let autoKey = "novagram_call_recording_auto"
     public static let dataSavingKey = "novagram_call_data_saving"
     static let warnedKey = "novagram_call_recording_warned"
+    static let captureRequestedKey = "novagram_call_recording_capture_requested"
 
     private static var defaults: UserDefaults? {
         return UserDefaults(suiteName: "pro_messager")
@@ -51,6 +52,15 @@ public enum NovagramCallRecordingSettings {
         }
         set {
             defaults?.set(newValue, forKey: warnedKey)
+        }
+    }
+
+    static var didRequestCapture: Bool {
+        get {
+            return defaults?.bool(forKey: captureRequestedKey) ?? false
+        }
+        set {
+            defaults?.set(newValue, forKey: captureRequestedKey)
         }
     }
 

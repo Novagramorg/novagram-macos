@@ -5,6 +5,8 @@ import TelegramCore
 import NovagramCore
 import PrivateCallScreen
 import CallsUI
+import InAppSettings
+import SwiftSignalKit
 
 func installNovagramHooks() {
     var hooks = NovagramHooks()
@@ -55,6 +57,12 @@ private func installNovagramCallRecordHooks() {
         NovagramCallRecording.shared.callDidUpdate(window: window, isEnded: state.isEnded, isMuted: state.isMuted)
     }
     NovagramCallRecordHooks.install(hooks)
+    NovagramCallRecording.shared.micDeviceId = {
+        guard let accountManager = appDelegate?.sharedApplicationContextValue?.sharedContext.accountManager else {
+            return .single(nil)
+        }
+        return voiceCallSettings(accountManager) |> take(1) |> map { $0.audioInputDeviceId }
+    }
 }
 
 private func installNovagramCallExtrasHooks() {

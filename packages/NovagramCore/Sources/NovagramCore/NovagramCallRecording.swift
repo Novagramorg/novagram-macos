@@ -33,6 +33,9 @@ public final class NovagramCallRecording {
     private var badge: NovagramCallRecordBadgeView?
     private var closeObserver: NSObjectProtocol?
     private let peerDisposable = MetaDisposable()
+    private static let quitSaveTimeout: TimeInterval = 3
+
+    public var micDeviceId: () -> Signal<String?, NoError> = { .single(nil) }
 
     public var recordingSignal: Signal<Bool, NoError> {
         return recordingPromise.get()
@@ -108,8 +111,16 @@ public final class NovagramCallRecording {
     }
 
     private func ensurePermission(window: Window, isAuto: Bool = false) -> Bool {
-        if CGPreflightScreenCaptureAccess() || CGRequestScreenCaptureAccess() {
+        if CGPreflightScreenCaptureAccess() {
             return true
+        }
+        let firstRequest = !NovagramCallRecordingSettings.didRequestCapture
+        NovagramCallRecordingSettings.didRequestCapture = true
+        if CGRequestScreenCaptureAccess() {
+            return true
+        }
+        if firstRequest {
+            return false
         }
         if isAuto && permissionAlertShown {
             return false
@@ -132,8 +143,9 @@ public final class NovagramCallRecording {
     private func start(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool) {
         isStarting = true
         stopWhenStarted = false
-        let peer = engine.data.get(TelegramEngine.EngineData.Item.Peer.Peer(id: peerId)) |> deliverOnMainQueue
-        peerDisposable.set(peer.start(next: { [weak self, weak window] peer in
+        let peer = engine.data.get(TelegramEngine.EngineData.Item.Peer.Peer(id: peerId))
+        let signal = combineLatest(peer, micDeviceId() |> take(1)) |> take(1) |> deliverOnMainQueue
+        peerDisposable.set(signal.start(next: { [weak self, weak window] peer, micDeviceId in
             guard let self else {
                 return
             }
@@ -141,15 +153,15 @@ public final class NovagramCallRecording {
                 self.isStarting = false
                 return
             }
-            self.begin(window: window, title: peer?.debugDisplayTitle ?? "", hasVideo: hasVideo)
+            self.begin(window: window, title: peer?.debugDisplayTitle ?? "", hasVideo: hasVideo, micDeviceId: micDeviceId)
         }))
     }
 
     @available(macOS 14.0, *)
-    private func begin(window: Window, title: String, hasVideo: Bool) {
+    private func begin(window: Window, title: String, hasVideo: Bool, micDeviceId: String?) {
         let fileExtension = hasVideo ? "mp4" : "m4a"
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("novagram-call-\(UUID().uuidString).\(fileExtension)")
-        let recorder = NovagramCallRecorder(outputURL: tempURL, hasVideo: hasVideo, window: window)
+        let recorder = NovagramCallRecorder(outputURL: tempURL, hasVideo: hasVideo, window: window, micDeviceId: micDeviceId)
         recorder.setMicMuted(isMuted)
         recorder.onStreamStop = { [weak self, weak recorder] in
             guard let self, let recorder, self.recorder === recorder, !self.isStarting else {
@@ -202,6 +214,23 @@ public final class NovagramCallRecording {
         }
     }
 
+    public func stopForQuit() {
+        guard #available(macOS 14.0, *), let recorder = recorder as? NovagramCallRecorder else {
+            return
+        }
+        self.recorder = nil
+        isRecording = false
+        detachBadge()
+        guard let url = recorder.stopAndWait(timeout: NovagramCallRecording.quitSaveTimeout) else {
+            return
+        }
+        if let folder = NovagramCallRecordingSettings.resolveFolder(), let saved = NovagramCallRecording.move(url, to: folder, fileName: fileName) {
+            NovagramCallRecording.log.info("saved on quit: \(saved.lastPathComponent, privacy: .public)")
+            return
+        }
+        _ = NovagramCallRecording.moveToDownloads(url, fileName: fileName)
+    }
+
     private func attachBadge(to window: Window) {
         detachBadge()
         guard let content = window.contentView else {
@@ -226,23 +255,47 @@ public final class NovagramCallRecording {
     }
 
     private func save(tempURL: URL, fileName: String, hasVideo: Bool) {
-        if let folder = NovagramCallRecordingSettings.resolveFolder() {
-            let accessing = folder.startAccessingSecurityScopedResource()
-            defer {
-                if accessing {
-                    folder.stopAccessingSecurityScopedResource()
-                }
-            }
-            let destination = NovagramCallRecording.uniqueURL(in: folder, fileName: fileName)
-            do {
-                try FileManager.default.moveItem(at: tempURL, to: destination)
-                showSaved(destination)
-                return
-            } catch {
-                NovagramCallRecording.log.error("folder save failed: \(String(describing: error), privacy: .public)")
+        guard let folder = NovagramCallRecordingSettings.resolveFolder() else {
+            askWhereToSave(tempURL: tempURL, fileName: fileName, hasVideo: hasVideo)
+            return
+        }
+        if let destination = NovagramCallRecording.move(tempURL, to: folder, fileName: fileName) {
+            showSaved(destination)
+        } else {
+            saveToDownloads(tempURL: tempURL, fileName: fileName)
+        }
+    }
+
+    private func saveToDownloads(tempURL: URL, fileName: String) {
+        if let destination = NovagramCallRecording.moveToDownloads(tempURL, fileName: fileName) {
+            showSaved(destination)
+        } else {
+            showToast(NovagramL10n.current.callRecording_saveFailed)
+        }
+    }
+
+    private static func move(_ tempURL: URL, to folder: URL, fileName: String) -> URL? {
+        let accessing = folder.startAccessingSecurityScopedResource()
+        defer {
+            if accessing {
+                folder.stopAccessingSecurityScopedResource()
             }
         }
-        askWhereToSave(tempURL: tempURL, fileName: fileName, hasVideo: hasVideo)
+        let destination = uniqueURL(in: folder, fileName: fileName)
+        do {
+            try FileManager.default.moveItem(at: tempURL, to: destination)
+            return destination
+        } catch {
+            log.error("folder save failed: \(String(describing: error), privacy: .public)")
+            return nil
+        }
+    }
+
+    private static func moveToDownloads(_ tempURL: URL, fileName: String) -> URL? {
+        guard let downloads = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first?.resolvingSymlinksInPath() else {
+            return nil
+        }
+        return move(tempURL, to: downloads, fileName: fileName)
     }
 
     private func askWhereToSave(tempURL: URL, fileName: String, hasVideo: Bool) {
@@ -253,7 +306,7 @@ public final class NovagramCallRecording {
         NSApp.activate(ignoringOtherApps: true)
         panel.begin { [weak self] response in
             guard response == .OK, let url = panel.url else {
-                try? FileManager.default.removeItem(at: tempURL)
+                self?.saveToDownloads(tempURL: tempURL, fileName: fileName)
                 return
             }
             do {
@@ -264,8 +317,7 @@ public final class NovagramCallRecording {
                 self?.showSaved(url)
             } catch {
                 NovagramCallRecording.log.error("save failed: \(String(describing: error), privacy: .public)")
-                try? FileManager.default.removeItem(at: tempURL)
-                self?.showToast(NovagramL10n.current.callRecording_saveFailed)
+                self?.saveToDownloads(tempURL: tempURL, fileName: fileName)
             }
         }
     }
