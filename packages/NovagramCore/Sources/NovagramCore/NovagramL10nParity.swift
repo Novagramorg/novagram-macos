@@ -77,12 +77,9 @@ public extension NovagramL10n {
     var search_clearDates: String { pick(en: "Clear dates", uz: "Sanalarni tozalash", ru: "Сбросить даты") }
     var search_unreadOnly: String { pick(en: "Unread only", uz: "Faqat o'qilmaganlar", ru: "Только непрочитанные") }
     var search_mentionsOnly: String { pick(en: "Mentions only", uz: "Faqat mention'lar", ru: "Только упоминания") }
-    var search_otherAccounts: String { pick(en: "Other accounts", uz: "Boshqa akkauntlar", ru: "Другие аккаунты") }
     func search_translatedTitle(_ text: String) -> String { pick(en: "Translated: \(text)", uz: "Tarjima: \(text)", ru: "Перевод: \(text)") }
     var settings_searchTranslate_title: String { pick(en: "Search the translated query too", uz: "Tarjima qilingan so'rov bo'yicha ham qidirish", ru: "Искать и по переводу запроса") }
     var settings_searchTranslate_subtitle: String { pick(en: "Messages search also looks for the query translated into your translation language. The query is sent to Telegram's translation service.", uz: "Xabarlar qidiruvi so'rovni tarjima tilingizga tarjima qilib ham qidiradi. So'rov Telegram'ning tarjima xizmatiga yuboriladi.", ru: "Поиск по сообщениям также ищет запрос, переведённый на ваш язык перевода. Запрос отправляется в сервис перевода Telegram.") }
-    var settings_searchAllAccounts_title: String { pick(en: "Search all accounts", uz: "Barcha akkauntlarda qidirish", ru: "Поиск по всем аккаунтам") }
-    var settings_searchAllAccounts_footer: String { pick(en: "Global search also shows matching chats and contacts from your other logged-in accounts. Only data saved on this Mac is searched, hidden and locked chats never show.", uz: "Global qidiruv tizimga kirgan boshqa akkauntlaringizdagi mos chat va kontaktlarni ham ko'rsatadi. Faqat shu Mac'da saqlangan ma'lumotlar qidiriladi, yashirin va qulflangan chatlar ko'rsatilmaydi.", ru: "Глобальный поиск также показывает подходящие чаты и контакты из других аккаунтов, в которые вы вошли. Поиск идёт только по данным на этом Mac, скрытые и закрытые паролем чаты не показываются.") }
     var editedHistory_file: String { pick(en: "File", uz: "Fayl", ru: "Файл") }
     var editedHistory_media: String { pick(en: "Media", uz: "Media", ru: "Медиа") }
     var settings_unlimitedPins_title: String { pick(en: "Unlimited Pins", uz: "Cheksiz pin", ru: "Безлимитные закрепы") }

@@ -24,7 +24,7 @@ public final class NovagramSearchPrivacyPass {
 
     public func hidesMessage(_ message: Message) -> Bool {
         let peerId = message.id.peerId
-        if NovagramHiddenChatsManager.shared.isHidden(peerId: peerId) {
+        if NovagramHiddenChatsManager.shared.isPeerHiddenInStorage(peerId) {
             return true
         }
         return isLocked(peerId)

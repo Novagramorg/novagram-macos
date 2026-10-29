@@ -31,9 +31,9 @@ struct NovagramSearchFilterState: Equatable {
 
 // MARK: - Privacy
 
-// A hidden chat (Novagram Hidden Chats) never shows in search while it is hidden.
+// A hidden chat (Novagram Hidden Chats) never shows in search, even while hidden chats are revealed.
 func novagramSearchHides(_ peerId: PeerId) -> Bool {
-    return NovagramHiddenChatsManager.shared.isHidden(peerId: peerId)
+    return NovagramHiddenChatsManager.shared.isPeerHiddenInStorage(peerId)
 }
 
 func novagramSearchHides(_ rendered: RenderedPeer) -> Bool {
