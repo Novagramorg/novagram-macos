@@ -91,6 +91,7 @@ public enum ChatListSearchEntryStableId: Hashable {
     case foundStories
     case disclaimer
     case novagramAdPeerId(PeerId) // Novagram
+    case novagramForeignPeerId(AccountRecordId, PeerId) // Novagram
     public func hash(into hasher: inout Hasher) {
         switch self {
         case let .localPeerId(peerId):
@@ -133,6 +134,7 @@ public enum ChatListSearchEntryStableId: Hashable {
         case .disclaimer:
             hasher.combine("disclaimer")
         case let .novagramAdPeerId(peerId): hasher.combine("novagramAdPeerId"); hasher.combine(peerId.hashValue) // Novagram
+        case let .novagramForeignPeerId(accountId, peerId): hasher.combine("novagramForeignPeerId"); hasher.combine(accountId); hasher.combine(peerId) // Novagram
         }
     }
 }
@@ -157,6 +159,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
     case emptyList(listType: SearchTags.ListType, postState: TelegramGlobalPostSearchState?, isPremium: Bool, query: String)
     case disclaimer(String)
     case novagramAdPeer(Peer, String, Int) // Novagram
+    case novagramForeignPeer(NovagramForeignPeerHit, Int) // Novagram
     var stableId: ChatListSearchEntryStableId {
         switch self {
         case let .localPeer(peer, _, secretChat, _, _, _, _):
@@ -192,6 +195,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
         case .disclaimer:
             return .disclaimer
         case let .novagramAdPeer(peer, _, _): return .novagramAdPeerId(peer.id) // Novagram
+        case let .novagramForeignPeer(hit, _): return .novagramForeignPeerId(hit.accountId, hit.peer.id) // Novagram
         }
     }
     
@@ -224,6 +228,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
         case .disclaimer:
             return 100000000
         case let .novagramAdPeer(_, _, index): return index // Novagram
+        case let .novagramForeignPeer(_, index): return index // Novagram
         }
     }
     
@@ -336,6 +341,7 @@ fileprivate enum ChatListSearchEntry: Comparable, Identifiable {
                 return false
             }
         case let .novagramAdPeer(peer, token, index): if case let .novagramAdPeer(rhsPeer, rhsToken, rhsIndex) = rhs { return peer.isEqual(rhsPeer) && token == rhsToken && index == rhsIndex } else { return false } // Novagram
+        case let .novagramForeignPeer(hit, index): if case let .novagramForeignPeer(rhsHit, rhsIndex) = rhs { return hit == rhsHit && index == rhsIndex } else { return false } // Novagram
         }
     }
     
@@ -637,6 +643,7 @@ fileprivate func prepareEntries(from:[AppearanceWrapperEntry<ChatListSearchEntry
                 arguments.openStorySearch(state)
             })
         case let .novagramAdPeer(peer, token, _): return novagramSearchAdRow(initialSize, peer: peer, token: token, context: arguments.context, stableId: entry.stableId, contextMenuItems: { peerContextMenuItems(peer: peer, pinnedItems: pinnedItems, arguments: arguments, isRecent: false) }) // Novagram
+        case let .novagramForeignPeer(hit, _): return novagramForeignPeerRow(initialSize, hit: hit, context: arguments.context, stableId: entry.stableId) // Novagram
         case let .disclaimer(text):
             return GeneralTextRowItem(initialSize, stableId: entry.stableId, height: 50, text: .markdown(text, linkHandler: { link in
                 if link == "grossing" {
@@ -1318,8 +1325,8 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                     hashtagSearch = .single(([], false, nil))
                 }
                 
-                return combineLatest(queue: prepareQueue, foundLocalPeers, foundRemotePeers, foundRemoteMessages, isRevealed, globalStorySearchState, hashtagSearch, messagesSourceValue, NovagramAdsHooks.shared.promotedSearchPeer(context, query), novagramSearchFilter.get()) // Novagram
-                    |> map { localPeers, remotePeers, remoteMessages, isRevealed, storySearchState, hashtagSearch, messagesSourceValue, promoted, novagramFilter -> ([ChatListSearchEntry], Bool, SearchMessagesState?, SearchMessagesResult?) in // Novagram
+                return combineLatest(queue: prepareQueue, foundLocalPeers, foundRemotePeers, foundRemoteMessages, isRevealed, globalStorySearchState, hashtagSearch, messagesSourceValue, NovagramAdsHooks.shared.promotedSearchPeer(context, query), novagramSearchFilter.get(), novagramForeignPeerSearch(context, query: query, target: target, tags: globalTags, options: options)) // Novagram
+                    |> map { localPeers, remotePeers, remoteMessages, isRevealed, storySearchState, hashtagSearch, messagesSourceValue, promoted, novagramFilter, novagramForeignPeers -> ([ChatListSearchEntry], Bool, SearchMessagesState?, SearchMessagesResult?) in // Novagram
                         
                         assertUniqueSearchEntries(remotePeers.0)
                         assertUniqueSearchEntries(remotePeers.1)
@@ -1351,6 +1358,8 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                                 entries += peers
                             }
                         }
+                        let novagramForeign = novagramForeignHits(novagramForeignPeers, shown: (localPeers + remotePeers.0).map { $0.stableId }) // Novagram
+                        if !novagramForeign.isEmpty { entries.append(.separator(text: novagramForeignSectionTitle(), index: 5000, state: .none)); entries += novagramForeign.enumerated().map { .novagramForeignPeer($0.element, 5001 + $0.offset) } } // Novagram
                         if !remotePeers.1.isEmpty || promoted != nil { // Novagram
                             
                             let state: SeparatorBlockState
@@ -2193,6 +2202,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
         var isGlobal = false
         let context = self.context
         var id: UIChatListEntryId?
+        if novagramOpenForeignPeer(item, context: context) { return } // Novagram
         
         if let item = item as? SearchTopicRowItem {
             id = .chatId(item.item.id, item.item.renderedPeer.peerId, -1)
@@ -2384,6 +2394,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
     }
 
     public func selectionWillChange(row: Int, item: TableRowItem, byClick: Bool) -> Bool {
+        if novagramIsForeignPeerRow(item) { return navigationController?.modalAction == nil } // Novagram
         
         
         
