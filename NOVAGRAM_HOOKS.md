@@ -427,3 +427,7 @@ The Novagram Settings "Camera picker" switch (`long_press_camera_selection`, iOS
 ## Novagram Bots row only in the main Settings (2026-10-29)
 
 Novagram Bots showed twice: in the main Settings list (`NovagramSettingsHooksInstall.swift`) and at the top of Novagram Settings. iOS has it only in the main Settings, so the Novagram Settings row is gone (About stays alone at the top). `tg://settings/novagrampro/bots` still opens the Bots screen. No Telegram file changed.
+
+## Edited message history keeps media (2026-10-29)
+
+Mac recorded only text versions, so a photo replaced by Edit showed "No previous versions recorded" and no picture. Now, like iOS (`EditedMessageHistoryAttribute` with media), a version is recorded when the text or the media changes (an upload that only turns a local photo into its cloud copy is skipped), with that version's own time. The media is kept as a base64 PostboxEncoder blob in the entry (`mediaData`, older entries decode without it). The Edit History screen shows every version with its time, text, photo or video thumbnail (other files as a line), and "Current" now shows the message's real edit time instead of the time the screen was opened. Only edits seen while the chat is open are recorded (unchanged). No Telegram file changed.
