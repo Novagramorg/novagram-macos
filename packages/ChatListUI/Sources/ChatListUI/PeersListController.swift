@@ -3242,6 +3242,7 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
                 }, options: self.searchOptions, frame: rect, target: target, communityId: searchCommunityId, tags: initialTags)
 //                searchController.defaultQuery = self.genericView.searchView.query
                 searchController.pinnedItems = self.collectPinnedItems
+                searchController.novagramSetQuery = { [weak self] in self?.genericView.searchView.setString($0) } // Novagram
                     
                 searchController.setPeerAsTag = { [weak self] peer in
                     self?.genericView.searchView.setString("")

@@ -70,6 +70,22 @@ public extension NovagramL10n {
     var settingsLink_hint: String { pick(en: "Right-click any row to get a link straight to that setting.", uz: "Istalgan qatorni o'ng tugma bilan bosing: o'sha sozlamaning havolasini olasiz.", ru: "Нажмите правой кнопкой на любую строку, чтобы получить ссылку именно на эту настройку.") }
     var developer_adEventsOffTitle: String { pick(en: "Don't send ad events", uz: "Reklama hodisalarini yubormaslik", ru: "Не отправлять события рекламы") }
     var developer_adEventsOffTip: String { pick(en: "Views, clicks and actions of Novagram and Telegram ads are not sent, so an ad shown once per user keeps showing while you test. This device only.", uz: "Novagram va Telegram reklamalarining ko'rish, bosish va harakat hodisalari serverga yuborilmaydi, shuning uchun bir marta ko'rsatiladigan reklama test paytida qayta chiqaveradi. Faqat shu qurilmada.", ru: "Просмотры, клики и действия по рекламе Novagram и Telegram не отправляются, поэтому реклама с одним показом на пользователя продолжает показываться во время теста. Только на этом устройстве.") }
+    var search_fromDate: String { pick(en: "From date…", uz: "Sanadan…", ru: "С даты…") }
+    var search_toDate: String { pick(en: "To date…", uz: "Sanagacha…", ru: "По дату…") }
+    func search_fromDateValue(_ date: String) -> String { pick(en: "From \(date)", uz: "\(date) dan", ru: "С \(date)") }
+    func search_toDateValue(_ date: String) -> String { pick(en: "To \(date)", uz: "\(date) gacha", ru: "По \(date)") }
+    var search_clearDates: String { pick(en: "Clear dates", uz: "Sanalarni tozalash", ru: "Сбросить даты") }
+    var search_unreadOnly: String { pick(en: "Unread only", uz: "Faqat o'qilmaganlar", ru: "Только непрочитанные") }
+    var about_searchHint: String { pick(en: "Inside a chat, search \"two words\" for the exact phrase or lowercase re: followed by a regular expression.", uz: "Chat ichida aniq ibora uchun \"ikki so'z\" yoki kichik harflarda re: va undan keyin regular expression yozib qidiring.", ru: "В чате ищите \"два слова\" для точной фразы или re: строчными буквами с регулярным выражением.") }
+    var search_mentionsOnly: String { pick(en: "Mentions only", uz: "Faqat mention'lar", ru: "Только упоминания") }
+    func search_translatedTitle(_ text: String) -> String { pick(en: "Translated: \(text)", uz: "Tarjima: \(text)", ru: "Перевод: \(text)") }
+    var search_savedTitle: String { pick(en: "Saved searches", uz: "Saqlangan qidiruvlar", ru: "Сохранённые поиски") }
+    var search_savedPinned: String { pick(en: "Pinned", uz: "Qadalgan", ru: "Закреплён") }
+    var search_savedPin: String { pick(en: "Pin", uz: "Qadash", ru: "Закрепить") }
+    var search_savedUnpin: String { pick(en: "Unpin", uz: "Qadashni olish", ru: "Открепить") }
+    var search_savedRemove: String { pick(en: "Remove", uz: "O'chirish", ru: "Удалить") }
+    var settings_searchTranslate_title: String { pick(en: "Search the translated query too", uz: "Tarjima qilingan so'rov bo'yicha ham qidirish", ru: "Искать и по переводу запроса") }
+    var settings_searchTranslate_subtitle: String { pick(en: "Messages search also looks for the query translated into your translation language. The query is sent to Telegram's translation service.", uz: "Xabarlar qidiruvi so'rovni tarjima tilingizga tarjima qilib ham qidiradi. So'rov Telegram'ning tarjima xizmatiga yuboriladi.", ru: "Поиск по сообщениям также ищет запрос, переведённый на ваш язык перевода. Запрос отправляется в сервис перевода Telegram.") }
     var editedHistory_file: String { pick(en: "File", uz: "Fayl", ru: "Файл") }
     var editedHistory_media: String { pick(en: "Media", uz: "Media", ru: "Медиа") }
     var settings_unlimitedPins_title: String { pick(en: "Unlimited Pins", uz: "Cheksiz pin", ru: "Безлимитные закрепы") }
