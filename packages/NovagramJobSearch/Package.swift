@@ -10,6 +10,7 @@ let deps: [(String, String)] = [
     ("TelegramUtils", "../TelegramUtils"),
     ("TelegramTheme", "../TelegramTheme"),
     ("AvatarUI", "../AvatarUI"),
+    ("ShortPeerRow", "../ShortPeerRow"),
     ("InputDataUI", "../InputDataUI"),
     ("NovagramCore", "../NovagramCore"),
 ]

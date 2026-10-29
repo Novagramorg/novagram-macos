@@ -48,6 +48,7 @@ public extension NovagramL10n {
     var jobSearch_channelsEmpty: String { pick(en: "Watched channels are searched with your query. Add some with Find channels.", uz: "Kuzatilayotgan kanallar so'rovingiz bo'yicha qidiriladi. Kanallarni topish orqali qo'shing.", ru: "В отслеживаемых каналах ищется ваш запрос. Добавьте их через «Найти каналы».") }
     var jobSearch_findChannels: String { pick(en: "Find channels", uz: "Kanallarni topish", ru: "Найти каналы") }
     var jobSearch_watch: String { pick(en: "Watch", uz: "Kuzatish", ru: "Отслеживать") }
+    var jobSearch_watching: String { pick(en: "Watching", uz: "Kuzatilmoqda", ru: "Отслеживается") }
     var jobSearch_join: String { pick(en: "Join", uz: "A'zo bo'lish", ru: "Вступить") }
     var jobSearch_remove: String { pick(en: "Remove", uz: "O'chirish", ru: "Удалить") }
     var jobSearch_savedHeader: String { pick(en: "Saved job searches", uz: "Saqlangan ish qidiruvlari", ru: "Сохранённые поиски работы") }

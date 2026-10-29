@@ -9,6 +9,7 @@ import TelegramTheme
 import TelegramUtils
 import InputDataUI
 import GeneralRows
+import ShortPeerRow
 import NovagramCore
 
 private final class Arguments {
@@ -58,12 +59,24 @@ private final class Arguments {
     }
 }
 
+private struct JobChannel: Equatable {
+    let peer: EnginePeer
+    let subscribers: Int32?
+}
+
+private struct JobChannelRowKey: Equatable {
+    let channel: JobChannel
+    let isWatched: Bool
+    let isFirst: Bool
+    let isLast: Bool
+}
+
 private struct State: Equatable {
     var filter: NovagramJobFilter
     var sources: NovagramJobSources = NovagramJobSources()
     var search: NovagramJobSearchState = NovagramJobSearchState()
-    var watched: [EnginePeer] = []
-    var discovered: [EnginePeer] = []
+    var watched: [JobChannel] = []
+    var discovered: [JobChannel] = []
     var isDiscovering: Bool = false
     var saved: [NovagramJobSavedSearch] = []
     var isPremium: Bool = false
@@ -319,37 +332,49 @@ private func resultEntries(_ state: State, arguments: Arguments, sectionId: inou
     return entries
 }
 
+private func channelStatus(_ channel: JobChannel) -> String {
+    var parts: [String] = []
+    if let username = channel.peer.addressName, !username.isEmpty {
+        parts.append("@" + username)
+    }
+    if let subscribers = channel.subscribers {
+        let count = Int(subscribers)
+        parts.append(strings().peerStatusSubscribersOther(count).replacingOccurrences(of: "\(count)", with: count.prettyNumber))
+    }
+    return parts.joined(separator: " · ")
+}
+
 private func channelEntries(_ state: State, arguments: Arguments, sectionId: inout Int32, index: inout Int32) -> [InputDataEntry] {
     let strings = NovagramL10n.current
     var entries: [InputDataEntry] = []
     entries.append(.desc(sectionId: sectionId, index: index, text: .plain(strings.jobSearch_channelsHeader.uppercased()), data: .init(color: theme.colors.listGrayText, viewType: .textTopItem)))
     index += 1
-    let watchedIds = Set(state.watched.map { $0.id })
-    let found = state.discovered.filter { !watchedIds.contains($0.id) }
-    var rows: [(InputDataIdentifier, String, [ContextMenuItem])] = []
-    for peer in state.watched {
-        let peerId = peer.id
-        rows.append((_id_watched(peerId), novagramJobPeerTitle(peer._asPeer()), [
-            ContextMenuItem(strings.jobSearch_openPost, handler: { arguments.openPeer(peerId) }),
-            ContextMenuItem(strings.jobSearch_remove, handler: { arguments.setWatched(peerId, false) })
-        ]))
-    }
-    for peer in found {
-        let peerId = peer.id
-        var items = [
-            ContextMenuItem(strings.jobSearch_watch, handler: { arguments.setWatched(peerId, true) }),
-            ContextMenuItem(strings.jobSearch_openPost, handler: { arguments.openPeer(peerId) })
-        ]
-        if case let .channel(channel) = peer, channel.participationStatus != .member {
-            items.append(ContextMenuItem(strings.jobSearch_join, handler: { arguments.join(peerId) }))
-        }
-        rows.append((_id_found(peerId), novagramJobPeerTitle(peer._asPeer()), items))
-    }
+    let watchedIds = Set(state.watched.map { $0.peer.id })
+    let rows = state.watched.map { ($0, true) } + state.discovered.filter { !watchedIds.contains($0.peer.id) }.map { ($0, false) }
     let total = rows.count + 1
     for (offset, row) in rows.enumerated() {
-        let isWatched = offset < state.watched.count
+        let (channel, isWatched) = row
+        let peerId = channel.peer.id
+        var menu: [ContextMenuItem] = []
+        if isWatched {
+            menu.append(ContextMenuItem(strings.jobSearch_openPost, handler: { arguments.openPeer(peerId) }))
+            menu.append(ContextMenuItem(strings.jobSearch_remove, handler: { arguments.setWatched(peerId, false) }))
+        } else {
+            menu.append(ContextMenuItem(strings.jobSearch_watch, handler: { arguments.setWatched(peerId, true) }))
+            menu.append(ContextMenuItem(strings.jobSearch_openPost, handler: { arguments.openPeer(peerId) }))
+            if case let .channel(value) = channel.peer, value.participationStatus != .member {
+                menu.append(ContextMenuItem(strings.jobSearch_join, handler: { arguments.join(peerId) }))
+            }
+        }
         let viewType = bestGeneralViewType(Array(0 ..< total), for: offset)
-        entries.append(.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: row.0, data: .init(name: row.1, color: theme.colors.text, type: .contextSelector(isWatched ? strings.jobSearch_sourceWatched : "", row.2), viewType: viewType)))
+        let status = channelStatus(channel)
+        let key = JobChannelRowKey(channel: channel, isWatched: isWatched, isFirst: offset == 0, isLast: offset == total - 1)
+        let items = menu
+        entries.append(.custom(sectionId: sectionId, index: index, value: .none, identifier: isWatched ? _id_watched(peerId) : _id_found(peerId), equatable: InputDataEquatable(key), comparable: nil, item: { initialSize, stableId in
+            ShortPeerRowItem(initialSize, peer: channel.peer._asPeer(), account: arguments.context.account, context: arguments.context, stableId: stableId, height: 50, photoSize: NSMakeSize(36, 36), status: status.isEmpty ? nil : status, inset: NSEdgeInsets(left: 20, right: 20), generalType: isWatched ? .context(strings.jobSearch_watching) : .none, viewType: viewType, action: {}, contextMenuItems: {
+                .single(items)
+            }, menuOnAction: true)
+        }))
         index += 1
     }
     entries.append(.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_find_channels, data: .init(name: strings.jobSearch_findChannels, color: theme.colors.accent, type: state.isDiscovering ? .loading : .none, viewType: bestGeneralViewType(Array(0 ..< total), for: total - 1), action: arguments.findChannels)))
@@ -432,32 +457,38 @@ private func entries(_ state: State, arguments: Arguments) -> [InputDataEntry] {
     return entries
 }
 
-private func loadChannels(context: any AccountContextProtocol, ids: [Int64]) -> Signal<[EnginePeer], NoError> {
-    return context.account.postbox.transaction { transaction -> [EnginePeer] in
-        return ids.map { PeerId($0) }.filter { !NovagramHiddenChatsManager.shared.isPeerHiddenInStorage($0) }.compactMap { transaction.getPeer($0).map(EnginePeer.init) }
+private func loadChannels(context: any AccountContextProtocol, ids: [Int64]) -> Signal<[JobChannel], NoError> {
+    let peerIds = ids.map { PeerId($0) }.filter { !NovagramHiddenChatsManager.shared.isPeerHiddenInStorage($0) }
+    let peers = EngineDataMap(peerIds.map { TelegramEngine.EngineData.Item.Peer.Peer(id: $0) })
+    let counts = EngineDataMap(peerIds.map { TelegramEngine.EngineData.Item.Peer.ParticipantCount(id: $0) })
+    return context.engine.data.get(peers, counts) |> map { peers, counts -> [JobChannel] in
+        return peerIds.compactMap { peerId -> JobChannel? in
+            guard let peer = peers[peerId] ?? nil else {
+                return nil
+            }
+            let count = (counts[peerId] ?? nil).map { Int32(clamping: $0) }
+            return JobChannel(peer: peer, subscribers: count)
+        }
     }
 }
 
-private func discoverChannels(context: any AccountContextProtocol, query: NovagramJobQuery) -> Signal<[EnginePeer], NoError> {
-    var texts = NovagramJobPresets.channelDiscoveryQueries
-    if let first = query.serverQueries.first {
-        texts.insert(first, at: 0)
-    }
-    let signals = texts.prefix(NovagramJobSearchEngine.maxConcurrentRequests).map { text in
+private func discoverChannels(context: any AccountContextProtocol, query: NovagramJobQuery) -> Signal<[JobChannel], NoError> {
+    let texts = NovagramJobChannelRelevance.discoveryQueries(userQuery: query.serverQueries.first)
+    let signals = texts.map { text in
         NovagramJobRequestLimiter.shared.limited(context.engine.contacts.searchRemotePeers(query: text, scope: .channels) |> take(1)) |> map { $0.0 + $0.1 }
     }
-    return combineLatest(signals) |> map { lists -> [EnginePeer] in
+    return combineLatest(signals) |> map { lists -> [JobChannel] in
         var seen = Set<PeerId>()
-        var result: [EnginePeer] = []
+        var result: [JobChannel] = []
         for found in lists.flatMap({ $0 }) {
-            guard case .channel = found.peer else {
+            guard case let .channel(channel) = found.peer else {
                 continue
             }
             let peerId = found.peer.id
-            guard seen.insert(peerId).inserted, !NovagramHiddenChatsManager.shared.isPeerHiddenInStorage(peerId) else {
+            guard seen.insert(peerId).inserted, !NovagramHiddenChatsManager.shared.isPeerHiddenInStorage(peerId), NovagramJobChannelRelevance.hasJobSignal(title: channel.title, username: found.peer.addressName) else {
                 continue
             }
-            result.append(found.peer)
+            result.append(JobChannel(peer: found.peer, subscribers: found.subscribers))
         }
         return result
     }
