@@ -48,30 +48,17 @@ func novagramSearchHides(_ rendered: RenderedPeer) -> Bool {
 
 // Message results also skip chats locked with Chat Lock: the lock guards the content, while the chat
 // name may still show (as in the chat list).
-func novagramSearchHidesMessage(_ message: Message) -> Bool {
-    if novagramSearchHides(message.id.peerId) {
-        return true
-    }
-    let pincode = NovagramChatPincodeManager.shared
-    return pincode.isMasterEnabled() && pincode.isLocked(message.id.peerId)
+func novagramSearchPrivateMessages(_ messages: [Message]) -> [Message] {
+    return NovagramSearchPrivacy.kept(messages, message: { $0 })
 }
 
 // MARK: - Message filters
 
 func novagramSearchKeptMessages(_ messages: [Message], readStates: [PeerId: CombinedPeerReadState], filter: NovagramSearchFilterState) -> [Message] {
-    var lockedByPeer: [PeerId: Bool] = [:]
-    let lockEnabled = NovagramChatPincodeManager.shared.isMasterEnabled()
+    let privacy = NovagramSearchPrivacyPass()
     return messages.filter { message in
-        let peerId = message.id.peerId
-        if novagramSearchHides(peerId) {
+        if privacy.hidesMessage(message) {
             return false
-        }
-        if lockEnabled {
-            let locked = lockedByPeer[peerId] ?? NovagramChatPincodeManager.shared.isLocked(peerId)
-            lockedByPeer[peerId] = locked
-            if locked {
-                return false
-            }
         }
         if filter.unreadOnly && !novagramIsUnread(message, readStates: readStates) {
             return false
@@ -103,18 +90,119 @@ private func novagramMentionsMe(_ message: Message) -> Bool {
 private let novagramFilledResultCount = 20
 private let novagramExtraPages = 5
 
-func novagramFillFilteredPage(_ first: Signal<(SearchMessagesResult, SearchMessagesState), NoError>, filter: NovagramSearchFilterState, next: @escaping (SearchMessagesState) -> Signal<(SearchMessagesResult, SearchMessagesState), NoError>) -> Signal<(SearchMessagesResult, SearchMessagesState), NoError> {
+typealias NovagramSearchPage = (SearchMessagesResult, SearchMessagesState)
+
+final class NovagramFilterAutoLoad {
+    private struct State {
+        var shown = 0
+        var autoLoads = 0
+        var pending = false
+    }
+
+    private static let maxAutoLoads = 3
+    private let state = Atomic(value: State())
+
+    fileprivate func startLoad(fresh: Bool) {
+        _ = state.modify { current in
+            var current = current
+            if fresh {
+                current = State()
+            }
+            current.pending = false
+            return current
+        }
+    }
+
+    fileprivate func finishLoad(matched: Int, completed: Bool) {
+        _ = state.modify { current in
+            var current = current
+            current.shown += matched
+            let short = current.shown < novagramFilledResultCount
+            current.pending = short && !completed && current.autoLoads < NovagramFilterAutoLoad.maxAutoLoads
+            return current
+        }
+    }
+
+    func takeRequest() -> Bool {
+        var take = false
+        _ = state.modify { current in
+            var current = current
+            if current.pending {
+                current.pending = false
+                current.autoLoads += 1
+                take = true
+            }
+            return current
+        }
+        return take
+    }
+}
+
+func novagramFillFilteredPage(
+    _ first: Signal<NovagramSearchPage, NoError>,
+    filter: NovagramSearchFilterState,
+    previous: [Message]?,
+    autoLoad: NovagramFilterAutoLoad,
+    next: @escaping (SearchMessagesState) -> Signal<NovagramSearchPage, NoError>
+) -> Signal<NovagramSearchPage, NoError> {
     guard filter.filtersMessages else {
         return first
     }
-    func step(_ value: (SearchMessagesResult, SearchMessagesState), pagesLeft: Int) -> Signal<(SearchMessagesResult, SearchMessagesState), NoError> {
-        let passing = novagramSearchKeptMessages(value.0.messages, readStates: value.0.readStates, filter: filter).count
-        if pagesLeft == 0 || value.0.completed || passing >= novagramFilledResultCount {
+    autoLoad.startLoad(fresh: previous == nil)
+    func step(
+        _ value: NovagramSearchPage,
+        seen: Set<MessageId>,
+        matched: Int,
+        pagesLeft: Int
+    ) -> Signal<NovagramSearchPage, NoError> {
+        let added = value.0.messages.filter { !seen.contains($0.id) }
+        let matched = matched + novagramSearchKeptMessages(added, readStates: value.0.readStates, filter: filter).count
+        if pagesLeft == 0 || value.0.completed || matched >= novagramFilledResultCount {
+            autoLoad.finishLoad(matched: matched, completed: value.0.completed)
             return .single(value)
         }
-        return .single(value) |> then(next(value.1) |> take(1) |> mapToSignal { step($0, pagesLeft: pagesLeft - 1) })
+        let seenNow = Set(value.0.messages.map { $0.id })
+        let more = next(value.1)
+            |> take(1)
+            |> mapToSignal { step($0, seen: seenNow, matched: matched, pagesLeft: pagesLeft - 1) }
+        return .single(value) |> then(more)
     }
-    return first |> mapToSignal { step($0, pagesLeft: novagramExtraPages) }
+    let seen = Set((previous ?? []).map { $0.id })
+    return first |> mapToSignal { step($0, seen: seen, matched: 0, pagesLeft: novagramExtraPages) }
+}
+
+func novagramWithReadStates(
+    _ signal: Signal<NovagramSearchPage, NoError>,
+    postbox: Postbox,
+    filter: NovagramSearchFilterState
+) -> Signal<NovagramSearchPage, NoError> {
+    guard filter.unreadOnly else {
+        return signal
+    }
+    return signal |> mapToSignal { value -> Signal<NovagramSearchPage, NoError> in
+        let known = value.0.readStates
+        let missing = Set(value.0.messages.map { $0.id.peerId }).filter { known[$0] == nil }
+        if missing.isEmpty {
+            return .single(value)
+        }
+        return postbox.transaction { transaction -> NovagramSearchPage in
+            var readStates = known
+            for peerId in missing {
+                if let readState = transaction.getCombinedPeerReadState(peerId) {
+                    readStates[peerId] = readState
+                }
+            }
+            let result = value.0
+            let merged = SearchMessagesResult(
+                messages: result.messages,
+                readStates: readStates,
+                threadInfo: result.threadInfo,
+                totalCount: result.totalCount,
+                completed: result.completed
+            )
+            return (merged, value.1)
+        }
+    }
 }
 
 // MARK: - Dates

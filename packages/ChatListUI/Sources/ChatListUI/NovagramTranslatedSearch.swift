@@ -43,7 +43,8 @@ func novagramTranslatedSearch(
         return .single(nil)
     }
     let engine = context.engine
-    return NovagramQueryTranslator.translatedQuery(engine: engine, query: scope.query)
+    let translation = NovagramQueryTranslator.translatedQuery(engine: engine, query: scope.query)
+    let translated: Signal<NovagramTranslatedMessages?, NoError> = translation
         |> mapToSignal { text -> Signal<NovagramTranslatedMessages?, NoError> in
             guard let text else {
                 return .single(nil)
@@ -72,6 +73,7 @@ func novagramTranslatedSearch(
                         }
                 }
         }
+    return .single(nil) |> then(translated)
 }
 
 func novagramTranslatedRows(
