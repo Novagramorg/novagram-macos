@@ -534,7 +534,7 @@ public class PCallSession {
         
         
         self.serializedData = data.configuration.serializedData
-        self.dataSaving = .never
+        self.dataSaving = novagramCallDataSaving() // Novagram
         self.derivedState = data.derivedState
         self.proxyServer = data.proxyServerSettings
         self.peer = data.peer

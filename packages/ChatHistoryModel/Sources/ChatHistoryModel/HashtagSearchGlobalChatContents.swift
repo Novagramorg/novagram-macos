@@ -5,6 +5,7 @@ import TGUIKit
 import TelegramCore
 import TelegramContext
 import ChatModeTypes
+import NovagramCore // Novagram
 
 public final class HashtagSearchGlobalChatContents: ChatCustomContentsProtocol {
     
@@ -102,6 +103,7 @@ public final class HashtagSearchGlobalChatContents: ChatCustomContentsProtocol {
         
         private func updateHistoryView(updateType: ViewUpdateType) {
             var entries = self.sourceHistoryView?.entries ?? []
+            entries = NovagramSearchPrivacy.kept(entries, message: { $0.message }) // Novagram
             entries.sort(by: { $0.message.index < $1.message.index })
             
             let mergedHistoryView = MessageHistoryView(tag: nil, namespaces: .just(Set([Namespaces.Message.Cloud])), entries: entries, holeEarlier: false, holeLater: false, isLoading: false)

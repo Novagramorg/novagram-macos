@@ -932,7 +932,7 @@ private func novagramAboutEntries(l10n: NovagramL10n, langCode: String) -> [Nova
 
     entries.append(.section(n()))
     entries.append(.header(n(), "introH", l10n.about_introHeader))
-    entries.append(.text(n(), "introB", l10n.about_introBody))
+    entries.append(.text(n(), "introB", l10n.about_introBody + " " + l10n.about_searchHint))
 
     entries.append(.section(n()))
     entries.append(.header(n(), "featH", l10n.about_featuresHeader))

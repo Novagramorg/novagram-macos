@@ -274,6 +274,7 @@ final class PeerCallScreenView : Control {
         settingsView.set(handler: { [weak self] _ in
             self?.arguments?.openSettings()
         }, for: .SingleClick)
+        settingsView.set(handler: { control in novagramShowCallDeviceMenu(control) }, for: .RightDown) // Novagram
         
         addPeerView.set(handler: { [weak self] _ in
             self?.arguments?.addMembers()

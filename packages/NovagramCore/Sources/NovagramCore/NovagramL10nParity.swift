@@ -70,6 +70,22 @@ public extension NovagramL10n {
     var settingsLink_hint: String { pick(en: "Right-click any row to get a link straight to that setting.", uz: "Istalgan qatorni o'ng tugma bilan bosing: o'sha sozlamaning havolasini olasiz.", ru: "Нажмите правой кнопкой на любую строку, чтобы получить ссылку именно на эту настройку.") }
     var developer_adEventsOffTitle: String { pick(en: "Don't send ad events", uz: "Reklama hodisalarini yubormaslik", ru: "Не отправлять события рекламы") }
     var developer_adEventsOffTip: String { pick(en: "Views, clicks and actions of Novagram and Telegram ads are not sent, so an ad shown once per user keeps showing while you test. This device only.", uz: "Novagram va Telegram reklamalarining ko'rish, bosish va harakat hodisalari serverga yuborilmaydi, shuning uchun bir marta ko'rsatiladigan reklama test paytida qayta chiqaveradi. Faqat shu qurilmada.", ru: "Просмотры, клики и действия по рекламе Novagram и Telegram не отправляются, поэтому реклама с одним показом на пользователя продолжает показываться во время теста. Только на этом устройстве.") }
+    var search_fromDate: String { pick(en: "From date…", uz: "Sanadan…", ru: "С даты…") }
+    var search_toDate: String { pick(en: "To date…", uz: "Sanagacha…", ru: "По дату…") }
+    func search_fromDateValue(_ date: String) -> String { pick(en: "From \(date)", uz: "\(date) dan", ru: "С \(date)") }
+    func search_toDateValue(_ date: String) -> String { pick(en: "To \(date)", uz: "\(date) gacha", ru: "По \(date)") }
+    var search_clearDates: String { pick(en: "Clear dates", uz: "Sanalarni tozalash", ru: "Сбросить даты") }
+    var search_unreadOnly: String { pick(en: "Unread only", uz: "Faqat o'qilmaganlar", ru: "Только непрочитанные") }
+    var about_searchHint: String { pick(en: "Inside a chat, search \"two words\" for the exact phrase or lowercase re: followed by a regular expression.", uz: "Chat ichida aniq ibora uchun \"ikki so'z\" yoki kichik harflarda re: va undan keyin regular expression yozib qidiring.", ru: "В чате ищите \"два слова\" для точной фразы или re: строчными буквами с регулярным выражением.") }
+    var search_mentionsOnly: String { pick(en: "Mentions only", uz: "Faqat mention'lar", ru: "Только упоминания") }
+    func search_translatedTitle(_ text: String) -> String { pick(en: "Translated: \(text)", uz: "Tarjima: \(text)", ru: "Перевод: \(text)") }
+    var search_savedTitle: String { pick(en: "Saved searches", uz: "Saqlangan qidiruvlar", ru: "Сохранённые поиски") }
+    var search_savedPinned: String { pick(en: "Pinned", uz: "Qadalgan", ru: "Закреплён") }
+    var search_savedPin: String { pick(en: "Pin", uz: "Qadash", ru: "Закрепить") }
+    var search_savedUnpin: String { pick(en: "Unpin", uz: "Qadashni olish", ru: "Открепить") }
+    var search_savedRemove: String { pick(en: "Remove", uz: "O'chirish", ru: "Удалить") }
+    var settings_searchTranslate_title: String { pick(en: "Search the translated query too", uz: "Tarjima qilingan so'rov bo'yicha ham qidirish", ru: "Искать и по переводу запроса") }
+    var settings_searchTranslate_subtitle: String { pick(en: "Messages search also looks for the query translated into your translation language. The query is sent to Telegram's translation service.", uz: "Xabarlar qidiruvi so'rovni tarjima tilingizga tarjima qilib ham qidiradi. So'rov Telegram'ning tarjima xizmatiga yuboriladi.", ru: "Поиск по сообщениям также ищет запрос, переведённый на ваш язык перевода. Запрос отправляется в сервис перевода Telegram.") }
     var editedHistory_file: String { pick(en: "File", uz: "Fayl", ru: "Файл") }
     var editedHistory_media: String { pick(en: "Media", uz: "Media", ru: "Медиа") }
     var settings_unlimitedPins_title: String { pick(en: "Unlimited Pins", uz: "Cheksiz pin", ru: "Безлимитные закрепы") }
@@ -85,4 +101,35 @@ public extension NovagramL10n {
     var settings_channelHistory_title: String { pick(en: "Channel history button", uz: "Kanal tarixi tugmasi", ru: "Кнопка истории канала") }
     var settings_channelHistory_subtitle: String { pick(en: "Adds “Recent Actions” to the chat list menu of channels and groups you admin", uz: "Siz admin bo'lgan kanal va guruhlar menyusiga «So'nggi amallar» bandini qo'shadi", ru: "Добавляет «Недавние действия» в меню каналов и групп, где вы администратор") }
     var settings_voiceTranslate_subtitle: String { pick(en: "When dictation ends, the text is translated into the auto-translate language. Works when “Ask to translate on send” is off", uz: "Diktovka tugagach matn avto-tarjima tiliga tarjima qilinadi. «Yuborishda tarjima so'rovi» o'chiq bo'lsa ishlaydi", ru: "После диктовки текст переводится на язык автоперевода. Работает, когда «Запрос перевода при отправке» выключен") }
+
+    var callRecording_section: String { pick(en: "Calls", uz: "Qo'ng'iroqlar", ru: "Звонки") }
+    var callRecording_title: String { pick(en: "Call recording", uz: "Qo'ng'iroqni yozib olish", ru: "Запись звонков") }
+    var callRecording_subtitle: String { pick(en: "Adds a Record button to voice and video calls", uz: "Ovozli va video qo'ng'iroqlarga «Yozish» tugmasini qo'shadi", ru: "Добавляет кнопку «Запись» в аудио- и видеозвонки") }
+    var callRecording_saveTo: String { pick(en: "Save to", uz: "Saqlash joyi", ru: "Сохранять в") }
+    var callRecording_askEveryTime: String { pick(en: "Ask every time", uz: "Har safar so'rash", ru: "Спрашивать каждый раз") }
+    var callRecording_footer: String { pick(en: "Recordings are made and kept only on this Mac. Only you see the REC mark; the other person is not notified. Recording calls without the other person's consent is illegal in some countries.", uz: "Yozuvlar faqat shu Mac'da yaratiladi va saqlanadi. REC belgisini faqat siz ko'rasiz, suhbatdoshingizga xabar berilmaydi. Ba'zi mamlakatlarda suhbatdoshning roziligisiz qo'ng'iroqni yozib olish qonunga zid.", ru: "Записи создаются и хранятся только на этом Mac. Значок REC видите только вы, собеседник не получает уведомления. В некоторых странах запись звонков без согласия собеседника запрещена законом.") }
+    var callRecording_chooseMessage: String { pick(en: "Choose a folder for call recordings", uz: "Qo'ng'iroq yozuvlari uchun papkani tanlang", ru: "Выберите папку для записей звонков") }
+    var callRecording_choose: String { pick(en: "Choose", uz: "Tanlash", ru: "Выбрать") }
+    var callRecording_chooseFolder: String { pick(en: "Choose Folder…", uz: "Papka tanlash…", ru: "Выбрать папку…") }
+    var callRecording_cancel: String { pick(en: "Cancel", uz: "Bekor qilish", ru: "Отмена") }
+    func callRecording_action(_ isRecording: Bool) -> String { isRecording ? pick(en: "Stop", uz: "To'xtatish", ru: "Стоп") : pick(en: "Record", uz: "Yozish", ru: "Запись") }
+    var callRecording_warningTitle: String { pick(en: "Record this call?", uz: "Qo'ng'iroq yozib olinsinmi?", ru: "Записать звонок?") }
+    var callRecording_warningText: String { pick(en: "In some countries it is illegal to record a call without the other person's consent. Make sure you are allowed to record it. The recording stays on this Mac.", uz: "Ba'zi mamlakatlarda suhbatdoshning roziligisiz qo'ng'iroqni yozib olish qonunga zid. Yozib olishga ruxsatingiz borligiga ishonch hosil qiling. Yozuv faqat shu Mac'da qoladi.", ru: "В некоторых странах запись звонка без согласия собеседника запрещена законом. Убедитесь, что вам можно его записывать. Запись остаётся только на этом Mac.") }
+    var callRecording_continue: String { pick(en: "Continue", uz: "Davom etish", ru: "Продолжить") }
+    var callRecording_permissionText: String { pick(en: "Novagram needs permission to record the call window. Open System Settings → Privacy & Security → Screen & System Audio Recording, turn on Novagram, then reopen the app.", uz: "Qo'ng'iroq oynasini yozib olish uchun Novagram'ga ruxsat kerak. System Settings → Privacy & Security → Screen & System Audio Recording bo'limida Novagram'ni yoqing, so'ng ilovani qayta oching.", ru: "Novagram нужно разрешение на запись окна звонка. Откройте Системные настройки → Конфиденциальность и безопасность → Запись экрана и системного аудио, включите Novagram и перезапустите приложение.") }
+    var callRecording_openSettings: String { pick(en: "Open Settings", uz: "Sozlamalarni ochish", ru: "Открыть настройки") }
+    var callRecording_saved: String { pick(en: "Call recording saved", uz: "Qo'ng'iroq yozuvi saqlandi", ru: "Запись звонка сохранена") }
+    var callRecording_showInFinder: String { pick(en: "Show in Finder", uz: "Finder'da ko'rsatish", ru: "Показать в Finder") }
+    var callRecording_failed: String { pick(en: "Call recording failed", uz: "Qo'ng'iroqni yozib bo'lmadi", ru: "Не удалось записать звонок") }
+    var callRecording_audioOnly: String { pick(en: "Video was turned on: this recording stays audio only", uz: "Video yoqildi: bu yozuv faqat ovozli bo'lib qoladi", ru: "Включено видео: эта запись останется только аудио") }
+    var callRecording_saveFailed: String { pick(en: "Couldn't save the call recording", uz: "Qo'ng'iroq yozuvini saqlab bo'lmadi", ru: "Не удалось сохранить запись звонка") }
+    var callRecording_auto_title: String { pick(en: "Record every call automatically", uz: "Har bir qo'ng'iroqni avtomatik yozib olish", ru: "Записывать каждый звонок автоматически") }
+    var callRecording_auto_subtitle: String { pick(en: "Recording starts as soon as the call screen opens", uz: "Qo'ng'iroq oynasi ochilishi bilan yozish boshlanadi", ru: "Запись начинается сразу при открытии окна звонка") }
+    var callDataSaving_title: String { pick(en: "Use less data for calls", uz: "Qo'ng'iroqlarda kamroq trafik", ru: "Экономия трафика в звонках") }
+    var callDataSaving_subtitle: String { pick(en: "Lower audio and video quality; applies to new calls", uz: "Ovoz va video sifati pasayadi; yangi qo'ng'iroqlarga ta'sir qiladi", ru: "Ниже качество звука и видео; действует для новых звонков") }
+    var callDevices_microphone: String { pick(en: "Microphone", uz: "Mikrofon", ru: "Микрофон") }
+    var callDevices_speaker: String { pick(en: "Speaker", uz: "Karnay", ru: "Динамик") }
+    var callDevices_default: String { pick(en: "System Default", uz: "Tizim bo'yicha", ru: "Системное по умолчанию") }
+    var callWeakNetwork_text: String { pick(en: "Weak connection", uz: "Aloqa sust", ru: "Слабое соединение") }
+    var callWeakNetwork_turnOffVideo: String { pick(en: "Turn off my video", uz: "Videomni o'chirish", ru: "Выключить моё видео") }
 }

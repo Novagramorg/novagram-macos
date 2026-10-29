@@ -1627,6 +1627,7 @@ class AppDelegate: NSResponder, NSApplicationDelegate, NSUserNotificationCenterD
     }
     
     func applicationWillTerminate(_ notification: Notification) {
+        NovagramCallRecording.shared.stopForQuit() // Novagram
         self.terminated = true
         disarmCrashMarker()
         if let containerUrl = self.containerUrl {
