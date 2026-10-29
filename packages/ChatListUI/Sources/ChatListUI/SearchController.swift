@@ -851,6 +851,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
     
     public typealias MessaagesSourceValue = SearchControllerMessaagesSourceValue
     private let messagesSourceValue: ValuePromise<MessaagesSourceValue> = ValuePromise(.allChats, ignoreRepeated: true)
+    private let novagramSearchFilter = ValuePromise(NovagramSearchFilterState(), ignoreRepeated: true) // Novagram
 
     private let searchAdState = ValuePromise<SearchAdState>(.init(), ignoreRepeated: true)
     private let approvedGlobalPostQueryState = ValuePromise<ApprovedGlobalPostQueryState?>(nil, ignoreRepeated: true)
@@ -921,6 +922,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
         let searchMessagesStateValue = self.searchMessagesStateValue
         
         let messagesSourceValue = messagesSourceValue.get()
+        let novagramSearchFilter = self.novagramSearchFilter // Novagram
         let searchAdState = self.searchAdState.get()
         let approvedGlobalPostQueryState = self.approvedGlobalPostQueryState.get()
 
@@ -1034,7 +1036,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                             
                             var index = 1
                             
-                            if let peer = inLinkPeer {
+                            if let peer = inLinkPeer, !novagramSearchHides(peer.id) { // Novagram
                                 if ids[peer.id] == nil {
                                     ids[peer.id] = peer.id
                                     entries.append(.localPeer(.init(peer: peer), index, nil, .none, true, false, nil))
@@ -1042,7 +1044,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                                 }
                             }
                             
-                            for rendered in peers.0 {
+                            for rendered in peers.0 where !novagramSearchHides(rendered) { // Novagram
                                 if ids[rendered.peerId] == nil {
                                     ids[rendered.peerId] = rendered.peerId
                                     if let peer = rendered.chatMainPeer {
@@ -1085,11 +1087,11 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                                 |> delay(0.2, queue: prepareQueue)
                                 |> map { (founds, adPeers) -> ([FoundPeer], [FoundPeer], [AdPeer]) in
                                     return (founds.0.filter { found -> Bool in
-                                        let first = ids[found.peer.id] == nil
+                                        let first = ids[found.peer.id] == nil && !novagramSearchHides(found.peer.id) // Novagram
                                         ids[found.peer.id] = found.peer.id
                                         return first
                                     }, founds.1.filter { found -> Bool in
-                                        let first = ids[found.peer.id] == nil
+                                        let first = ids[found.peer.id] == nil && !novagramSearchHides(found.peer.id) // Novagram
                                         ids[found.peer.id] = found.peer.id
                                         return first
                                     }, adPeers)
@@ -1239,7 +1241,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                 }
 
 
-                let remoteSearch = combineLatest(searchMessagesState.get(), messagesSourceValue) |> mapToSignal { state, messagesSourceValue -> Signal<([ChatListSearchEntry], Bool, SearchMessagesState?, SearchMessagesResult?), NoError> in
+                let remoteSearch = combineLatest(searchMessagesState.get(), messagesSourceValue, novagramSearchFilter.get()) |> mapToSignal { state, messagesSourceValue, novagramFilter -> Signal<([ChatListSearchEntry], Bool, SearchMessagesState?, SearchMessagesResult?), NoError> in // Novagram
                     
                     var signal: Signal<(SearchMessagesResult, SearchMessagesState), NoError>
                     
@@ -1248,9 +1250,10 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                         signal = context.engine.messages.searchHashtagPosts(hashtag: text.replacingOccurrences(of: "[#$]", with: "", options: .regularExpression), state: state?.state, limit: 100)
                         |> delay(0.2, queue: prepareQueue)
                     } else {
-                        signal = context.engine.messages.searchMessages(location: location.withUpdatedSouce(messagesSourceValue), query: globalTags.text ?? query, state: state?.state)
+                        signal = context.engine.messages.searchMessages(location: location.withUpdatedSouce(messagesSourceValue).novagramDates(novagramFilter), query: globalTags.text ?? query, state: state?.state) // Novagram
                         |> delay(0.2, queue: prepareQueue)
                     }
+                    signal = novagramFillFilteredPage(signal, filter: novagramFilter, next: { state in context.engine.messages.searchMessages(location: location.withUpdatedSouce(messagesSourceValue).novagramDates(novagramFilter), query: globalTags.text ?? query, state: state) }) // Novagram
                     
                     if let state {
                         signal = .single((state.result, state.state)) |> then(signal)
@@ -1261,7 +1264,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                             
                             var entries: [ChatListSearchEntry] = []
                             var index = 20001
-                            for message in result.0.messages {
+                            for message in novagramSearchKeptMessages(result.0.messages, readStates: result.0.readStates, filter: novagramFilter) { // Novagram
                                 switch target {
                                 case .forum:
                                     if let threadInfo = result.0.threadInfo[message.id] {
@@ -1293,7 +1296,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                     hashtagSearch = .single(([], false, nil)) |> then(context.engine.messages.searchHashtagPosts(hashtag: query.replacingOccurrences(of: "[#$]", with: "", options: .regularExpression), state: nil, limit: 100) |> map { result in
                         var entries: [ChatListSearchEntry] = []
                         var index = 20001
-                        for message in result.0.messages {
+                        for message in result.0.messages where !novagramSearchHidesMessage(message) { // Novagram
                             switch target {
                             case .forum:
                                 if let threadInfo = result.0.threadInfo[message.id] {
@@ -1315,8 +1318,8 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                     hashtagSearch = .single(([], false, nil))
                 }
                 
-                return combineLatest(queue: prepareQueue, foundLocalPeers, foundRemotePeers, foundRemoteMessages, isRevealed, globalStorySearchState, hashtagSearch, messagesSourceValue, NovagramAdsHooks.shared.promotedSearchPeer(context, query)) // Novagram
-                    |> map { localPeers, remotePeers, remoteMessages, isRevealed, storySearchState, hashtagSearch, messagesSourceValue, promoted -> ([ChatListSearchEntry], Bool, SearchMessagesState?, SearchMessagesResult?) in
+                return combineLatest(queue: prepareQueue, foundLocalPeers, foundRemotePeers, foundRemoteMessages, isRevealed, globalStorySearchState, hashtagSearch, messagesSourceValue, NovagramAdsHooks.shared.promotedSearchPeer(context, query), novagramSearchFilter.get()) // Novagram
+                    |> map { localPeers, remotePeers, remoteMessages, isRevealed, storySearchState, hashtagSearch, messagesSourceValue, promoted, novagramFilter -> ([ChatListSearchEntry], Bool, SearchMessagesState?, SearchMessagesResult?) in // Novagram
                         
                         assertUniqueSearchEntries(remotePeers.0)
                         assertUniqueSearchEntries(remotePeers.1)
@@ -1377,12 +1380,12 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                         }
                         
                         
-                        if !remoteMessages.0.isEmpty {
+                        if !remoteMessages.0.isEmpty || novagramFilter.isActive { // Novagram
                             let blockState: SeparatorBlockState
                             if globalTags.publicPosts || globalTags.myMessages {
                                 blockState = .custom(strings().searchSeparatorShowAsMessages, .showAsMessages(onlyMy: globalTags.myMessages))
                             } else {
-                                blockState = .dropdown(strings().searchFilterFrom(messagesSourceValue.string), [.init(title: MessaagesSourceValue.allChats.string, selected: messagesSourceValue == .allChats, action: {
+                                blockState = .dropdown(novagramSearchFilterTitle(strings().searchFilterFrom(messagesSourceValue.string), novagramFilter), [.init(title: MessaagesSourceValue.allChats.string, selected: messagesSourceValue == .allChats, action: { // Novagram
                                     arguments.toggleMessageSourceValue(.allChats)
                                 }),
                                 .init(title: MessaagesSourceValue.privateChats.string, selected: messagesSourceValue == .privateChats, action: {
@@ -1393,7 +1396,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                                 }),
                                 .init(title: MessaagesSourceValue.channels.string, selected: messagesSourceValue == .channels, action: {
                                     arguments.toggleMessageSourceValue(.channels)
-                                })])
+                                })] + novagramSearchFilterActions(novagramFilter, window: context.window, update: { searchMessagesState.set(nil); novagramSearchFilter.set($0) })) // Novagram
                             }
                             entries.append(.separator(text: strings().searchSeparatorMessages, index: 20000, state: blockState))
                             entries += remoteMessages.0
@@ -1635,7 +1638,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                         let result = signal |> map { result -> ([ChatListSearchEntry], Bool, Bool, SearchMessagesState?, SearchMessagesResult?) in
                             var entries: [ChatListSearchEntry] = []
                             var index = 20001
-                            for message in result.0.messages {
+                            for message in result.0.messages where !novagramSearchHidesMessage(message) { // Novagram
                                 switch target {
                                 case .forum:
                                     if let threadInfo = result.0.threadInfo[message.id] {
@@ -1714,7 +1717,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                                     var unread:[PeerId: UnreadSearchBadge] = [:]
                                     var online: [PeerId : Bool] = [:]
                                     for peerView in peerViews {
-                                        if let peer = peerViewMainPeer(peerView) {
+                                        if let peer = peerViewMainPeer(peerView), !novagramSearchHides(peerView.peerId) { // Novagram
                                             var isActive:Bool = false
                                             if let presence = peerView.peerPresences[peer.id] as? TelegramUserPresence {
                                                 let timestamp = CFAbsoluteTimeGetCurrent() + NSTimeIntervalSince1970
@@ -1750,7 +1753,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                         entries.append(.separator(text: strings().searchSeparatorRecent, index: i, state: .clear))
                         i += 1
                         for peerView in recent.0 {
-                            if ids[peerView.peerId] == nil {
+                            if ids[peerView.peerId] == nil, !novagramSearchHides(peerView.peerId) { // Novagram
                                 ids[peerView.peerId] = peerView.peerId
                                 if (peerViewMainPeer(peerView)) != nil {
                                     var wrapper:SearchSecretChatWrapper? = nil

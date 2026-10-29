@@ -446,3 +446,13 @@ Owner's rule: Ghost mode never touches ads (Telegram and Novagram ads work fully
 | `TelegramCore/.../TelegramEngine/Messages/AdMessages.swift` (fork patch) | `if novagramAdEventsOff() { return }` first line of `AdMessagesHistoryContextImpl.markAsSeen`, `_internal_markAdAction`, `_internal_markAdAsSeen`: covers chat, video, gallery and search sponsored ads (3 lines) |
 
 Ours: `NovagramDeveloperFlags.isAdEventsOff` / `adEventsOffSignal`, `NovagramAdsCenter.recordView` / `recordClick` / `recordVideoOpenIfOurs` return before the SDK call and before `markViewed` (so nothing is queued and the ad is not marked as seen; the click still opens the ad, no action watch starts), log line `… -> not sent (developer: ad events off)`. Settings row second in the Developer section.
+
+## Search plus, batch A (branch `feature/search-plus`, 2026-10-29)
+
+Plan: hidden chats were not filtered in global search (only `ChatListController.swift:1037` used the hidden-chats filter). Now they are, and the Messages section gets a date range and "Unread only" / "Mentions only".
+
+| File | Change |
+| --- | --- |
+| `packages/ChatListUI/.../SearchController.swift` | `novagramSearchFilter` promise (+ local capture); local peers `for rendered in peers.0 where !novagramSearchHides(rendered)`, link peer, both remote `let first = … && !novagramSearchHides(found.peer.id)`, top peers and recent peers skip hidden chats; hashtag and posts loops skip hidden / locked chats; Messages: `remoteSearch` combines the filter, `location…novagramDates(novagramFilter)`, `novagramFillFilteredPage(...)` after the request, the message loop goes through `novagramSearchKeptMessages(...)`; final combine gets the filter (9th argument); the Messages header stays while a filter is active (`|| novagramFilter.isActive`), its title shows the active filters and its dropdown gets `+ novagramSearchFilterActions(...)` (≈19 lines, each `// Novagram`) |
+
+Ours: `packages/ChatListUI/.../NovagramSearchFilters.swift` (privacy checks; locked chats keep their name but not their messages; unread = incoming message after the peer's read index; mentions = `ConsumablePersonalMentionMessageAttribute` or `.unseenPersonalMessage`; up to 5 more pages are read while fewer than 20 messages pass; dates through `FeatureNavigationHooks.makeCalendarController`, "To" includes the whole day; `messages.searchGlobal` takes min/max dates, the Posts tab does not). Strings in `NovagramL10nParity.swift`.
