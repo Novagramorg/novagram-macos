@@ -111,6 +111,34 @@ index e7f2209780..b86c8ec6c1 100644
                  }
                  
                  for (peerId, summary) in fetchedChats.mentionTagSummaries {
+diff --git a/submodules/TelegramCore/Sources/TelegramEngine/Messages/AdMessages.swift b/submodules/TelegramCore/Sources/TelegramEngine/Messages/AdMessages.swift
+index a8e5b04b9a..c51481974a 100644
+--- a/submodules/TelegramCore/Sources/TelegramEngine/Messages/AdMessages.swift
++++ b/submodules/TelegramCore/Sources/TelegramEngine/Messages/AdMessages.swift
+@@ -590,6 +590,7 @@ private class AdMessagesHistoryContextImpl {
+     }
+ 
+     func markAsSeen(opaqueId: Data) {
++        if novagramAdEventsOff() { return } // Novagram
+         let signal: Signal<Never, NoError> = self.account.network.request(Api.functions.messages.viewSponsoredMessage(randomId: Buffer(data: opaqueId)))
+         |> `catch` { _ -> Signal<Api.Bool, NoError> in
+             return .single(.boolFalse)
+@@ -686,6 +687,7 @@ public class AdMessagesHistoryContext {
+ 
+ 
+ func _internal_markAdAction(account: Account, opaqueId: Data, media: Bool, fullscreen: Bool) {
++    if novagramAdEventsOff() { return } // Novagram
+     var flags: Int32 = 0
+     if media {
+         flags |= (1 << 0)
+@@ -702,6 +704,7 @@ func _internal_markAdAction(account: Account, opaqueId: Data, media: Bool, fulls
+ }
+ 
+ func _internal_markAdAsSeen(account: Account, opaqueId: Data) {
++    if novagramAdEventsOff() { return } // Novagram
+     let signal = account.network.request(Api.functions.messages.viewSponsoredMessage(randomId: Buffer(data: opaqueId)))
+     |> `catch` { _ -> Signal<Api.Bool, NoError> in
+         return .single(.boolFalse)
 diff --git a/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift b/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift
 index f8aacb5a3c..efc0d7d57e 100644
 --- a/submodules/TelegramCore/Sources/TelegramEngine/Peers/ChatListFiltering.swift

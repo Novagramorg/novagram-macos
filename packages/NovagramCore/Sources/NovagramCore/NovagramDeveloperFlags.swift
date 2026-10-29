@@ -20,6 +20,8 @@ public enum NovagramDeveloperFlags {
     private static let currencyRatesViewKey = "novagram_currency_rates_view"
     private static let adsPanelKey = "novagram_ads_panel"
     private static let stickerPackSaveKey = "novagram_sticker_pack_save"
+    // Read by TelegramCore too (fork-patches/telegramcore/NovagramAdEvents.swift): keep the name in sync.
+    private static let adEventsOffKey = "novagram_ads_events_off"
 
     /// Show the currency rates row (Settings, under Analytics).
     public static var isCurrencyRatesViewEnabled: Bool {
@@ -37,6 +39,17 @@ public enum NovagramDeveloperFlags {
     public static var isStickerPackSaveEnabled: Bool {
         get { return self.value(forKey: self.stickerPackSaveKey) }
         set { self.setValue(newValue, forKey: self.stickerPackSaveKey) }
+    }
+
+    /// "Don't send ad events": views, clicks and actions of Novagram and Telegram ads are not reported, so a
+    /// developer can test an ad that the backend shows once per user. Nothing to do with Ghost mode.
+    public static var isAdEventsOff: Bool {
+        get { return self.value(forKey: self.adEventsOffKey) }
+        set { self.setValue(newValue, forKey: self.adEventsOffKey) }
+    }
+
+    public static var adEventsOffSignal: Signal<Bool, NoError> {
+        return self.signal { self.isAdEventsOff }
     }
 
     /// Emits the current value, then again whenever a Developer switch flips. Main queue.

@@ -435,3 +435,14 @@ Mac recorded only text versions, so a photo replaced by Edit showed "No previous
 ## Search results no longer vanish (2026-10-29)
 
 Owner: search results appeared and then disappeared. Cause: our `NovagramAdsHooks.searchTelegramFallback` (SearchController line `adPeers = NovagramAdsHooks.shared.searchTelegramFallback(...)`) emitted twice for queries of 4+ characters: `[]` while our ads backend was still asking, then the settled value (log: `SEARCH source=none`, ~0.3 s later `served SEARCH → no ad`). SearchController's remote search map dedupes against a dictionary (`ids`) shared across emissions, so the second emission filtered out every remote and global result it had just shown. Fix in our files only: `NovagramAdsCenter.oursFirst(waitForOurs: true)` skips the pending value and `NovagramSearchAds.telegramFallback` sends exactly one value (`take(1)`, at most 1.5 s, then `[]`). Upstream `SearchController.swift` is unchanged (checked against upstream/master 30097e3be). No Telegram file changed.
+
+## Developer switch "Don't send ad events" (2026-10-29)
+
+Owner's rule: Ghost mode never touches ads (Telegram and Novagram ads work fully in Ghost mode; the Mac never gated them). For testing, Novagram Settings → Developer has a new switch `novagram_ads_events_off` (pro_messager, iOS key): while it is on, no ad view, click, action or video_open is reported, so an ad the backend shows once per user keeps showing for the developer.
+
+| File | Change |
+| --- | --- |
+| `fork-patches/telegramcore/NovagramAdEvents.swift` (ours, copied into TelegramCore) | `novagramAdEventsOff()` reads the key |
+| `TelegramCore/.../TelegramEngine/Messages/AdMessages.swift` (fork patch) | `if novagramAdEventsOff() { return }` first line of `AdMessagesHistoryContextImpl.markAsSeen`, `_internal_markAdAction`, `_internal_markAdAsSeen`: covers chat, video, gallery and search sponsored ads (3 lines) |
+
+Ours: `NovagramDeveloperFlags.isAdEventsOff` / `adEventsOffSignal`, `NovagramAdsCenter.recordView` / `recordClick` / `recordVideoOpenIfOurs` return before the SDK call and before `markViewed` (so nothing is queued and the ad is not marked as seen; the click still opens the ad, no action watch starts), log line `… -> not sent (developer: ad events off)`. Settings row second in the Developer section.

@@ -229,6 +229,9 @@ enum NovagramAdsCenter {
         guard let token = NovagramAdsHooks.token(opaqueId: opaqueId) else {
             return false
         }
+        if eventsOff(event: "video_open", token: token) {
+            return true
+        }
         guard let entry = registry.served(token: token), let session = registry.existingSession(userId: entry.userId) else {
             return true
         }
@@ -250,7 +253,20 @@ enum NovagramAdsCenter {
         return true
     }
 
+    // Developer switch "Don't send ad events": nothing is reported and nothing is marked as viewed here, so
+    // the backend keeps serving the same ad while a developer tests it. The click still opens the ad.
+    private static func eventsOff(event: String, token: String) -> Bool {
+        guard NovagramDeveloperFlags.isAdEventsOff else {
+            return false
+        }
+        logger.debug("\(event, privacy: .public) -> not sent (developer: ad events off) \(masked(token), privacy: .public)")
+        return true
+    }
+
     static func recordView(token: String) {
+        if eventsOff(event: "view", token: token) {
+            return
+        }
         guard let entry = registry.served(token: token), registry.markViewed(token: token), let session = registry.existingSession(userId: entry.userId) else {
             return
         }
@@ -264,6 +280,9 @@ enum NovagramAdsCenter {
     /// The click Task is created synchronously, before the caller opens the url; the SDK only persists
     /// the event to its on-disk queue (a few ms), the request goes out with the next batch.
     static func recordClick(token: String) {
+        if eventsOff(event: "click", token: token) {
+            return
+        }
         guard let entry = registry.served(token: token), let session = registry.existingSession(userId: entry.userId) else {
             return
         }

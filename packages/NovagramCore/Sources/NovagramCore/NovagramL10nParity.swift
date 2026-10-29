@@ -68,6 +68,8 @@ public extension NovagramL10n {
     var settingsLink_share: String { pick(en: "Share link", uz: "Havolani ulashish", ru: "Поделиться ссылкой") }
     var settingsLink_copied: String { pick(en: "Link copied", uz: "Havola nusxalandi", ru: "Ссылка скопирована") }
     var settingsLink_hint: String { pick(en: "Right-click any row to get a link straight to that setting.", uz: "Istalgan qatorni o'ng tugma bilan bosing: o'sha sozlamaning havolasini olasiz.", ru: "Нажмите правой кнопкой на любую строку, чтобы получить ссылку именно на эту настройку.") }
+    var developer_adEventsOffTitle: String { pick(en: "Don't send ad events", uz: "Reklama hodisalarini yubormaslik", ru: "Не отправлять события рекламы") }
+    var developer_adEventsOffTip: String { pick(en: "Views, clicks and actions of Novagram and Telegram ads are not sent, so an ad shown once per user keeps showing while you test. This device only.", uz: "Novagram va Telegram reklamalarining ko'rish, bosish va harakat hodisalari serverga yuborilmaydi, shuning uchun bir marta ko'rsatiladigan reklama test paytida qayta chiqaveradi. Faqat shu qurilmada.", ru: "Просмотры, клики и действия по рекламе Novagram и Telegram не отправляются, поэтому реклама с одним показом на пользователя продолжает показываться во время теста. Только на этом устройстве.") }
     var editedHistory_file: String { pick(en: "File", uz: "Fayl", ru: "Файл") }
     var editedHistory_media: String { pick(en: "Media", uz: "Media", ru: "Медиа") }
     var settings_unlimitedPins_title: String { pick(en: "Unlimited Pins", uz: "Cheksiz pin", ru: "Безлимитные закрепы") }

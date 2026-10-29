@@ -129,6 +129,7 @@ private struct NovagramSettingsState: Equatable {
     var currencyRatesView: Bool = false
     var adsPanel: Bool = false
     var stickerPackSave: Bool = false
+    var adEventsOff: Bool = false
 
     static func load() -> NovagramSettingsState {
         let d = novagramDefaults
@@ -217,7 +218,7 @@ private enum NovagramEntryId: Hashable {
     case protectionChatLock, protectionProxy, protectionForeign, protectionAutoDownload, protectionFooter
     case appearanceAccent, appearanceFooter
     case remindersUnread, remindersTime, remindersSound, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoFolderStyle, autoChannelHistory, autoStoryUnlock, autoTranslateChats, actionShareLink, autoFooter
-    case adsRemoveAll, devCurrencyRates, devAdsPanel, devStickerPackSave, devFooter
+    case adsRemoveAll, devAdEventsOff, devCurrencyRates, devAdsPanel, devStickerPackSave, devFooter
 }
 
 // iOS 1:1 — har bir row uchun rangli kvadrat ikonka (NovagramIconColor + SF Symbol).
@@ -272,6 +273,7 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .devCurrencyRates:         map = ("dollarsign.circle.fill", .green)
     case .devAdsPanel:              map = ("rectangle.stack.badge.person.crop.fill", .purple)
     case .devStickerPackSave:       map = ("square.and.arrow.down.on.square.fill", .orange)
+    case .devAdEventsOff:           map = ("eye.slash.circle.fill", .red)
     default:                        map = nil
     }
     guard let (symbol, color) = map else { return nil }
@@ -467,6 +469,8 @@ private enum NovagramEntry: Comparable, Identifiable {
                         NovagramDeveloperFlags.isAdsPanelEnabled = !value
                     case .devStickerPackSave:
                         NovagramDeveloperFlags.isStickerPackSaveEnabled = !value
+                    case .devAdEventsOff:
+                        NovagramDeveloperFlags.isAdEventsOff = !value
                     default:
                         break
                     }
@@ -581,6 +585,7 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
         entries.append(.section(sectionId)); sectionId += 1
         entries.append(.header(next(), .header(7), l10n.developer_sectionTitle))
         entries.append(.adsToggle(next(), .adsRemoveAll, NovagramAdsGate.toggleTitle, l10n.developer_removeAdsTip, !state.showAds, .firstItem))
+        entries.append(.developerToggle(next(), .devAdEventsOff, l10n.developer_adEventsOffTitle, l10n.developer_adEventsOffTip, state.adEventsOff, .innerItem))
         entries.append(.developerToggle(next(), .devCurrencyRates, l10n.developer_currencyRatesTitle, l10n.developer_currencyRatesTip, state.currencyRatesView, .innerItem))
         entries.append(.developerToggle(next(), .devAdsPanel, l10n.developer_adsPanelTitle, l10n.developer_adsPanelTip, state.adsPanel, .innerItem))
         entries.append(.developerToggle(next(), .devStickerPackSave, l10n.developer_stickerPackSaveTitle, l10n.developer_stickerPackSaveTip, state.stickerPackSave, .lastItem))
@@ -819,11 +824,12 @@ class NovagramSettingsController: TableViewController {
             }
         }))
 
-        developerDisposable.set(combineLatest(NovagramDeveloperFlags.currencyRatesViewSignal, NovagramDeveloperFlags.adsPanelSignal, NovagramDeveloperFlags.stickerPackSaveSignal).start(next: { currencyRatesView, adsPanel, stickerPackSave in
+        developerDisposable.set(combineLatest(NovagramDeveloperFlags.currencyRatesViewSignal, NovagramDeveloperFlags.adsPanelSignal, NovagramDeveloperFlags.stickerPackSaveSignal, NovagramDeveloperFlags.adEventsOffSignal).start(next: { currencyRatesView, adsPanel, stickerPackSave, adEventsOff in
             updateState { state in
                 state.currencyRatesView = currencyRatesView
                 state.adsPanel = adsPanel
                 state.stickerPackSave = stickerPackSave
+                state.adEventsOff = adEventsOff
             }
         }))
 
