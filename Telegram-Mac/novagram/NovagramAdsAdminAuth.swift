@@ -12,7 +12,9 @@
 //  also throttles: 5 wrong tries lock the prompt for 5 minutes. The typed values are never stored.
 //
 //  Port of iOS submodules/Novagram/ProMessager/Sources/NovagramAdsAdminAuth.swift — same salt, rounds and
-//  digest, so one admin credential works on both apps. Same UserDefaults keys (pro_messager suite).
+//  digests, so one admin credential works on both apps. Same UserDefaults keys (pro_messager suite).
+//
+//  Each login has its own digest and role (NovagramDeveloperRole): the developer's and the director's.
 //
 
 import Cocoa
@@ -23,7 +25,10 @@ import NovagramCore
 enum NovagramAdsAdminAuth {
     private static let saltHex = "6ced8c7f8279470c768f8739196a445b"
     private static let rounds: UInt32 = 600_000
-    private static let credentialDigest = "bf0445f7b4c37604336598ba977f8065c2e90da61c1bbd933d64d018077203eb"
+    private static let credentials: [(digest: String, role: NovagramDeveloperRole)] = [
+        ("bf0445f7b4c37604336598ba977f8065c2e90da61c1bbd933d64d018077203eb", .developer),
+        ("17ca3795cd21c510e781c68eec2df12e1038f8e599cc80751f626a736d7d6fca", .director)
+    ]
     private static let derivedKeyLength = 32
 
     private static let maxFailedAttempts = 5
@@ -42,14 +47,18 @@ enum NovagramAdsAdminAuth {
 
     // MARK: - Verification
 
-    /// True when the login (case-insensitive, trimmed) and the exact password match.
+    /// The role whose login (case-insensitive, trimmed) and exact password match, or nil.
     /// Slow on purpose (600k PBKDF2 rounds) — call it off the main thread.
-    static func verify(login: String, password: String) -> Bool {
+    static func verify(login: String, password: String) -> NovagramDeveloperRole? {
         let normalizedLogin = login.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard let digest = derive(secret: "\(normalizedLogin)|\(password)") else {
-            return false
+            return nil
         }
-        return constantTimeEquals(digest, credentialDigest)
+        var matched: NovagramDeveloperRole?
+        for credential in credentials where constantTimeEquals(digest, credential.digest) {
+            matched = credential.role
+        }
+        return matched
     }
 
     private static func derive(secret: String) -> String? {
@@ -143,14 +152,14 @@ enum NovagramAdsAdminAuth {
 
     // MARK: - Prompt
 
-    /// Asks for the admin login + password. `completion(true)` only on a match; cancel, a wrong entry and
-    /// an active lockout all end in `completion(false)` (after explaining why). Main thread.
-    static func presentPrompt(window: Window, completion: @escaping (Bool) -> Void) {
+    /// Asks for the admin login + password. `completion(role)` only on a match; cancel, a wrong entry and
+    /// an active lockout all end in `completion(nil)` (after explaining why). Main thread.
+    static func presentPrompt(window: Window, completion: @escaping (NovagramDeveloperRole?) -> Void) {
         let strings = NovagramL10n.current
         if let lockedUntil {
             let minutes = max(1, Int((lockedUntil.timeIntervalSinceNow / secondsPerMinute).rounded(.up)))
             alert(for: window, info: strings.ads_admin_locked(minutes: minutes))
-            completion(false)
+            completion(nil)
             return
         }
 
@@ -178,7 +187,7 @@ enum NovagramAdsAdminAuth {
 
         prompt.beginSheetModal(for: window) { response in
             guard response == .alertFirstButtonReturn else {
-                completion(false)
+                completion(nil)
                 return
             }
             let login = loginField.stringValue
@@ -186,16 +195,16 @@ enum NovagramAdsAdminAuth {
             passwordField.stringValue = ""
             // The key derivation is deliberately slow; keep it off the main thread.
             Task.detached(priority: .userInitiated) {
-                let granted = verify(login: login, password: password)
+                let role = verify(login: login, password: password)
                 await MainActor.run {
-                    if granted {
+                    if let role {
                         registerSuccess()
-                        completion(true)
+                        completion(role)
                     } else {
                         registerFailure()
                         let text = lockedUntil != nil ? strings.ads_admin_locked(minutes: Int(lockoutDuration / secondsPerMinute)) : strings.ads_admin_wrong
                         alert(for: window, info: text)
-                        completion(false)
+                        completion(nil)
                     }
                 }
             }

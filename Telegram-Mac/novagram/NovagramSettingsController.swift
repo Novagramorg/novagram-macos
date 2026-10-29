@@ -139,6 +139,8 @@ private struct NovagramSettingsState: Equatable {
     var callRecordingFolder: String? = nil
     var callRecordingAuto: Bool = false
     var callDataSaving: Bool = false
+    // Which Developer switches show: filled from NovagramDeveloperRole.
+    var developerRole: NovagramDeveloperRole = .developer
 
     static func load() -> NovagramSettingsState {
         let d = novagramDefaults
@@ -618,11 +620,17 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     if state.adsRevealed {
         entries.append(.section(sectionId)); sectionId += 1
         entries.append(.header(next(), .header(7), l10n.developer_sectionTitle))
-        entries.append(.adsToggle(next(), .adsRemoveAll, NovagramAdsGate.toggleTitle, l10n.developer_removeAdsTip, !state.showAds, .firstItem))
-        entries.append(.developerToggle(next(), .devAdEventsOff, l10n.developer_adEventsOffTitle, l10n.developer_adEventsOffTip, state.adEventsOff, .innerItem))
-        entries.append(.developerToggle(next(), .devCurrencyRates, l10n.developer_currencyRatesTitle, l10n.developer_currencyRatesTip, state.currencyRatesView, .innerItem))
-        entries.append(.developerToggle(next(), .devAdsPanel, l10n.developer_adsPanelTitle, l10n.developer_adsPanelTip, state.adsPanel, .innerItem))
-        entries.append(.developerToggle(next(), .devStickerPackSave, l10n.developer_stickerPackSaveTitle, l10n.developer_stickerPackSaveTip, state.stickerPackSave, .lastItem))
+        let developerRows: [(item: NovagramDeveloperRole.Switch, entry: (Int, GeneralViewType) -> NovagramEntry)] = [
+            (.removeAllAds, { .adsToggle($0, .adsRemoveAll, NovagramAdsGate.toggleTitle, l10n.developer_removeAdsTip, !state.showAds, $1) }),
+            (.adEventsOff, { .developerToggle($0, .devAdEventsOff, l10n.developer_adEventsOffTitle, l10n.developer_adEventsOffTip, state.adEventsOff, $1) }),
+            (.currencyRatesView, { .developerToggle($0, .devCurrencyRates, l10n.developer_currencyRatesTitle, l10n.developer_currencyRatesTip, state.currencyRatesView, $1) }),
+            (.adsPanel, { .developerToggle($0, .devAdsPanel, l10n.developer_adsPanelTitle, l10n.developer_adsPanelTip, state.adsPanel, $1) }),
+            (.stickerPackSave, { .developerToggle($0, .devStickerPackSave, l10n.developer_stickerPackSaveTitle, l10n.developer_stickerPackSaveTip, state.stickerPackSave, $1) })
+        ]
+        let visibleRows = developerRows.filter { state.developerRole.canUse($0.item) }
+        for (index, row) in visibleRows.enumerated() {
+            entries.append(row.entry(next(), bestGeneralViewType(visibleRows, for: index)))
+        }
         entries.append(.footer(next(), .devFooter, l10n.developer_footer))
     }
 
@@ -873,12 +881,13 @@ class NovagramSettingsController: TableViewController {
             }
         }))
 
-        developerDisposable.set(combineLatest(NovagramDeveloperFlags.currencyRatesViewSignal, NovagramDeveloperFlags.adsPanelSignal, NovagramDeveloperFlags.stickerPackSaveSignal, NovagramDeveloperFlags.adEventsOffSignal).start(next: { currencyRatesView, adsPanel, stickerPackSave, adEventsOff in
+        developerDisposable.set(combineLatest(NovagramDeveloperFlags.currencyRatesViewSignal, NovagramDeveloperFlags.adsPanelSignal, NovagramDeveloperFlags.stickerPackSaveSignal, NovagramDeveloperFlags.adEventsOffSignal, NovagramDeveloperRole.currentSignal).start(next: { currencyRatesView, adsPanel, stickerPackSave, adEventsOff, developerRole in
             updateState { state in
                 state.currencyRatesView = currencyRatesView
                 state.adsPanel = adsPanel
                 state.stickerPackSave = stickerPackSave
                 state.adEventsOff = adEventsOff
+                state.developerRole = developerRole
             }
         }))
 
