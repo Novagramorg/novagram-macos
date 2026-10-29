@@ -98,6 +98,7 @@ public final class PeerCallScreen : ViewController {
     }
     
     public func setState(_ signal: Signal<ExternalPeerCallState, NoError>) {
+        let signal = novagramCallRecordState(signal, window: self.window) // Novagram
         stateDisposable.set((signal |> deliverOnMainQueue).start(next: { [weak self] external in
             
             let actions: [PeerCallAction] = peerCallActionSpecs(external).map { spec in
@@ -113,6 +114,8 @@ public final class PeerCallScreen : ViewController {
                     callback = { self?.external.acceptcall() }
                 case .redial:
                     callback = { self?.external.recall() }
+                case .record: // Novagram
+                    callback = { if let self { novagramToggleCallRecording(self.window, self.external, external) } } // Novagram
                 case .end:
                     callback = { self?.external.endcall(external) }
                 }

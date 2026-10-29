@@ -36,6 +36,7 @@ func peerCallActionSpecs(_ external: ExternalPeerCallState) -> [PeerCallActionSp
     let muteEnabled = !external.canBeRemoved && !disableEverything && !redial
     let endEnabled = !external.canBeRemoved
 
+    specs.append(contentsOf: novagramCallRecordSpecs(external)) // Novagram
     if external.videoState != .notAvailable, external.state != .ringing, !redial {
         let videoActive = external.videoState == .active(true)
         specs.append(PeerCallActionSpec(type: .video, active: videoActive && !external.isScreenCapture, enabled: videoEnabled, interactive: true, attract: false))

@@ -85,4 +85,25 @@ public extension NovagramL10n {
     var settings_channelHistory_title: String { pick(en: "Channel history button", uz: "Kanal tarixi tugmasi", ru: "Кнопка истории канала") }
     var settings_channelHistory_subtitle: String { pick(en: "Adds “Recent Actions” to the chat list menu of channels and groups you admin", uz: "Siz admin bo'lgan kanal va guruhlar menyusiga «So'nggi amallar» bandini qo'shadi", ru: "Добавляет «Недавние действия» в меню каналов и групп, где вы администратор") }
     var settings_voiceTranslate_subtitle: String { pick(en: "When dictation ends, the text is translated into the auto-translate language. Works when “Ask to translate on send” is off", uz: "Diktovka tugagach matn avto-tarjima tiliga tarjima qilinadi. «Yuborishda tarjima so'rovi» o'chiq bo'lsa ishlaydi", ru: "После диктовки текст переводится на язык автоперевода. Работает, когда «Запрос перевода при отправке» выключен") }
+
+    var callRecording_section: String { pick(en: "Calls", uz: "Qo'ng'iroqlar", ru: "Звонки") }
+    var callRecording_title: String { pick(en: "Call recording", uz: "Qo'ng'iroqni yozib olish", ru: "Запись звонков") }
+    var callRecording_subtitle: String { pick(en: "Adds a Record button to voice and video calls", uz: "Ovozli va video qo'ng'iroqlarga «Yozish» tugmasini qo'shadi", ru: "Добавляет кнопку «Запись» в аудио- и видеозвонки") }
+    var callRecording_saveTo: String { pick(en: "Save to", uz: "Saqlash joyi", ru: "Сохранять в") }
+    var callRecording_askEveryTime: String { pick(en: "Ask every time", uz: "Har safar so'rash", ru: "Спрашивать каждый раз") }
+    var callRecording_footer: String { pick(en: "Recordings are made and kept only on this Mac. Only you see the REC mark; the other person is not notified. Recording calls without the other person's consent is illegal in some countries.", uz: "Yozuvlar faqat shu Mac'da yaratiladi va saqlanadi. REC belgisini faqat siz ko'rasiz, suhbatdoshingizga xabar berilmaydi. Ba'zi mamlakatlarda suhbatdoshning roziligisiz qo'ng'iroqni yozib olish qonunga zid.", ru: "Записи создаются и хранятся только на этом Mac. Значок REC видите только вы, собеседник не получает уведомления. В некоторых странах запись звонков без согласия собеседника запрещена законом.") }
+    var callRecording_chooseMessage: String { pick(en: "Choose a folder for call recordings", uz: "Qo'ng'iroq yozuvlari uchun papkani tanlang", ru: "Выберите папку для записей звонков") }
+    var callRecording_choose: String { pick(en: "Choose", uz: "Tanlash", ru: "Выбрать") }
+    var callRecording_chooseFolder: String { pick(en: "Choose Folder…", uz: "Papka tanlash…", ru: "Выбрать папку…") }
+    var callRecording_cancel: String { pick(en: "Cancel", uz: "Bekor qilish", ru: "Отмена") }
+    func callRecording_action(_ isRecording: Bool) -> String { isRecording ? pick(en: "Stop", uz: "To'xtatish", ru: "Стоп") : pick(en: "Record", uz: "Yozish", ru: "Запись") }
+    var callRecording_warningTitle: String { pick(en: "Record this call?", uz: "Qo'ng'iroq yozib olinsinmi?", ru: "Записать звонок?") }
+    var callRecording_warningText: String { pick(en: "In some countries it is illegal to record a call without the other person's consent. Make sure you are allowed to record it. The recording stays on this Mac.", uz: "Ba'zi mamlakatlarda suhbatdoshning roziligisiz qo'ng'iroqni yozib olish qonunga zid. Yozib olishga ruxsatingiz borligiga ishonch hosil qiling. Yozuv faqat shu Mac'da qoladi.", ru: "В некоторых странах запись звонка без согласия собеседника запрещена законом. Убедитесь, что вам можно его записывать. Запись остаётся только на этом Mac.") }
+    var callRecording_continue: String { pick(en: "Continue", uz: "Davom etish", ru: "Продолжить") }
+    var callRecording_permissionText: String { pick(en: "Novagram needs permission to record the call window. Open System Settings → Privacy & Security → Screen & System Audio Recording, turn on Novagram, then reopen the app.", uz: "Qo'ng'iroq oynasini yozib olish uchun Novagram'ga ruxsat kerak. System Settings → Privacy & Security → Screen & System Audio Recording bo'limida Novagram'ni yoqing, so'ng ilovani qayta oching.", ru: "Novagram нужно разрешение на запись окна звонка. Откройте Системные настройки → Конфиденциальность и безопасность → Запись экрана и системного аудио, включите Novagram и перезапустите приложение.") }
+    var callRecording_openSettings: String { pick(en: "Open Settings", uz: "Sozlamalarni ochish", ru: "Открыть настройки") }
+    var callRecording_saved: String { pick(en: "Call recording saved", uz: "Qo'ng'iroq yozuvi saqlandi", ru: "Запись звонка сохранена") }
+    var callRecording_showInFinder: String { pick(en: "Show in Finder", uz: "Finder'da ko'rsatish", ru: "Показать в Finder") }
+    var callRecording_failed: String { pick(en: "Call recording failed", uz: "Qo'ng'iroqni yozib bo'lmadi", ru: "Не удалось записать звонок") }
+    var callRecording_saveFailed: String { pick(en: "Couldn't save the call recording", uz: "Qo'ng'iroq yozuvini saqlab bo'lmadi", ru: "Не удалось сохранить запись звонка") }
 }

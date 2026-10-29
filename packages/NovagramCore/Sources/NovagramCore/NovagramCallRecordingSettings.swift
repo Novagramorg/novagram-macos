@@ -1,0 +1,134 @@
+import AppKit
+import TGUIKit
+import AlertsUI
+
+// Mac-only local call recording settings (pro_messager suite). The folder is an app-scoped security-scoped bookmark.
+public enum NovagramCallRecordingSettings {
+    public static let enabledKey = "novagram_call_recording"
+    public static let folderKey = "novagram_call_recording_folder"
+    static let warnedKey = "novagram_call_recording_warned"
+
+    private static var defaults: UserDefaults? {
+        return UserDefaults(suiteName: "pro_messager")
+    }
+
+    public static var isSupported: Bool {
+        if #available(macOS 14.0, *) {
+            return true
+        }
+        return false
+    }
+
+    public static var isEnabled: Bool {
+        return isSupported && (defaults?.bool(forKey: enabledKey) ?? false)
+    }
+
+    public static func setEnabled(_ value: Bool) {
+        defaults?.set(value, forKey: enabledKey)
+    }
+
+    static var wasWarned: Bool {
+        get {
+            return defaults?.bool(forKey: warnedKey) ?? false
+        }
+        set {
+            defaults?.set(newValue, forKey: warnedKey)
+        }
+    }
+
+    public static func clearFolder() {
+        defaults?.removeObject(forKey: folderKey)
+    }
+
+    @discardableResult
+    static func storeFolder(_ url: URL) -> Bool {
+        guard let data = try? url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil) else {
+            return false
+        }
+        defaults?.set(data, forKey: folderKey)
+        return true
+    }
+
+    static func resolveFolder() -> URL? {
+        guard let data = defaults?.data(forKey: folderKey) else {
+            return nil
+        }
+        var isStale = false
+        guard let url = try? URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil, bookmarkDataIsStale: &isStale) else {
+            return nil
+        }
+        if isStale {
+            let accessing = url.startAccessingSecurityScopedResource()
+            defer {
+                if accessing {
+                    url.stopAccessingSecurityScopedResource()
+                }
+            }
+            guard storeFolder(url) else {
+                return nil
+            }
+        }
+        return url
+    }
+
+    public static var folderDisplayPath: String? {
+        guard let path = resolveFolder()?.path else {
+            return nil
+        }
+        let home = realHomeDirectory
+        if path == home || path.hasPrefix(home + "/") {
+            return "~" + path.dropFirst(home.count)
+        }
+        return path
+    }
+
+    private static var realHomeDirectory: String {
+        if let entry = getpwuid(getuid()), let dir = entry.pointee.pw_dir {
+            return String(cString: dir)
+        }
+        return NSHomeDirectory()
+    }
+
+    public static func chooseFolder(window: NSWindow?, completion: @escaping (Bool) -> Void) {
+        let l10n = NovagramL10n.current
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.prompt = l10n.callRecording_choose
+        panel.message = l10n.callRecording_chooseMessage
+        if let current = resolveFolder() {
+            panel.directoryURL = current
+        }
+        let handler: (NSApplication.ModalResponse) -> Void = { response in
+            guard response == .OK, let url = panel.url else {
+                completion(false)
+                return
+            }
+            completion(storeFolder(url))
+        }
+        if let window {
+            panel.beginSheetModal(for: window, completionHandler: handler)
+        } else {
+            panel.begin(completionHandler: handler)
+        }
+    }
+
+    public static func changeFolder(window: Window, completion: @escaping () -> Void) {
+        guard let path = folderDisplayPath else {
+            chooseFolder(window: window, completion: { _ in completion() })
+            return
+        }
+        let l10n = NovagramL10n.current
+        verifyAlert_button(for: window, header: l10n.callRecording_saveTo, information: path, ok: l10n.callRecording_chooseFolder, cancel: l10n.callRecording_cancel, option: l10n.callRecording_askEveryTime, successHandler: { result in
+            switch result {
+            case .basic:
+                chooseFolder(window: window, completion: { _ in completion() })
+            case .thrid:
+                clearFolder()
+                completion()
+            }
+        })
+    }
+}

@@ -33,6 +33,7 @@ enum PeerCallActionType : Int32 {
     case mute = 97
     case screencast = 96
     case video = 95
+    case record = 94 // Novagram
     
     var title: String {
         switch self {
@@ -48,6 +49,8 @@ enum PeerCallActionType : Int32 {
             return L10n.callScreen
         case .video:
             return L10n.callVideo
+        case .record: // Novagram
+            return novagramCallRecordTitle() // Novagram
         }
     }
     
@@ -65,6 +68,8 @@ enum PeerCallActionType : Int32 {
             return .icScreen
         case .video:
             return .icVideo
+        case .record: // Novagram
+            return novagramCallRecordResource // Novagram
         }
     }
 }
@@ -292,6 +297,8 @@ final class PeerCallActionView : Control {
             return accessibilityDeclines ? strings().voiceOverCommonDecline : strings().voiceOverCommonEndCall
         case .redial:
             return state.stableId.title
+        case .record: // Novagram
+            return state.stableId.title // Novagram
         }
     }
 

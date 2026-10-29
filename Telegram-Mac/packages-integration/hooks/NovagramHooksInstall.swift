@@ -3,6 +3,7 @@ import TGUIKit
 import Postbox
 import TelegramCore
 import NovagramCore
+import PrivateCallScreen
 
 func installNovagramHooks() {
     var hooks = NovagramHooks()
@@ -25,4 +26,28 @@ func installNovagramHooks() {
     NovagramHooks.install(hooks)
     installNovagramSettingsHooks()
     installNovagramAdsHooks()
+    installNovagramCallRecordHooks()
+}
+
+private func installNovagramCallRecordHooks() {
+    var hooks = NovagramCallRecordHooks()
+    hooks.isAvailable = {
+        NovagramCallRecordingSettings.isEnabled
+    }
+    hooks.isRecording = {
+        NovagramCallRecording.shared.isRecording
+    }
+    hooks.recordingSignal = {
+        NovagramCallRecording.shared.recordingSignal
+    }
+    hooks.title = { isRecording in
+        NovagramL10n.current.callRecording_action(isRecording)
+    }
+    hooks.toggle = { request in
+        NovagramCallRecording.shared.toggle(window: request.window, engine: request.engine, peerId: request.peerId, hasVideo: request.hasVideo)
+    }
+    hooks.callDidUpdate = { window, state in
+        NovagramCallRecording.shared.callDidUpdate(window: window, isEnded: state.isEnded, isMuted: state.isMuted)
+    }
+    NovagramCallRecordHooks.install(hooks)
 }
