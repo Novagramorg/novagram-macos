@@ -281,7 +281,7 @@ public final class NovagramJobAlertMonitor {
                 var items: [NovagramJobResult] = []
                 for key in searchKeys {
                     let source = requests[key]?.source ?? .myChats
-                    for message in messagesByKey[key] ?? [] where message.timestamp > search.lastSeenDate && !message.text.isEmpty && seen.insert(message.id).inserted {
+                    for message in messagesByKey[key] ?? [] where message.timestamp > search.lastSeenDate && !message.text.isEmpty && !novagramJobIsSpam(message, text: message.text) && seen.insert(message.id).inserted {
                         let result = parsed[message.id] ?? NovagramJobResult(message: message, text: message.text, info: NovagramJobPostParser.parse(message.text), source: source)
                         parsed[message.id] = result
                         if search.filter.accepts(text: result.text, info: result.info, date: message.timestamp, now: now, query: query) {

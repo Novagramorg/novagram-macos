@@ -66,6 +66,11 @@ private final class NovagramJobSearchTask {
     }
 }
 
+func novagramJobIsSpam(_ message: Message, text: String) -> Bool {
+    let peer = message.peers[message.id.peerId]
+    return NovagramJobSpamGuard.isSpamSource(title: novagramJobPeerTitle(peer), username: peer.flatMap { EnginePeer($0).addressName }) || NovagramJobSpamGuard.isSpamText(text)
+}
+
 public final class NovagramJobSearchEngine {
     public static let maxConcurrentRequests = 6
     private static let debounceDelay: Double = 0.4
@@ -214,8 +219,10 @@ public final class NovagramJobSearchEngine {
     private func finishGlobal(generation: Int, messages: [Message]?) {
         state.isGlobalLoading = false
         if let messages {
-            for message in NovagramSearchPrivacy.kept(messages, message: { $0 }) where !message.text.isEmpty {
-                globalFound[message.id] = NovagramJobResult(message: message, text: message.text, info: NovagramJobPostParser.parse(message.text), source: .global)
+            for message in NovagramSearchPrivacy.kept(messages, message: { $0 }) where !message.text.isEmpty && !novagramJobIsSpam(message, text: message.text) {
+                var info = NovagramJobPostParser.parse(message.text)
+                info.contacts = NovagramJobMessageContacts.merged(parsed: info.contacts, message: message)
+                globalFound[message.id] = NovagramJobResult(message: message, text: message.text, info: info, source: .global)
             }
         } else {
             state.failedSources.insert(.global)
@@ -312,7 +319,11 @@ public final class NovagramJobSearchEngine {
             guard !text.isEmpty else {
                 continue
             }
-            let info = NovagramJobPostParser.parse(text)
+            guard !novagramJobIsSpam(message, text: text) else {
+                continue
+            }
+            var info = NovagramJobPostParser.parse(text)
+            info.contacts = NovagramJobMessageContacts.merged(parsed: info.contacts, message: message)
             guard filter.accepts(text: text, info: info, date: message.timestamp, now: now, query: query) else {
                 continue
             }

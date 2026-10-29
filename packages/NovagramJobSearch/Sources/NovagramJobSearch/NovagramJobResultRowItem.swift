@@ -99,6 +99,7 @@ final class NovagramJobResultRowItem: GeneralRowItem {
     let chipsLayout: TextViewLayout?
     let snippetLayout: TextViewLayout
     let canWrite: Bool
+    let writeTitle: String
     let contact: String?
     let openPost: () -> Void
     let write: () -> Void
@@ -128,6 +129,13 @@ final class NovagramJobResultRowItem: GeneralRowItem {
         self.snippetLayout = TextViewLayout(NSAttributedString(string: novagramJobSnippet(result), attributes: [.font: NSFont.normal(.text), .foregroundColor: theme.colors.grayText]), maximumNumberOfLines: NovagramJobResultRowItem.snippetLines)
         let hasUsername = result.info.contacts.contains { if case .username = $0 { return true } else { return false } }
         self.canWrite = hasUsername || message.author is TelegramUser
+        let firstUsername = result.info.contacts.compactMap { contact -> NovagramJobContact? in
+            if case .username = contact {
+                return contact
+            }
+            return nil
+        }.first
+        self.writeTitle = firstUsername.map { NovagramL10n.current.jobSearch_writeTo(novagramJobContactText($0)) } ?? NovagramL10n.current.jobSearch_write
         self.contact = result.info.contacts.first.map(novagramJobContactText)
         super.init(initialSize, stableId: stableId, viewType: viewType)
     }
@@ -215,7 +223,7 @@ private final class NovagramJobResultRowView: GeneralContainableRowView {
         chipsView.isHidden = item.chipsLayout == nil
         snippetView.update(item.snippetLayout)
         openButton.set(text: strings.jobSearch_openPost, for: .Normal)
-        writeButton.set(text: strings.jobSearch_write, for: .Normal)
+        writeButton.set(text: item.writeTitle, for: .Normal)
         copyButton.set(text: strings.jobSearch_copyContact, for: .Normal)
         for button in [openButton, writeButton, copyButton] {
             button.set(color: theme.colors.accent, for: .Normal)

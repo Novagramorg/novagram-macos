@@ -83,11 +83,15 @@ private func installNovagramCallRecordHooks() {
 
 private func installNovagramJobSearchHooks() {
     var hooks = NovagramJobSearchHooks()
-    hooks.openMessage = { context, messageId in
+    hooks.openMessage = { context, message in
         guard let context = context as? AccountContext else {
             return
         }
-        navigateToChat(navigation: context.bindings.rootNavigation(), context: context, chatLocation: .peer(messageId.peerId), focusTarget: .init(messageId: messageId))
+        #if DEBUG
+        Logger.shared.log("NovagramJobSearch", "open post \(message.id)")
+        #endif
+        context.engine.messages.ensureMessagesAreLocallyAvailable(messages: [EngineMessage(message)])
+        navigateToChat(navigation: context.bindings.rootNavigation(), context: context, chatLocation: .peer(message.id.peerId), focusTarget: .init(messageId: message.id))
     }
     hooks.openPeer = { context, peerId in
         guard let context = context as? AccountContext else {

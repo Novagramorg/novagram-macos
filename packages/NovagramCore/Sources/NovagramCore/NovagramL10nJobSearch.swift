@@ -40,6 +40,10 @@ public extension NovagramL10n {
     var jobSearch_loadMore: String { pick(en: "Load more", uz: "Yana yuklash", ru: "Загрузить ещё") }
     var jobSearch_openPost: String { pick(en: "Open post", uz: "Postni ochish", ru: "Открыть пост") }
     var jobSearch_write: String { pick(en: "Write", uz: "Yozish", ru: "Написать") }
+    func jobSearch_writeTo(_ target: String) -> String { String(format: pick(en: "Write %@", uz: "%@ ga yozish", ru: "Написать %@"), target) }
+    var jobSearch_latestVacancies: String { pick(en: "Latest vacancies", uz: "Oxirgi vakansiyalar", ru: "Последние вакансии") }
+    var jobSearch_latestResumes: String { pick(en: "Latest resumes", uz: "Oxirgi rezyumelar", ru: "Последние резюме") }
+    var jobSearch_roles: [String] { pick(en: "Sales, Developer, Driver, Accountant, Operator, Cook", uz: "Sotuvchi, Dasturchi, Haydovchi, Buxgalter, Operator, Oshpaz", ru: "Продавец, Разработчик, Водитель, Бухгалтер, Оператор, Повар").components(separatedBy: ", ") }
     var jobSearch_copyContact: String { pick(en: "Copy contact", uz: "Kontaktni nusxalash", ru: "Скопировать контакт") }
     var jobSearch_copied: String { pick(en: "Copied", uz: "Nusxalandi", ru: "Скопировано") }
     func jobSearch_experience(_ years: Int) -> String { String(format: pick(en: "%d+ yrs", uz: "%d+ yil", ru: "%d+ лет"), years) }

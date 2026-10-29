@@ -34,6 +34,7 @@ private final class Arguments {
     let toggleAlerts: (NovagramJobSavedSearch) -> Void
     let removeSaved: (NovagramJobSavedSearch) -> Void
     var toggleLanguage: (NovagramSearchLanguage?) -> Void = { _ in }
+    var selectRole: (String) -> Void = { _ in }
 
     init(context: any AccountContextProtocol, setMode: @escaping (NovagramJobMode) -> Void, toggleCity: @escaping (String) -> Void, toggleFormat: @escaping (NovagramJobWorkFormat) -> Void, setPeriod: @escaping (NovagramJobPeriod) -> Void, toggleSalary: @escaping () -> Void, toggleSource: @escaping (NovagramJobSource) -> Void, searchGlobal: @escaping () -> Void, loadMore: @escaping () -> Void, openPost: @escaping (NovagramJobResult) -> Void, write: @escaping (NovagramJobResult) -> Void, copyContact: @escaping (NovagramJobResult) -> Void, findChannels: @escaping () -> Void, setWatched: @escaping (PeerId, Bool) -> Void, join: @escaping (PeerId) -> Void, openPeer: @escaping (PeerId) -> Void, saveCurrent: @escaping () -> Void, loadSaved: @escaping (NovagramJobSavedSearch) -> Void, toggleAlerts: @escaping (NovagramJobSavedSearch) -> Void, removeSaved: @escaping (NovagramJobSavedSearch) -> Void) {
         self.context = context
@@ -88,6 +89,7 @@ private let _id_format = InputDataIdentifier("_id_format")
 private let _id_period = InputDataIdentifier("_id_period")
 private let _id_salary = InputDataIdentifier("_id_salary")
 private let _id_languages = InputDataIdentifier("_id_languages")
+private let _id_roles = InputDataIdentifier("_id_roles")
 private let _id_global = InputDataIdentifier("_id_global")
 private let _id_loading = InputDataIdentifier("_id_loading")
 private let _id_load_more = InputDataIdentifier("_id_load_more")
@@ -288,7 +290,18 @@ private func resultEntries(_ state: State, arguments: Arguments, sectionId: inou
     let strings = NovagramL10n.current
     let search = state.search
     var entries: [InputDataEntry] = []
-    let header = search.items.isEmpty ? strings.jobSearch_resultsHeader : "\(strings.jobSearch_resultsHeader) (\(search.items.count))"
+    let isFeed = state.filter.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    if isFeed {
+        let roles = strings.jobSearch_roles
+        entries.append(.custom(sectionId: sectionId, index: index, value: .none, identifier: _id_roles, equatable: InputDataEquatable(roles), comparable: nil, item: { initialSize, stableId in
+            NovagramJobRoleChipsRowItem(initialSize, stableId: stableId, roles: roles, viewType: .singleItem, select: arguments.selectRole)
+        }))
+        index += 1
+        entries.append(.sectionId(sectionId, type: .normal))
+        sectionId += 1
+    }
+    let feedHeader = state.filter.mode == .findJob ? strings.jobSearch_latestVacancies : strings.jobSearch_latestResumes
+    let header = isFeed ? feedHeader : search.items.isEmpty ? strings.jobSearch_resultsHeader : "\(strings.jobSearch_resultsHeader) (\(search.items.count))"
     entries.append(.desc(sectionId: sectionId, index: index, text: .plain(header.uppercased()), data: .init(color: theme.colors.listGrayText, viewType: .textTopItem)))
     index += 1
     for source in [NovagramJobSource.hashtags, .myChats, .watched, .global] where search.failedSources.contains(source) {
@@ -485,7 +498,7 @@ private func discoverChannels(context: any AccountContextProtocol, query: Novagr
                 continue
             }
             let peerId = found.peer.id
-            guard seen.insert(peerId).inserted, !NovagramHiddenChatsManager.shared.isPeerHiddenInStorage(peerId), NovagramJobChannelRelevance.hasJobSignal(title: channel.title, username: found.peer.addressName) else {
+            guard seen.insert(peerId).inserted, !NovagramHiddenChatsManager.shared.isPeerHiddenInStorage(peerId), NovagramJobChannelRelevance.hasJobSignal(title: channel.title, username: found.peer.addressName), !NovagramJobSpamGuard.isSpamSource(title: channel.title, username: found.peer.addressName) else {
                 continue
             }
             result.append(JobChannel(peer: found.peer, subscribers: found.subscribers))
@@ -619,8 +632,9 @@ public func NovagramJobSearchController(context: any AccountContextProtocol, sav
     }, loadMore: {
         engine.loadMore()
     }, openPost: { result in
-        NovagramJobSearchHooks.shared.openMessage(context, result.message.id)
+        NovagramJobSearchHooks.shared.openMessage(context, result.message)
     }, write: { result in
+        context.engine.messages.ensureMessagesAreLocallyAvailable(messages: [EngineMessage(result.message)])
         actionsDisposable.add((writeTarget(context: context, result: result) |> deliverOnMainQueue).start(next: { peerId in
             if let peerId {
                 NovagramJobSearchHooks.shared.openPeer(context, peerId)
@@ -686,6 +700,9 @@ public func NovagramJobSearchController(context: any AccountContextProtocol, sav
         NovagramJobStore.remove(id: saved.id, account: account)
         reloadStore()
     })
+    arguments.selectRole = { role in
+        updateFilter { $0.query = role }
+    }
     arguments.toggleLanguage = { language in
         updateFilter { filter in
             guard let language else {
