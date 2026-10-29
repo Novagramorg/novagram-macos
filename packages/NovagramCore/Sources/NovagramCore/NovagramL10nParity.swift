@@ -105,6 +105,7 @@ public extension NovagramL10n {
     var callRecording_saved: String { pick(en: "Call recording saved", uz: "Qo'ng'iroq yozuvi saqlandi", ru: "Запись звонка сохранена") }
     var callRecording_showInFinder: String { pick(en: "Show in Finder", uz: "Finder'da ko'rsatish", ru: "Показать в Finder") }
     var callRecording_failed: String { pick(en: "Call recording failed", uz: "Qo'ng'iroqni yozib bo'lmadi", ru: "Не удалось записать звонок") }
+    var callRecording_audioOnly: String { pick(en: "Video was turned on: this recording stays audio only", uz: "Video yoqildi: bu yozuv faqat ovozli bo'lib qoladi", ru: "Включено видео: эта запись останется только аудио") }
     var callRecording_saveFailed: String { pick(en: "Couldn't save the call recording", uz: "Qo'ng'iroq yozuvini saqlab bo'lmadi", ru: "Не удалось сохранить запись звонка") }
     var callRecording_auto_title: String { pick(en: "Record every call automatically", uz: "Har bir qo'ng'iroqni avtomatik yozib olish", ru: "Записывать каждый звонок автоматически") }
     var callRecording_auto_subtitle: String { pick(en: "Recording starts as soon as the call screen opens", uz: "Qo'ng'iroq oynasi ochilishi bilan yozish boshlanadi", ru: "Запись начинается сразу при открытии окна звонка") }

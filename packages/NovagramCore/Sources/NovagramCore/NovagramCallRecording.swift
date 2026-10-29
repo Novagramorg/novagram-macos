@@ -34,6 +34,10 @@ public final class NovagramCallRecording {
     private var closeObserver: NSObjectProtocol?
     private let peerDisposable = MetaDisposable()
     private static let quitSaveTimeout: TimeInterval = 3
+    private static let autoStartRetries = 2
+    private weak var autoRetryWindow: Window?
+    private var autoRetriesLeft = 0
+    private var videoNoticeShown = false
 
     public var micDeviceId: () -> Signal<String?, NoError> = { .single(nil) }
 
@@ -53,20 +57,25 @@ public final class NovagramCallRecording {
             guard let self, let window, self.ensurePermission(window: window) else {
                 return
             }
-            self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo)
+            self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo, isAuto: false)
         })
     }
 
     public func autoStart(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool) {
+        noteVideoUpgrade(hasVideo: hasVideo)
         guard #available(macOS 14.0, *), NovagramCallRecordingSettings.isAutoEnabled, window.isVisible, autoWindow !== window, recorder == nil, !isStarting else {
             return
+        }
+        if autoRetryWindow !== window {
+            autoRetryWindow = window
+            autoRetriesLeft = NovagramCallRecording.autoStartRetries
         }
         autoWindow = window
         confirmConsent(window: window, proceed: { [weak self, weak window] in
             guard let self, let window, self.autoWindow === window, self.recorder == nil, !self.isStarting, self.ensurePermission(window: window, isAuto: true) else {
                 return
             }
-            self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo)
+            self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo, isAuto: true)
         }, cancel: {
             NovagramCallRecordingSettings.setAutoEnabled(false)
             NotificationCenter.default.post(name: NSNotification.Name("NovagramSettingsChanged"), object: nil)
@@ -140,7 +149,7 @@ public final class NovagramCallRecording {
     }
 
     @available(macOS 14.0, *)
-    private func start(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool) {
+    private func start(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool, isAuto: Bool) {
         isStarting = true
         stopWhenStarted = false
         let peer = engine.data.get(TelegramEngine.EngineData.Item.Peer.Peer(id: peerId))
@@ -153,12 +162,13 @@ public final class NovagramCallRecording {
                 self.isStarting = false
                 return
             }
-            self.begin(window: window, title: peer?.debugDisplayTitle ?? "", hasVideo: hasVideo, micDeviceId: micDeviceId)
+            self.begin(window: window, title: peer?.debugDisplayTitle ?? "", hasVideo: hasVideo, micDeviceId: micDeviceId, isAuto: isAuto)
         }))
     }
 
     @available(macOS 14.0, *)
-    private func begin(window: Window, title: String, hasVideo: Bool, micDeviceId: String?) {
+    private func begin(window: Window, title: String, hasVideo: Bool, micDeviceId: String?, isAuto: Bool) {
+        videoNoticeShown = false
         let fileExtension = hasVideo ? "mp4" : "m4a"
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("novagram-call-\(UUID().uuidString).\(fileExtension)")
         let recorder = NovagramCallRecorder(outputURL: tempURL, hasVideo: hasVideo, window: window, micDeviceId: micDeviceId)
@@ -180,6 +190,11 @@ public final class NovagramCallRecording {
             if let error {
                 NovagramCallRecording.log.error("start failed: \(String(describing: error), privacy: .public)")
                 self.recorder = nil
+                if isAuto, let window, self.autoWindow === window, self.autoRetriesLeft > 0 {
+                    self.autoRetriesLeft -= 1
+                    self.autoWindow = nil
+                    return
+                }
                 self.showToast(NovagramL10n.current.callRecording_failed)
                 return
             }
@@ -192,6 +207,14 @@ public final class NovagramCallRecording {
                 self.stop()
             }
         }
+    }
+
+    private func noteVideoUpgrade(hasVideo: Bool) {
+        guard #available(macOS 14.0, *), hasVideo, isRecording, !videoNoticeShown, let recorder = recorder as? NovagramCallRecorder, !recorder.hasVideo else {
+            return
+        }
+        videoNoticeShown = true
+        showToast(NovagramL10n.current.callRecording_audioOnly)
     }
 
     private func stop() {
