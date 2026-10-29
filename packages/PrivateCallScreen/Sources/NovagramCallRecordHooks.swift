@@ -49,10 +49,10 @@ func novagramCallRecordSpecs(_ external: ExternalPeerCallState) -> [PeerCallActi
         return []
     }
     switch external.state {
-    case .active, .reconnecting:
-        return [PeerCallActionSpec(type: .record, active: isRecording, enabled: true, interactive: true, attract: false)]
-    default:
+    case .terminating, .terminated:
         return []
+    default:
+        return [PeerCallActionSpec(type: .record, active: isRecording, enabled: true, interactive: true, attract: false)]
     }
 }
 
