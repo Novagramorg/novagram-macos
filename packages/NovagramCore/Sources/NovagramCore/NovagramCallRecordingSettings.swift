@@ -3,6 +3,8 @@ import TGUIKit
 import AlertsUI
 import NovagramCallRecordingCore
 
+typealias NovagramMenu = ContextMenu
+
 // Mac-only local call recording settings (pro_messager suite). The folder is an app-scoped security-scoped bookmark.
 public enum NovagramCallRecordingSettings {
     public static let enabledKey = CallRecordingSettings.enabledKey

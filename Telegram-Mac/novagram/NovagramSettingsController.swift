@@ -993,7 +993,7 @@ private let novagramSettingsSlugs: [(NovagramEntryId, String)] = [
     (.autoTranslateChats, "translate-entire-chats"), (.actionShareLink, "share-link"),
     (.protectionChatLock, "chat-lock"), (.protectionProxy, "proxy"), (.protectionForeign, "block-foreign"), (.protectionAutoDownload, "auto-download"),
     (.appearanceAccent, "white-accent"),
-    (.callRecording, "call-recording"), (.callRecordingFolder, "call-recording-folder"), (.callRecordingAuto, "call-recording-auto"), (.callDataSaving, "call-data-saving")
+    (.callRecording, "call-recording"), (.callRecordingFolder, "call-recording-folder"), (.callRecordingAuto, "call-recording-auto"), (.callRecordingList, "call-recordings"), (.callDataSaving, "call-data-saving")
 ]
 
 private func novagramSettingsSlug(_ id: NovagramEntryId) -> String? {
@@ -1009,10 +1009,14 @@ private func novagramSettingsEntryId(slug: String) -> NovagramEntryId? {
 
 private let novagramCallRecordingSettingsSlugs: Set<String> = ["call-recording", "call-recording-folder", "call-recording-auto"]
 private let novagramCallDataSavingSettingsSlug = "call-data-saving"
+let novagramCallRecordingsSlug = "call-recordings"
 
 func novagramSettingsSlugAllowed(_ slug: String) -> Bool {
     if novagramCallRecordingSettingsSlugs.contains(slug) {
         return NovagramDeveloperFlags.isCallRecordingEnabled
+    }
+    if slug == novagramCallRecordingsSlug {
+        return NovagramDeveloperFlags.isCallRecordingEnabled && NovagramCallRecordingSettings.isSupported
     }
     if slug == novagramCallDataSavingSettingsSlug {
         return NovagramDeveloperFlags.isCallDataSavingEnabled

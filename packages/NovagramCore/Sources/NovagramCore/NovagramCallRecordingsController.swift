@@ -4,6 +4,7 @@ import TGUIKit
 import SwiftSignalKit
 import TelegramTheme
 import Localization
+import AlertsUI
 import NovagramCallRecordingCore
 import NovagramCallRecordingUI
 
@@ -38,6 +39,10 @@ final class NovagramCallRecordingsController: GenericViewController<NovagramCall
     private static let dayFormat = "d MMMM yyyy"
 
     private let storage: CallRecordingStorage
+    private lazy var model: CallRecordingsListViewModel = MainActor.assumeIsolated { CallRecordingsListViewModel(storage: storage) }
+    private var strings: CallRecordingStrings {
+        return CallRecordingStrings(languageCode: appCurrentLanguage.languageCode)
+    }
     private let accessedFolder: URL?
     private let appearanceDisposable = MetaDisposable()
 
@@ -65,6 +70,84 @@ final class NovagramCallRecordingsController: GenericViewController<NovagramCall
         return NovagramL10n.current.callRecording_list
     }
 
+    override func getRightBarViewOnce() -> BarView {
+        let bar = ImageBarView(controller: self, theme.icons.chatActions)
+        bar.button.contextMenu = { [weak self] in
+            return self?.makeMenu()
+        }
+        return bar
+    }
+
+    private func makeMenu() -> NovagramMenu {
+        let strings = self.strings
+        let model = self.model
+        let menu = NovagramMenu()
+        let current = MainActor.assumeIsolated { model.filter }
+        for filter in CallRecordingFilter.allCases {
+            let item = ContextMenuItem(filter.title(strings), handler: {
+                MainActor.assumeIsolated {
+                    model.filter = filter
+                }
+            })
+            item.state = filter == current ? .on : .off
+            menu.addItem(item)
+        }
+        menu.addItem(ContextSeparatorItem())
+        let selected = MainActor.assumeIsolated { model.selectedURLs }
+        let allSelected = MainActor.assumeIsolated { model.allVisibleSelected }
+        let isSelecting = MainActor.assumeIsolated { model.isSelecting }
+        if isSelecting || !selected.isEmpty {
+            menu.addItem(ContextMenuItem(allSelected ? strings.deselectAll : strings.selectAll, handler: {
+                MainActor.assumeIsolated {
+                    model.toggleSelectAll()
+                }
+            }))
+            if !selected.isEmpty {
+                menu.addItem(ContextMenuItem(strings.share, handler: { [weak self] in
+                    self?.share(selected, rect: .zero)
+                }))
+                menu.addItem(ContextMenuItem(strings.deleteSelectedButton(selected.count), handler: { [weak self] in
+                    self?.confirmDelete(selected)
+                }, itemMode: .destruct))
+            }
+            menu.addItem(ContextMenuItem(strings.done, handler: {
+                MainActor.assumeIsolated {
+                    model.setSelecting(false)
+                }
+            }))
+        } else {
+            menu.addItem(ContextMenuItem(strings.select, handler: {
+                MainActor.assumeIsolated {
+                    model.setSelecting(true)
+                }
+            }))
+        }
+        let hasRecordings = !MainActor.assumeIsolated { model.visibleRecordings.isEmpty }
+        if hasRecordings {
+            menu.addItem(ContextSeparatorItem())
+            menu.addItem(ContextMenuItem(strings.clearAll, handler: {
+                MainActor.assumeIsolated {
+                    model.requestClearAll()
+                }
+            }, itemMode: .destruct))
+        }
+        return menu
+    }
+
+    private func confirmDelete(_ urls: [URL]) {
+        guard let window = self.window else {
+            return
+        }
+        let strings = self.strings
+        let model = self.model
+        verifyAlert(for: window, information: strings.deleteSelectedConfirm(urls.count), ok: strings.delete, cancel: strings.cancel, successHandler: { _ in
+            MainActor.assumeIsolated {
+                _ = model.delete(urls)
+                model.setSelecting(false)
+            }
+        })
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         appearanceDisposable.set(appearanceSignal.start(next: { [weak self] _ in
@@ -75,7 +158,9 @@ final class NovagramCallRecordingsController: GenericViewController<NovagramCall
 
     private func updateContent() {
         genericView.backgroundColor = theme.colors.listBackground
-        let hosting = NSHostingView(rootView: CallRecordingsListView(storage: storage, environment: makeEnvironment()))
+        let model = self.model
+        let environment = makeEnvironment()
+        let hosting = MainActor.assumeIsolated { NSHostingView(rootView: CallRecordingsListView(model: model, environment: environment)) }
         genericView.setHost(hosting)
     }
 
@@ -94,7 +179,8 @@ final class NovagramCallRecordingsController: GenericViewController<NovagramCall
             subtitleFontSize: NovagramCallRecordingsController.smallFontSize,
             timeFontSize: NovagramCallRecordingsController.smallFontSize,
             freeTextFontSize: NovagramCallRecordingsController.smallFontSize,
-            followsDynamicType: false
+            followsDynamicType: false,
+            freeText: Color(nsColor: colors.grayText)
         )
         var environment = CallRecordingUIEnvironment(
             languageCode: languageCode,
@@ -107,6 +193,7 @@ final class NovagramCallRecordingsController: GenericViewController<NovagramCall
                 self?.share(urls, rect: rect)
             }
         )
+        environment.showsToolbar = false
         let strings = environment.strings
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: languageCode)

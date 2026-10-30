@@ -72,6 +72,10 @@ func openNovagramSettings(context: AccountContext, feature: String?) {
         navigation.push(NovagramAutoTranslateController(context))
     case "translate-language", "translation-language", "language":
         navigation.push(NovagramTranslationLanguageController(context))
+    case novagramCallRecordingsSlug:
+        if let recordings = makeNovagramCallRecordingsController() {
+            navigation.push(recordings)
+        }
     default:
         controller.focusSlug = feature
     }
