@@ -133,7 +133,14 @@ final class NovagramCallRecordingsController: GenericViewController<NovagramCall
         guard !urls.isEmpty, let host = genericView.host else {
             return
         }
-        let anchor = rect == .zero ? NSRect(x: host.bounds.midX, y: host.bounds.midY, width: 1, height: 1) : rect
+        let anchor: NSRect
+        if rect == .zero {
+            anchor = NSRect(x: host.bounds.midX, y: host.bounds.midY, width: 1, height: 1)
+        } else if let contentView = host.window?.contentView {
+            anchor = host.convert(NSRect(x: rect.minX, y: contentView.bounds.height - rect.maxY, width: rect.width, height: rect.height), from: nil)
+        } else {
+            anchor = rect
+        }
         let picker = NSSharingServicePicker(items: urls)
         picker.show(relativeTo: anchor, of: host, preferredEdge: .minY)
     }
