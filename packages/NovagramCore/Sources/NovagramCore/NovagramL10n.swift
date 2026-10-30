@@ -1266,7 +1266,7 @@ public struct NovagramL10n {
     }
 
     public var developer_jobSearchTitle: String {
-        pick(en: "Job search (beta)", uz: "Ish qidirish (beta)", ru: "Поиск работы (бета)")
+        pick(en: "Job search", uz: "Ish qidirish", ru: "Поиск работы")
     }
 
     public var developer_jobSearchTip: String {
@@ -1277,29 +1277,9 @@ public struct NovagramL10n {
         )
     }
 
-    public var developer_callRecordingTitle: String {
-        pick(en: "Call recording (beta)", uz: "Qo'ng'iroqni yozib olish (beta)", ru: "Запись звонков (бета)")
-    }
 
-    public var developer_callRecordingTip: String {
-        pick(
-            en: "Record button in calls and the recording rows in Settings → Calls",
-            uz: "Qo'ng'iroqdagi yozish tugmasi va Sozlamalar → Qo'ng'iroqlardagi yozish qatorlari",
-            ru: "Кнопка записи в звонке и строки записи в Настройки → Звонки"
-        )
-    }
 
-    public var developer_callDataSavingTitle: String {
-        pick(en: "Use less data for calls (beta)", uz: "Qo'ng'iroqlarda kam trafik (beta)", ru: "Экономия трафика в звонках (бета)")
-    }
 
-    public var developer_callDataSavingTip: String {
-        pick(
-            en: "The \"Use less data for calls\" row in Novagram Settings → Calls",
-            uz: "Novagram sozlamalari → Qo'ng'iroqlardagi \"Qo'ng'iroqlarda kam trafik\" qatori",
-            ru: "Строка «Экономия трафика в звонках» в Настройки Novagram → Звонки"
-        )
-    }
 
     public var developer_stickerPackSaveTitle: String {
         pick(en: "Save sticker packs", uz: "Stiker paketlarini saqlash", ru: "Сохранение наборов стикеров")

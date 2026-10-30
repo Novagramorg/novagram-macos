@@ -451,6 +451,8 @@ Roles (2026-10-29), port of iOS: the developer login decides a role, `NovagramDe
 
 ## Local call recording (2026-10-29)
 
+> 2026-10-30, owner rule "one unapproved feature = one switch, inside Developer": the `novagram_dev_call_recording` and `novagram_dev_call_data_saving` flags, their "(beta)" rows, strings (`developer_callRecording*`, `developer_callDataSaving*`) and signals are removed, and Settings → Calls is gone (`callRecording_section` removed). See "One switch per unapproved feature (2026-10-30)" below.
+
 Owner: record 1:1 voice and video calls on the Mac, locally (Telegram has no 1:1 recording, nothing is sent to the other side). Novagram Settings → Calls: "Call recording" (`novagram_call_recording`, pro_messager, default off, Mac only, macOS 14+) and, while it is on, "Save to" (`novagram_call_recording_folder`, an app-scoped security-scoped bookmark; no folder = "Ask every time"). Turning the switch on opens a folder picker (Cancel keeps the switch on with "Ask every time"); the "Save to" row offers Choose Folder… / Ask Every Time. Link slugs `call-recording`, `call-recording-folder`. The first recording ever asks once about consent laws (`novagram_call_recording_warned`).
 
 | File | Change |
@@ -470,6 +472,8 @@ Ours:
 Manual repro for regressions: turn on Novagram Settings → Calls → Call recording, start a 1:1 call, press Record: REC timer runs; press again (or hang up): the file is saved (folder or save panel) and the toast offers Show in Finder; the file has both voices (and the picture for a video call).
 
 ## Call extras (2026-10-29)
+
+> 2026-10-30, owner rule "one unapproved feature = one switch, inside Developer": the `novagram_dev_call_recording` and `novagram_dev_call_data_saving` flags, their "(beta)" rows, strings (`developer_callRecording*`, `developer_callDataSaving*`) and signals are removed, and Settings → Calls is gone (`callRecording_section` removed). See "One switch per unapproved feature (2026-10-30)" below.
 
 Owner: four 1:1 call extras on the Mac. Novagram Settings → Calls: "Record every call automatically" (`novagram_call_recording_auto`, pro_messager, default off, shown only while Call recording is on, slug `call-recording-auto`) and "Use less data for calls" (`novagram_call_data_saving`, default off, slug `call-data-saving`; shown on every macOS, the recording rows stay macOS 14+). Noise suppression for 1:1 calls was not added: the 1:1 engine hard-codes WebRTC noise suppression on (`enableNS = true` in `tgcalls/macos/Sources/OngoingCallThreadLocalContext.mm`) and has no switch reachable from Swift.
 
@@ -706,6 +710,8 @@ iOS parity. The rules come from SDK `NovagramSearchSettings`: `translateTargets`
 
 ## Developer flags for search and call recording (2026-10-30)
 
+> 2026-10-30, owner rule "one unapproved feature = one switch, inside Developer": the `novagram_dev_call_recording` and `novagram_dev_call_data_saving` flags, their "(beta)" rows, strings (`developer_callRecording*`, `developer_callDataSaving*`) and signals are removed, and Settings → Calls is gone (`callRecording_section` removed). See "One switch per unapproved feature (2026-10-30)" below.
+
 > The search flag `novagram_dev_search_features` removed 2026-10-30 (manager scope), last on main at 9d9b178d4; job search has its own flag `novagram_dev_job_search`. The call recording and call data saving flags stay.
 
 Owner's rule: search features and call recording are hidden Developer features until the manager accepts them (same spec on iOS).
@@ -840,3 +846,14 @@ Kit pin c9c508c (2026-10-30): `packages/NovagramCallRecordingKit` moved from c44
 
   The SDK's `CallRecordingStrings` (en/uz/ru/zh) provide every menu title. `NovagramMenu` (in `NovagramCallRecordingSettings.swift`) is a typealias for TGUIKit's `ContextMenu`, because SwiftUI also has a `ContextMenu` and the TGUIKit module has a `TGUIKit` struct.
 - Deep link: `tg://settings/novagrampro/call-recordings` (slug `call-recordings`, `novagramCallRecordingsSlug`) opens the Recordings screen above Novagram Settings, only while the developer flag is on and on macOS 14+ (`novagramSettingsSlugAllowed`); the row's share link uses the same slug (`novagramSettingsSlugs`).
+
+## One switch per unapproved feature (2026-10-30)
+
+Owner rule (iOS does the same): an unapproved feature is one feature with one switch, inside the hidden Developer section (revealed by the 20 s hold on the version line). The developer role sees these rows; a director login turns their keys off (`NovagramDeveloperRole.didLogIn`: `novagram_call_recording`, `novagram_call_recording_auto` and `novagram_call_data_saving` set to false). No Telegram file changed (`// Novagram` lines: 475 before, 475 after; the 483 → 475 drop is the all-accounts search removal commit).
+
+- Developer section (`Telegram-Mac/novagram/NovagramSettingsController.swift`): the first group keeps the existing switches, plus "Job search" (`novagram_dev_job_search`; the title has lost "(beta)") and "Use less data for calls" (`novagram_call_data_saving`), then the developer footer. Below it, on macOS 14+, a second group: "Call recording" (`novagram_call_recording`) and, while it is on, "Record every call automatically", "Save to" (`novagram_call_recording_folder`) and "Call recordings" (the list), with the call recording footer. The Calls section is gone.
+- Removed: `NovagramDeveloperFlags.isCallRecordingEnabled` / `callRecordingSignal` / `isCallDataSavingEnabled` / `callDataSavingSignal`, the `devCallRecording` / `devCallDataSaving` rows, state and strings. `NovagramDeveloperRole.Switch.callRecording` / `.callDataSaving` stay and now gate the user-key rows.
+- Gating is the user key alone: `NovagramCallRecordingSettings.isEnabled` = macOS 14+ and `novagram_call_recording`, so the Record button, auto-record, the notice and the capture follow this key alone. `TelegramCallsCore/NovagramCallDataSaving.swift` reads only `novagram_call_data_saving` (`.always` / `.never`); Telegram's `VoiceCallSettings.dataSaving` is never touched.
+- `NovagramCallRecordingSettings.enabledSignal` emits the key on `UserDefaults.didChangeNotification`, `NovagramSettingsChanged` and `novagramDeveloperFlagsChanged`. The call screen's `recordingSignal` hook combines it in, and `NovagramCallRecording` watches it: when the key turns off during a recording, the recording stops through `stop()` and is saved, and a start in progress stops as soon as it starts (same as the old flag).
+- Slugs `call-recording`, `call-recording-auto`, `call-recording-folder`, `call-recordings` and `call-data-saving` work only while the Developer section is revealed (`NovagramAdsGate.isRevealed`), the role can use the switch, and (for recording) macOS is 14+. Otherwise they do nothing.
+- SDK: c9c508c's `CallRecordingSettings.isEnabled` / `isAutoEnabled` still AND `isDeveloperEnabled` (`CallRecordingCore/Settings/CallRecordingSettings.swift:47-54`). The Mac never reads them (only `isUserEnabled`, `isUserAutoEnabled`, `wasWarned`, the key constants, and our own `isRecordingEnabled` passed to the list), so it needs no new pin. Move the pin when iOS ships the user-key-only version, to stay in line.

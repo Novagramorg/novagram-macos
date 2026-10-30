@@ -50,6 +50,10 @@ final class NovagramAdsGate {
     // Drives the Settings list rebuild (combined into AccountViewController's signal) and the ad gates.
     static let uiState: ValuePromise<UIState> = ValuePromise(NovagramAdsGate.currentState(), ignoreRepeated: true)
 
+    static var isRevealed: Bool {
+        return memoRevealed
+    }
+
     private static func currentState() -> UIState {
         return UIState(revealed: memoRevealed, showAds: memoShowAds)
     }

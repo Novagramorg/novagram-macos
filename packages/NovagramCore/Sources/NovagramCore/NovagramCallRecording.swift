@@ -47,7 +47,7 @@ public final class NovagramCallRecording {
     private static let autoStartRetries = 2
     private weak var autoRetryWindow: Window?
     private var autoRetriesLeft = 0
-    private let developerFlagDisposable = MetaDisposable()
+    private let switchDisposable = MetaDisposable()
 
     public var micDeviceId: () -> Signal<String?, NoError> = { .single(nil) }
 
@@ -56,9 +56,9 @@ public final class NovagramCallRecording {
     }
 
     init() {
-        developerFlagDisposable.set((NovagramDeveloperFlags.callRecordingSignal |> deliverOnMainQueue).start(next: { [weak self] enabled in
+        switchDisposable.set((NovagramCallRecordingSettings.enabledSignal |> deliverOnMainQueue).start(next: { [weak self] enabled in
             if !enabled {
-                self?.developerFlagDidTurnOff()
+                self?.recordingSwitchDidTurnOff()
             }
         }))
     }
@@ -67,7 +67,7 @@ public final class NovagramCallRecording {
         return appCurrentLanguage.languageCode
     }
 
-    private func developerFlagDidTurnOff() {
+    private func recordingSwitchDidTurnOff() {
         autoWindow = nil
         if isStarting {
             stopWhenStarted = true

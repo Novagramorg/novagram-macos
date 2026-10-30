@@ -93,7 +93,6 @@ public extension NovagramL10n {
     var settings_channelHistory_subtitle: String { pick(en: "Adds “Recent Actions” to the chat list menu of channels and groups you admin", uz: "Siz admin bo'lgan kanal va guruhlar menyusiga «So'nggi amallar» bandini qo'shadi", ru: "Добавляет «Недавние действия» в меню каналов и групп, где вы администратор") }
     var settings_voiceTranslate_subtitle: String { pick(en: "When dictation ends, the text is translated into the auto-translate language. Works when “Ask to translate on send” is off", uz: "Diktovka tugagach matn avto-tarjima tiliga tarjima qilinadi. «Yuborishda tarjima so'rovi» o'chiq bo'lsa ishlaydi", ru: "После диктовки текст переводится на язык автоперевода. Работает, когда «Запрос перевода при отправке» выключен") }
 
-    var callRecording_section: String { pick(en: "CALLS", uz: "QO'NG'IROQLAR", ru: "ЗВОНКИ") }
     var callRecording_title: String { pick(en: "Call recording", uz: "Qo'ng'iroqni yozib olish", ru: "Запись звонков") }
     var callRecording_subtitle: String { pick(en: "Adds a Record button to voice and video calls", uz: "Ovozli va video qo'ng'iroqlarga «Yozish» tugmasini qo'shadi", ru: "Добавляет кнопку «Запись» в аудио- и видеозвонки") }
     var callRecording_list: String { pick(en: "Recordings", uz: "Yozuvlar", ru: "Записи") }

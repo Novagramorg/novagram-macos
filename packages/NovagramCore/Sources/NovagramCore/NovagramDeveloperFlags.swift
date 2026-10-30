@@ -7,7 +7,6 @@
 //  iOS keys. "Remove all ads" is the third switch there; the app reads it through NovagramAdsGate.
 //
 
-import NovagramCallRecordingCore
 import Cocoa
 import SwiftSignalKit
 
@@ -24,34 +23,14 @@ public enum NovagramDeveloperFlags {
     // Read by TelegramCore too (fork-patches/telegramcore/NovagramAdEvents.swift): keep the name in sync.
     private static let adEventsOffKey = "novagram_ads_events_off"
     public static let jobSearchKey = "novagram_dev_job_search"
-    private static let callRecordingKey = CallRecordingSettings.developerFlagKey
-    private static let callDataSavingKey = "novagram_dev_call_data_saving"
-
-    public static var isCallDataSavingEnabled: Bool {
-        get { return self.value(forKey: self.callDataSavingKey) }
-        set { self.setValue(newValue, forKey: self.callDataSavingKey) }
-    }
-
-    public static var callDataSavingSignal: Signal<Bool, NoError> {
-        return self.signal { self.isCallDataSavingEnabled }
-    }
 
     public static var isJobSearchEnabled: Bool {
         get { return self.value(forKey: self.jobSearchKey) }
         set { self.setValue(newValue, forKey: self.jobSearchKey) }
     }
 
-    public static var isCallRecordingEnabled: Bool {
-        get { return self.value(forKey: self.callRecordingKey) }
-        set { self.setValue(newValue, forKey: self.callRecordingKey) }
-    }
-
     public static var jobSearchSignal: Signal<Bool, NoError> {
         return self.signal { self.isJobSearchEnabled }
-    }
-
-    public static var callRecordingSignal: Signal<Bool, NoError> {
-        return self.signal { self.isCallRecordingEnabled }
     }
 
     /// Show the currency rates row (Settings, under Analytics).
@@ -195,11 +174,12 @@ public enum NovagramDeveloperRole: String {
         if !role.canUse(.jobSearch) && NovagramDeveloperFlags.isJobSearchEnabled {
             NovagramDeveloperFlags.isJobSearchEnabled = false
         }
-        if !role.canUse(.callRecording) && NovagramDeveloperFlags.isCallRecordingEnabled {
-            NovagramDeveloperFlags.isCallRecordingEnabled = false
+        if !role.canUse(.callRecording) {
+            NovagramCallRecordingSettings.setEnabled(false)
+            NovagramCallRecordingSettings.setAutoEnabled(false)
         }
-        if !role.canUse(.callDataSaving) && NovagramDeveloperFlags.isCallDataSavingEnabled {
-            NovagramDeveloperFlags.isCallDataSavingEnabled = false
+        if !role.canUse(.callDataSaving) {
+            NovagramCallRecordingSettings.setDataSavingEnabled(false)
         }
         NotificationCenter.default.post(name: .novagramDeveloperFlagsChanged, object: nil)
     }

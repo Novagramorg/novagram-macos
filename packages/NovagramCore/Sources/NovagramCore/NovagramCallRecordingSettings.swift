@@ -1,6 +1,7 @@
 import AppKit
 import TGUIKit
 import AlertsUI
+import SwiftSignalKit
 import NovagramCallRecordingCore
 
 typealias NovagramMenu = ContextMenu
@@ -29,7 +30,7 @@ public enum NovagramCallRecordingSettings {
     }
 
     public static var isEnabled: Bool {
-        return isSupported && NovagramDeveloperFlags.isCallRecordingEnabled && isStoredEnabled
+        return isSupported && isStoredEnabled
     }
 
     public static var isStoredEnabled: Bool {
@@ -54,6 +55,26 @@ public enum NovagramCallRecordingSettings {
 
     public static var isDataSavingEnabled: Bool {
         return defaults?.bool(forKey: dataSavingKey) ?? false
+    }
+
+    public static func setDataSavingEnabled(_ value: Bool) {
+        defaults?.set(value, forKey: dataSavingKey)
+    }
+
+    public static var enabledSignal: Signal<Bool, NoError> {
+        return Signal { subscriber in
+            subscriber.putNext(isEnabled)
+            let names = [UserDefaults.didChangeNotification, NSNotification.Name("NovagramSettingsChanged"), NSNotification.Name.novagramDeveloperFlagsChanged]
+            let observers = names.map { name in
+                NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { _ in
+                    subscriber.putNext(isEnabled)
+                }
+            }
+            return ActionDisposable {
+                observers.forEach { NotificationCenter.default.removeObserver($0) }
+            }
+        }
+        |> distinctUntilChanged
     }
 
     static var wasWarned: Bool {
