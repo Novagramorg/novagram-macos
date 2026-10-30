@@ -9,6 +9,28 @@ public struct NovagramCallRecordRequest {
     public let engine: TelegramEngine
     public let peerId: PeerId
     public let hasVideo: Bool
+    public let callId: UUID?
+}
+
+private final class NovagramCallIdEntry {
+    weak var arguments: PeerCallArguments?
+    let callId: UUID
+
+    init(arguments: PeerCallArguments, callId: UUID) {
+        self.arguments = arguments
+        self.callId = callId
+    }
+}
+
+private var novagramCallIds: [NovagramCallIdEntry] = []
+
+public func novagramSetCallId(_ arguments: PeerCallArguments, _ callId: UUID) {
+    novagramCallIds.removeAll { $0.arguments == nil || $0.arguments === arguments }
+    novagramCallIds.append(NovagramCallIdEntry(arguments: arguments, callId: callId))
+}
+
+func novagramCallId(_ arguments: PeerCallArguments) -> UUID? {
+    return novagramCallIds.first(where: { $0.arguments === arguments })?.callId
 }
 
 public struct NovagramCallRecordCallState: Equatable {
@@ -77,7 +99,7 @@ func novagramToggleCallRecording(_ window: Window?, _ arguments: PeerCallArgumen
     guard let window else {
         return
     }
-    NovagramCallRecordHooks.shared.toggle(NovagramCallRecordRequest(window: window, engine: arguments.engine, peerId: arguments.peerId, hasVideo: novagramCallHasVideo(external)))
+    NovagramCallRecordHooks.shared.toggle(NovagramCallRecordRequest(window: window, engine: arguments.engine, peerId: arguments.peerId, hasVideo: novagramCallHasVideo(external), callId: novagramCallId(arguments)))
 }
 
 func novagramCallCanAutoRecord(_ external: ExternalPeerCallState) -> Bool {
@@ -98,7 +120,7 @@ func novagramCallRecordState(_ signal: Signal<ExternalPeerCallState, NoError>, w
         hooks.callDidUpdate(window, NovagramCallRecordCallState(isEnded: novagramCallIsEnded(external), isMuted: external.isMuted))
         if let window, let arguments = arguments() {
             if novagramCallCanAutoRecord(external) {
-                hooks.autoStart(NovagramCallRecordRequest(window: window, engine: arguments.engine, peerId: arguments.peerId, hasVideo: novagramCallHasVideo(external)))
+                hooks.autoStart(NovagramCallRecordRequest(window: window, engine: arguments.engine, peerId: arguments.peerId, hasVideo: novagramCallHasVideo(external), callId: novagramCallId(arguments)))
             }
             NovagramCallWeakNetwork.shared.update(window: window, external: external, turnOffVideo: { [weak arguments] in
                 arguments?.toggleCamera(external)

@@ -780,3 +780,23 @@ Pre-merge review fixes (on top of e1c3ee96b):
 - Keyboard moves: `novagramOpenOtherAccountsRow` and `novagramOpenArchiveSearchRow` act only on a mouse click or Return / Enter (`novagramIsOpenGesture`, from `NSApp.currentEvent`: `TableView.selectRow` sets `byClick` for clicks, while Return (`select(item: highlighted)`) and Option+Down / Ctrl+Tab (`selectNext`) both pass `byClick: false`, so `byClick` alone cannot tell them apart). On a keyboard highlight move they still claim the row (return true), so Telegram's code never opens another account's peer in the current account. No Telegram line changed for this.
 
 `// Novagram` lines after the review fixes: 482 (one changed line, no new ones).
+
+## Call recording notice (2026-10-30)
+
+Owner's rule: the other person must know about a recording (same spec on iOS, same strings). No audible notice, nothing in tgcalls / tg_owt / the call audio device / native code. Behind the existing developer flag `novagram_dev_call_recording` (a recording can only start while it is on).
+
+| File | Change |
+| --- | --- |
+| `packages/CallsUI/Sources/CallsUI/CallScreenController.swift` | `novagramSetCallId(arguments, session.internalId)` before `screen.update(arguments: arguments)` (`:315`, 1 new line): ties the call screen's `PeerCallArguments` to the call session id |
+
+Ours:
+- `packages/PrivateCallScreen/Sources/NovagramCallRecordHooks.swift`: `NovagramCallRecordRequest.callId` (`UUID?`); `novagramSetCallId` / `novagramCallId` keep a weak `PeerCallArguments` → `CallSessionInternalId` list (dead entries pruned on every set), so the Record button and auto-record pass the call id.
+- `NovagramCallRecording` (NovagramCore): `toggle` / `autoStart` take `callId`; when the recorder has really started (manual or auto) `sendNotice` sends one text message to the call's peer through `enqueueMessages(account: engine.account, ...)` (the engine of the account in the call). Once per call: `noticeCallId` remembers the last call id that got the notice, so Stop → Record again in the same call sends nothing; a new call (also a redial in the same window) has a new session id and sends again. Only for `Namespaces.Peer.CloudUser` peers, never without a call id (the debug `PeerCallLab` has none), never for group calls or conferences (no Record there). A failed enqueue never touches the recording; debug builds log "recording notice was not sent".
+- REC badge always visible: the call screen hides its controls only by fading named views (`PeerCallScreenView.updateLayout`, `hideOutside` = video on + mouse outside + active: settings, add peer, status, video shadow, tooltips, secret key, actions). The badge is not one of them (a separate content-view subview, layer `zPosition` 1000, no hit testing). `NovagramCallRecordBadgeView` now follows the window, not a fixed view: it observes `window.contentView` (KVO) and, every timer tick, moves itself back into the current content view and to the top of its subviews, so a content view swap (`PeerCallScreen.show`, the present transition's `attach`) or a later subview (status tooltip, participants) never hides it.
+- Strings (`NovagramL10nParity.swift`): `callRecording_notice` (en "🔴 I'm recording this call (Novagram)", uz "🔴 Men bu qo'ng'iroqni yozib olyapman (Novagram)", ru "🔴 Я записываю этот звонок (Novagram)"), `callRecording_warningText` (consent alert) and `callRecording_footer` (Settings → Calls footer) replaced: the other person gets a message, the REC mark stays visible; no more "the other person is not notified".
+
+`// Novagram` lines in `packages` + `Telegram-Mac`: 482 before, 483 after.
+
+Manual repro for regressions (test account only): developer flag and Call recording on, call a test contact, press Record: the contact's chat gets "🔴 I'm recording this call (Novagram)" once; Stop and Record again: no second message; hang up and call again, Record: a new message. Video call with the mouse outside the window: the controls fade, REC mm:ss stays.
+
+- 2026-10-30: consent alert key bumped to `novagram_call_recording_warned_v2` so everyone sees the new text ("the other person gets a message in this chat") once, even if they accepted the old one.

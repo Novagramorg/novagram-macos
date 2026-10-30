@@ -73,10 +73,10 @@ private func installNovagramCallRecordHooks() {
         NovagramL10n.current.callRecording_action(isRecording)
     }
     hooks.toggle = { request in
-        NovagramCallRecording.shared.toggle(window: request.window, engine: request.engine, peerId: request.peerId, hasVideo: request.hasVideo)
+        NovagramCallRecording.shared.toggle(window: request.window, engine: request.engine, peerId: request.peerId, hasVideo: request.hasVideo, callId: request.callId)
     }
     hooks.autoStart = { request in
-        NovagramCallRecording.shared.autoStart(window: request.window, engine: request.engine, peerId: request.peerId, hasVideo: request.hasVideo)
+        NovagramCallRecording.shared.autoStart(window: request.window, engine: request.engine, peerId: request.peerId, hasVideo: request.hasVideo, callId: request.callId)
     }
     hooks.callDidUpdate = { window, state in
         NovagramCallRecording.shared.callDidUpdate(window: window, isEnded: state.isEnded, isMuted: state.isMuted)

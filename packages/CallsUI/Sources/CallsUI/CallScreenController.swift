@@ -312,6 +312,7 @@ public func callScreen(_ result:PCallResult, source: CallWindowSource? = nil) {
         
         
         
+        novagramSetCallId(arguments, session.internalId) // Novagram
         screen.update(arguments: arguments)
         screen.show(source: source, animated: true)
         

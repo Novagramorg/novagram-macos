@@ -38,6 +38,7 @@ public final class NovagramCallRecording {
     private weak var autoRetryWindow: Window?
     private var autoRetriesLeft = 0
     private var videoNoticeShown = false
+    private var noticeCallId: UUID?
     private let developerFlagDisposable = MetaDisposable()
 
     public var micDeviceId: () -> Signal<String?, NoError> = { .single(nil) }
@@ -66,7 +67,7 @@ public final class NovagramCallRecording {
         stop()
     }
 
-    public func toggle(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool) {
+    public func toggle(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool, callId: UUID?) {
         if isRecording {
             stop()
             return
@@ -81,11 +82,11 @@ public final class NovagramCallRecording {
             guard let self, let window, NovagramCallRecordingSettings.isEnabled, self.ensurePermission(window: window) else {
                 return
             }
-            self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo, isAuto: false)
+            self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo, isAuto: false, callId: callId)
         })
     }
 
-    public func autoStart(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool) {
+    public func autoStart(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool, callId: UUID?) {
         noteVideoUpgrade(hasVideo: hasVideo)
         guard #available(macOS 14.0, *), NovagramCallRecordingSettings.isAutoEnabled, window.isVisible, autoWindow !== window, recorder == nil, !isStarting else {
             return
@@ -99,7 +100,7 @@ public final class NovagramCallRecording {
             guard let self, let window, NovagramCallRecordingSettings.isAutoEnabled, self.autoWindow === window, self.recorder == nil, !self.isStarting, self.ensurePermission(window: window, isAuto: true) else {
                 return
             }
-            self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo, isAuto: true)
+            self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo, isAuto: true, callId: callId)
         }, cancel: {
             NovagramCallRecordingSettings.setAutoEnabled(false)
             NotificationCenter.default.post(name: NSNotification.Name("NovagramSettingsChanged"), object: nil)
@@ -173,7 +174,7 @@ public final class NovagramCallRecording {
     }
 
     @available(macOS 14.0, *)
-    private func start(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool, isAuto: Bool) {
+    private func start(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool, isAuto: Bool, callId: UUID?) {
         isStarting = true
         stopWhenStarted = false
         let peer = engine.data.get(TelegramEngine.EngineData.Item.Peer.Peer(id: peerId))
@@ -186,12 +187,14 @@ public final class NovagramCallRecording {
                 self.isStarting = false
                 return
             }
-            self.begin(window: window, title: peer?.debugDisplayTitle ?? "", hasVideo: hasVideo, micDeviceId: micDeviceId, isAuto: isAuto)
+            self.begin(window: window, title: peer?.debugDisplayTitle ?? "", hasVideo: hasVideo, micDeviceId: micDeviceId, isAuto: isAuto, onStarted: { [weak self] in
+                self?.sendNotice(engine: engine, peerId: peerId, callId: callId)
+            })
         }))
     }
 
     @available(macOS 14.0, *)
-    private func begin(window: Window, title: String, hasVideo: Bool, micDeviceId: String?, isAuto: Bool) {
+    private func begin(window: Window, title: String, hasVideo: Bool, micDeviceId: String?, isAuto: Bool, onStarted: @escaping () -> Void) {
         videoNoticeShown = false
         let fileExtension = hasVideo ? "mp4" : "m4a"
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("novagram-call-\(UUID().uuidString).\(fileExtension)")
@@ -224,6 +227,7 @@ public final class NovagramCallRecording {
             }
             self.isRecording = true
             self.recordingPromise.set(true)
+            onStarted()
             if let window {
                 self.attachBadge(to: window)
             }
@@ -231,6 +235,21 @@ public final class NovagramCallRecording {
                 self.stop()
             }
         }
+    }
+
+    private func sendNotice(engine: TelegramEngine, peerId: PeerId, callId: UUID?) {
+        guard let callId, noticeCallId != callId, peerId.namespace == Namespaces.Peer.CloudUser else {
+            return
+        }
+        noticeCallId = callId
+        let message = EnqueueMessage.message(text: NovagramL10n.current.callRecording_notice, attributes: [], inlineStickers: [:], mediaReference: nil, threadId: nil, replyToMessageId: nil, replyToStoryId: nil, localGroupingKey: nil, correlationId: nil, bubbleUpEmojiOrStickersets: [])
+        let _ = (enqueueMessages(account: engine.account, peerId: peerId, messages: [message]) |> deliverOnMainQueue).start(next: { ids in
+            #if DEBUG
+            if ids.isEmpty || ids.contains(where: { $0 == nil }) {
+                NovagramCallRecording.log.error("recording notice was not sent")
+            }
+            #endif
+        })
     }
 
     private func noteVideoUpgrade(hasVideo: Bool) {
@@ -280,11 +299,11 @@ public final class NovagramCallRecording {
 
     private func attachBadge(to window: Window) {
         detachBadge()
-        guard let content = window.contentView else {
+        guard window.contentView != nil else {
             return
         }
         let badge = NovagramCallRecordBadgeView()
-        badge.place(in: content)
+        badge.place(in: window)
         self.badge = badge
         closeObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification, object: window, queue: .main) { [weak self] _ in
             self?.stop()
@@ -437,6 +456,8 @@ final class NovagramCallRecordBadgeView: NSView {
     private let label = NSTextField(labelWithString: "")
     private let startDate = Date()
     private var timer: Foundation.Timer?
+    private weak var hostWindow: NSWindow?
+    private var contentObservation: NSKeyValueObservation?
 
     init() {
         super.init(frame: .zero)
@@ -469,14 +490,30 @@ final class NovagramCallRecordBadgeView: NSView {
         return nil
     }
 
-    func place(in content: NSView) {
-        content.addSubview(self)
-        layout(in: content)
+    func place(in window: NSWindow) {
+        hostWindow = window
+        contentObservation = window.observe(\.contentView, options: [.new]) { [weak self] _, _ in
+            self?.keepOnTop()
+        }
+        keepOnTop()
     }
 
     func invalidate() {
         timer?.invalidate()
         timer = nil
+        contentObservation?.invalidate()
+        contentObservation = nil
+        hostWindow = nil
+    }
+
+    private func keepOnTop() {
+        guard let content = hostWindow?.contentView else {
+            return
+        }
+        if superview !== content || content.subviews.last !== self {
+            content.addSubview(self, positioned: .above, relativeTo: nil)
+        }
+        layout(in: content)
     }
 
     private func update() {
@@ -484,9 +521,7 @@ final class NovagramCallRecordBadgeView: NSView {
         let text = String(format: "REC %02d:%02d", elapsed / 60, elapsed % 60)
         label.stringValue = text
         setAccessibilityLabel(text)
-        if let content = superview {
-            layout(in: content)
-        }
+        keepOnTop()
     }
 
     private func layout(in content: NSView) {
