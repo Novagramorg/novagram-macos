@@ -115,30 +115,77 @@ private func novagramTranslatedSections(
     guard scope.applies, NovagramSearchFeatures.isEnabled, NovagramQueryTranslator.isEnabled else {
         return .single(nil)
     }
+    let query = NovagramQueryTranslation.trimmed(scope.query)
+    guard query.count >= NovagramQueryTranslator.minQueryLength else {
+        return .single(nil)
+    }
     let engine = context.engine
     let allTargets = NovagramQueryTranslator.targets
+    let plan = NovagramSearchConversion.plan(query: query, languages: Set(allTargets.compactMap(NovagramSearchLanguage.init(rawValue:))))
+    let routes = allTargets.compactMap { novagramTranslateRoute($0, plan: plan) }
     var translations: [String: Signal<String?, NoError>] = [:]
-    for code in NovagramQueryTranslator.serverCodes(for: allTargets) {
-        translations[code] = NovagramQueryTranslator.translatedQuery(engine: engine, query: scope.query, language: code)
+    for code in NovagramQueryTranslator.serverCodes(for: routes.compactMap { $0.serverTarget }) {
+        translations[code] = NovagramQueryTranslator.translatedQuery(engine: engine, query: query, language: code)
     }
-    let targets = allTargets.filter { target in
-        NovagramQueryTranslator.serverCode(for: target).map { translations[$0] != nil } ?? false
+    var targets: [String] = []
+    var sections: [Signal<NovagramTranslatedMessages?, NoError>] = []
+    for route in routes {
+        let text: Signal<String?, NoError>
+        switch route.source {
+        case let .local(converted):
+            let section = NovagramQueryTranslation.sectionText(translation: converted, query: query)
+            text = .single(nil) |> then(.single(section) |> delay(NovagramQueryTranslation.debounceSeconds, queue: .concurrentDefaultQueue()))
+        case let .server(target):
+            guard let code = NovagramQueryTranslator.serverCode(for: target), let translation = translations[code] else {
+                continue
+            }
+            text = translation |> map { novagramTargetText($0, target: route.target, query: query) }
+        }
+        targets.append(route.target)
+        sections.append(novagramTranslatedMessages(engine, target: route.target, text: text, location: location, source: source, filter: filter))
     }
     guard !targets.isEmpty else {
         return .single(nil)
     }
-    let sections = targets.compactMap { target -> Signal<NovagramTranslatedMessages?, NoError>? in
-        guard let code = NovagramQueryTranslator.serverCode(for: target), let translation = translations[code] else {
-            return nil
-        }
-        let text = translation |> map { novagramTargetText($0, target: target, query: scope.query) }
-        return novagramTranslatedMessages(engine, target: target, text: text, location: location, source: source, filter: filter)
-    }
     let chips = NovagramTranslateChipsState()
+    let chipTargets = targets
     return combineLatest(combineLatest(sections), chips.disabled)
         |> map { sections, disabled -> NovagramTranslatedResult? in
-            return NovagramTranslatedResult(targets: targets, sections: sections.compactMap { $0 }, disabled: disabled, chips: chips)
+            return NovagramTranslatedResult(targets: chipTargets, sections: sections.compactMap { $0 }, disabled: disabled, chips: chips)
         }
+}
+
+private enum NovagramTranslateSource {
+    case local(String)
+    case server(String)
+}
+
+private struct NovagramTranslateRoute {
+    let target: String
+    let source: NovagramTranslateSource
+
+    var serverTarget: String? {
+        if case let .server(target) = source {
+            return target
+        }
+        return nil
+    }
+}
+
+private func novagramTranslateRoute(_ target: String, plan: NovagramSearchConversionPlan) -> NovagramTranslateRoute? {
+    guard let language = NovagramSearchLanguage(rawValue: target) else {
+        return NovagramTranslateRoute(target: target, source: .server(target))
+    }
+    if language == plan.sourceLanguage {
+        return nil
+    }
+    if let converted = plan.transliterations[language] {
+        return NovagramTranslateRoute(target: target, source: .local(converted))
+    }
+    if plan.translationsNeeded.contains(language) {
+        return NovagramTranslateRoute(target: target, source: .server(target))
+    }
+    return nil
 }
 
 private func novagramTargetText(_ translation: String?, target: String, query: String) -> String? {
