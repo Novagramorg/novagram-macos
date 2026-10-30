@@ -1289,6 +1289,18 @@ public struct NovagramL10n {
         )
     }
 
+    public var developer_callDataSavingTitle: String {
+        pick(en: "Use less data for calls (beta)", uz: "Qo'ng'iroqlarda kam trafik (beta)", ru: "Экономия трафика в звонках (бета)")
+    }
+
+    public var developer_callDataSavingTip: String {
+        pick(
+            en: "The \"Use less data for calls\" row in Novagram Settings → Calls",
+            uz: "Novagram sozlamalari → Qo'ng'iroqlardagi \"Qo'ng'iroqlarda kam trafik\" qatori",
+            ru: "Строка «Экономия трафика в звонках» в Настройки Novagram → Звонки"
+        )
+    }
+
     public var developer_stickerPackSaveTitle: String {
         pick(en: "Save sticker packs", uz: "Stiker paketlarini saqlash", ru: "Сохранение наборов стикеров")
     }

@@ -24,6 +24,16 @@ public enum NovagramDeveloperFlags {
     private static let adEventsOffKey = "novagram_ads_events_off"
     private static let searchFeaturesKey = "novagram_dev_search_features"
     private static let callRecordingKey = "novagram_dev_call_recording"
+    private static let callDataSavingKey = "novagram_dev_call_data_saving"
+
+    public static var isCallDataSavingEnabled: Bool {
+        get { return self.value(forKey: self.callDataSavingKey) }
+        set { self.setValue(newValue, forKey: self.callDataSavingKey) }
+    }
+
+    public static var callDataSavingSignal: Signal<Bool, NoError> {
+        return self.signal { self.isCallDataSavingEnabled }
+    }
 
     public static var isSearchFeaturesEnabled: Bool {
         get { return self.value(forKey: self.searchFeaturesKey) }
@@ -124,6 +134,7 @@ public enum NovagramDeveloperRole: String {
         case stickerPackSave
         case searchFeatures
         case callRecording
+        case callDataSaving
     }
 
     private static let udSuite = "pro_messager"
@@ -138,7 +149,7 @@ public enum NovagramDeveloperRole: String {
             switch item {
             case .adEventsOff, .adsPanel:
                 return true
-            case .removeAllAds, .currencyRatesView, .stickerPackSave, .searchFeatures, .callRecording:
+            case .removeAllAds, .currencyRatesView, .stickerPackSave, .searchFeatures, .callRecording, .callDataSaving:
                 return false
             }
         }
@@ -185,6 +196,9 @@ public enum NovagramDeveloperRole: String {
         }
         if !role.canUse(.callRecording) && NovagramDeveloperFlags.isCallRecordingEnabled {
             NovagramDeveloperFlags.isCallRecordingEnabled = false
+        }
+        if !role.canUse(.callDataSaving) && NovagramDeveloperFlags.isCallDataSavingEnabled {
+            NovagramDeveloperFlags.isCallDataSavingEnabled = false
         }
         NotificationCenter.default.post(name: .novagramDeveloperFlagsChanged, object: nil)
     }

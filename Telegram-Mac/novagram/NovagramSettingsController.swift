@@ -139,6 +139,7 @@ private struct NovagramSettingsState: Equatable {
     var stickerPackSave: Bool = false
     var devSearchFeatures: Bool = false
     var devCallRecording: Bool = false
+    var devCallDataSaving: Bool = false
     var adEventsOff: Bool = false
     var callRecording: Bool = false
     var callRecordingFolder: String? = nil
@@ -242,7 +243,7 @@ private enum NovagramEntryId: Hashable {
     case protectionChatLock, protectionProxy, protectionForeign, protectionAutoDownload, protectionFooter
     case appearanceAccent, appearanceFooter
     case remindersUnread, remindersTime, remindersSound, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoFolderStyle, autoChannelHistory, autoStoryUnlock, autoTranslateChats, actionShareLink, autoFooter
-    case adsRemoveAll, devAdEventsOff, devCurrencyRates, devAdsPanel, devStickerPackSave, devSearchFeatures, devCallRecording, devFooter
+    case adsRemoveAll, devAdEventsOff, devCurrencyRates, devAdsPanel, devStickerPackSave, devSearchFeatures, devCallRecording, devCallDataSaving, devFooter
     case callRecording, callRecordingFolder, callRecordingFooter, callRecordingAuto, callDataSaving
 }
 
@@ -303,6 +304,7 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .devStickerPackSave:       map = ("square.and.arrow.down.on.square.fill", .orange)
     case .devSearchFeatures:        map = ("magnifyingglass", .blue)
     case .devCallRecording:         map = ("record.circle", .red)
+    case .devCallDataSaving:        map = ("antenna.radiowaves.left.and.right", .green)
     case .devAdEventsOff:           map = ("eye.slash.circle.fill", .red)
     case .callRecording:            map = ("record.circle", .red)
     case .callRecordingFolder:      map = ("folder.fill", .blue)
@@ -509,6 +511,8 @@ private enum NovagramEntry: Comparable, Identifiable {
                         NovagramDeveloperFlags.isSearchFeaturesEnabled = !value
                     case .devCallRecording:
                         NovagramDeveloperFlags.isCallRecordingEnabled = !value
+                    case .devCallDataSaving:
+                        NovagramDeveloperFlags.isCallDataSavingEnabled = !value
                     default:
                         break
                     }
@@ -591,17 +595,22 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.toggle(next(), .sttVoiceTranslate, l10n.settings_voiceTranslate_title, l10n.settings_voiceTranslate_subtitle, state.voiceTranslateEnabled, .lastItem, NovagramDefaultsKey.voiceTranslateEnabled))
 
     // ─── CALLS (Mac only) ───
-    entries.append(.section(sectionId)); sectionId += 1
-    entries.append(.header(next(), .header(9), l10n.callRecording_section))
-    if NovagramCallRecordingSettings.isSupported && state.devCallRecording {
-        entries.append(.toggle(next(), .callRecording, l10n.callRecording_title, l10n.callRecording_subtitle, state.callRecording, state.callRecording ? .firstItem : .singleItem, NovagramDefaultsKey.callRecording))
-        if state.callRecording {
-            entries.append(.toggle(next(), .callRecordingAuto, l10n.callRecording_auto_title, l10n.callRecording_auto_subtitle, state.callRecordingAuto, .innerItem, NovagramDefaultsKey.callRecordingAuto))
-            entries.append(.disclosurePlaceholder(next(), .callRecordingFolder, l10n.callRecording_saveTo, state.callRecordingFolder ?? l10n.callRecording_askEveryTime, .lastItem, "call_recording_folder"))
+    let showsCallRecording = NovagramCallRecordingSettings.isSupported && state.devCallRecording
+    if showsCallRecording || state.devCallDataSaving {
+        entries.append(.section(sectionId)); sectionId += 1
+        entries.append(.header(next(), .header(9), l10n.callRecording_section))
+        if showsCallRecording {
+            entries.append(.toggle(next(), .callRecording, l10n.callRecording_title, l10n.callRecording_subtitle, state.callRecording, state.callRecording ? .firstItem : .singleItem, NovagramDefaultsKey.callRecording))
+            if state.callRecording {
+                entries.append(.toggle(next(), .callRecordingAuto, l10n.callRecording_auto_title, l10n.callRecording_auto_subtitle, state.callRecordingAuto, .innerItem, NovagramDefaultsKey.callRecordingAuto))
+                entries.append(.disclosurePlaceholder(next(), .callRecordingFolder, l10n.callRecording_saveTo, state.callRecordingFolder ?? l10n.callRecording_askEveryTime, .lastItem, "call_recording_folder"))
+            }
+            entries.append(.footer(next(), .callRecordingFooter, l10n.callRecording_footer))
         }
-        entries.append(.footer(next(), .callRecordingFooter, l10n.callRecording_footer))
+        if state.devCallDataSaving {
+            entries.append(.toggle(next(), .callDataSaving, l10n.callDataSaving_title, l10n.callDataSaving_subtitle, state.callDataSaving, .singleItem, NovagramDefaultsKey.callDataSaving))
+        }
     }
-    entries.append(.toggle(next(), .callDataSaving, l10n.callDataSaving_title, l10n.callDataSaving_subtitle, state.callDataSaving, .singleItem, NovagramDefaultsKey.callDataSaving))
 
     // ─── AUTOMATION & FOLDERS ───
     entries.append(.section(sectionId)); sectionId += 1
@@ -655,7 +664,8 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
             (.adsPanel, { .developerToggle($0, .devAdsPanel, l10n.developer_adsPanelTitle, l10n.developer_adsPanelTip, state.adsPanel, $1) }),
             (.stickerPackSave, { .developerToggle($0, .devStickerPackSave, l10n.developer_stickerPackSaveTitle, l10n.developer_stickerPackSaveTip, state.stickerPackSave, $1) }),
             (.searchFeatures, { .developerToggle($0, .devSearchFeatures, l10n.developer_searchFeaturesTitle, l10n.developer_searchFeaturesTip, state.devSearchFeatures, $1) }),
-            (.callRecording, { .developerToggle($0, .devCallRecording, l10n.developer_callRecordingTitle, l10n.developer_callRecordingTip, state.devCallRecording, $1) })
+            (.callRecording, { .developerToggle($0, .devCallRecording, l10n.developer_callRecordingTitle, l10n.developer_callRecordingTip, state.devCallRecording, $1) }),
+            (.callDataSaving, { .developerToggle($0, .devCallDataSaving, l10n.developer_callDataSavingTitle, l10n.developer_callDataSavingTip, state.devCallDataSaving, $1) })
         ]
         let visibleRows = developerRows.filter { state.developerRole.canUse($0.item) }
         for (index, row) in visibleRows.enumerated() {
@@ -916,7 +926,7 @@ class NovagramSettingsController: TableViewController {
             }
         }))
 
-        developerDisposable.set(combineLatest(NovagramDeveloperFlags.currencyRatesViewSignal, NovagramDeveloperFlags.adsPanelSignal, NovagramDeveloperFlags.stickerPackSaveSignal, NovagramDeveloperFlags.adEventsOffSignal, NovagramDeveloperRole.currentSignal, NovagramDeveloperFlags.searchFeaturesSignal, NovagramDeveloperFlags.callRecordingSignal).start(next: { currencyRatesView, adsPanel, stickerPackSave, adEventsOff, developerRole, devSearchFeatures, devCallRecording in
+        developerDisposable.set(combineLatest(NovagramDeveloperFlags.currencyRatesViewSignal, NovagramDeveloperFlags.adsPanelSignal, NovagramDeveloperFlags.stickerPackSaveSignal, NovagramDeveloperFlags.adEventsOffSignal, NovagramDeveloperRole.currentSignal, NovagramDeveloperFlags.searchFeaturesSignal, NovagramDeveloperFlags.callRecordingSignal, NovagramDeveloperFlags.callDataSavingSignal).start(next: { currencyRatesView, adsPanel, stickerPackSave, adEventsOff, developerRole, devSearchFeatures, devCallRecording, devCallDataSaving in
             updateState { state in
                 state.currencyRatesView = currencyRatesView
                 state.adsPanel = adsPanel
@@ -925,6 +935,7 @@ class NovagramSettingsController: TableViewController {
                 state.developerRole = developerRole
                 state.devSearchFeatures = devSearchFeatures
                 state.devCallRecording = devCallRecording
+                state.devCallDataSaving = devCallDataSaving
             }
         }))
 
@@ -1024,6 +1035,7 @@ private func novagramSettingsEntryId(slug: String) -> NovagramEntryId? {
 
 private let novagramSearchSettingsSlugs: Set<String> = ["search-features", "search-translate", "search-translate-langs"]
 private let novagramCallRecordingSettingsSlugs: Set<String> = ["call-recording", "call-recording-folder", "call-recording-auto"]
+private let novagramCallDataSavingSettingsSlug = "call-data-saving"
 
 func novagramSettingsSlugAllowed(_ slug: String) -> Bool {
     if novagramSearchSettingsSlugs.contains(slug) {
@@ -1031,6 +1043,9 @@ func novagramSettingsSlugAllowed(_ slug: String) -> Bool {
     }
     if novagramCallRecordingSettingsSlugs.contains(slug) {
         return NovagramDeveloperFlags.isCallRecordingEnabled
+    }
+    if slug == novagramCallDataSavingSettingsSlug {
+        return NovagramDeveloperFlags.isCallDataSavingEnabled
     }
     return true
 }
