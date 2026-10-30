@@ -48,7 +48,7 @@ public final class NovagramJobAlertMonitor {
     }
 
     public func stop(context: any AccountContextProtocol) {
-        guard let current = self.context, current.account.id == context.account.id else {
+        guard let current = self.context, (current as AnyObject) === (context as AnyObject) else {
             return
         }
         reset()
@@ -79,19 +79,22 @@ public final class NovagramJobAlertMonitor {
         }
     }
 
-    func pageDidOpen(account: NovagramJobAccount, load: @escaping (String) -> Void) -> Int {
+    func pageDidAppear(account: NovagramJobAccount, load: @escaping (String) -> Void) -> Int {
         nextPageToken += 1
         pages[nextPageToken] = NovagramJobAlertPage(recordId: account.recordId, load: load)
         return nextPageToken
     }
 
-    func pageDidClose(token: Int) {
+    func pageDidDisappear(token: Int) {
         pages[token] = nil
     }
 
     public func handleNotificationClick(_ userInfo: [AnyHashable: Any]) -> Bool {
         guard let searchId = userInfo[NovagramJobAlertMonitor.searchIdKey] as? String else {
             return false
+        }
+        guard NovagramJobSearchAvailability.isEnabled else {
+            return true
         }
         guard let context, (userInfo[NovagramJobAlertMonitor.accountKey] as? Int64) == context.peerId.toInt64() else {
             return true

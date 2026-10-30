@@ -74,7 +74,7 @@ let uzLatinVacancy = """
 🕘 Ish vaqti: 9:00-18:00, to'liq stavka, ofisda
 📌 Tajriba: kamida 2 yil
 📞 +998 90 123-45-67
-✉️ @hr_uzum
+✉️ @hr_example_uz
 """
 let info1 = NovagramJobPostParser.parse(uzLatinVacancy)
 checkEqual(info1.kind, .vacancy, "uz latin vacancy kind")
@@ -87,7 +87,7 @@ checkEqual(info1.cityIds, ["tashkent"], "uz latin city")
 checkEqual(info1.formats, [.office], "uz latin office format")
 checkEqual(info1.employment, [.fullTime], "uz latin full time")
 checkEqual(info1.experienceYears, 2, "uz latin experience")
-checkEqual(info1.contacts, [.phone("+998901234567"), .username("hr_uzum")], "uz latin contacts")
+checkEqual(info1.contacts, [.phone("+998901234567"), .username("hr_example_uz")], "uz latin contacts")
 
 let ruVacancy = """
 #вакансия
@@ -96,7 +96,7 @@ let ruVacancy = """
 Зарплата: от 5 000 000 до 8 000 000 сум
 Опыт работы от 1 года
 Тел: +998 (93) 555 44 33
-hr@company.uz
+hr@example.uz
 """
 let info2 = NovagramJobPostParser.parse(ruVacancy)
 checkEqual(info2.kind, .vacancy, "ru vacancy kind")
@@ -104,7 +104,7 @@ checkEqual(info2.title, "Требуется менеджер по продажа
 checkEqual(info2.salary, NovagramJobSalary(text: "от 5 000 000 до 8 000 000 сум", min: 5_000_000, max: 8_000_000, currency: .uzs), "ru salary range with от/до")
 checkEqual(info2.cityIds, ["tashkent"], "ru city with г.")
 checkEqual(info2.experienceYears, 1, "ru experience")
-checkEqual(info2.contacts, [.phone("+998935554433"), .email("hr@company.uz")], "ru contacts")
+checkEqual(info2.contacts, [.phone("+998935554433"), .email("hr@example.uz")], "ru contacts")
 
 let uzCyrillicVacancy = """
 #вакансия
@@ -129,7 +129,7 @@ Looking for a job: iOS developer
 3 years of experience with Swift
 Remote or hybrid
 Expected salary: $1500+
-Contact: @ali_dev, https://github.com/alidev.
+Contact: @dev_example, https://github.com/alidev.
 """
 let info4 = NovagramJobPostParser.parse(enResume)
 checkEqual(info4.kind, .resume, "en resume kind")
@@ -138,7 +138,7 @@ checkEqual(info4.experienceYears, 3, "en experience")
 checkEqual(info4.formats, [.remote, .hybrid], "en formats")
 checkEqual(info4.salary?.min, 1500, "$1500+ min")
 checkEqual(info4.salary?.max, nil, "$1500+ has no max")
-checkEqual(info4.contacts, [.username("ali_dev"), .link("https://github.com/alidev")], "en contacts trim punctuation")
+checkEqual(info4.contacts, [.username("dev_example"), .link("https://github.com/alidev")], "en contacts trim punctuation")
 
 let uzResume = """
 #rezyume
@@ -173,7 +173,7 @@ checkEqual(info6.salary?.min, 80_000, "rub salary")
 checkEqual(info6.salary?.currency, .rub, "руб is rub")
 checkEqual(info6.contacts, [.phone("+79991234567")], "+7 phone")
 
-checkEqual(NovagramJobPostParser.parse("Sotuv menejeri kerak. Rezyumeni @hr_team ga yuboring").kind, .vacancy, "send-resume request counts as vacancy")
+checkEqual(NovagramJobPostParser.parse("Sotuv menejeri kerak. Rezyumeni @example_hr_team ga yuboring").kind, .vacancy, "send-resume request counts as vacancy")
 checkEqual(NovagramJobPostParser.parse("Salom hammaga, yaxshi kun").kind, .unknown, "no markers is unknown")
 checkEqual(NovagramJobPostParser.parse("Maosh yaxshi.\nTel: +998 90 123 45 67").salary, nil, "phone is not a salary")
 checkEqual(NovagramJobPostParser.parse("Ish haqi 2026-yil 1-yanvardan oshadi").salary, nil, "year and date are not a salary")
@@ -189,7 +189,7 @@ checkEqual(NovagramJobPostParser.parse("до 2000$ в месяц").salary?.max, 
 checkEqual(NovagramJobPostParser.parse("Зарплата по договоренности").salary?.isNegotiable, true, "ru negotiable")
 checkEqual(NovagramJobPostParser.parse("Офис в Ташкенте и Самарканде, в г. Фергане").cityIds, ["tashkent", "samarkand", "fergana"], "ru city declensions in order")
 checkEqual(NovagramJobPostParser.parse("Qo‘qon va Farg'onada filiallar, Toshkentda ham").cityIds, ["kokand", "fergana", "tashkent"], "uz latin cities with apostrophes")
-checkEqual(NovagramJobPostParser.parse("Email: info@novagram.uz, @username_ok, t.me/novagram_jobs").contacts, [.email("info@novagram.uz"), .username("username_ok"), .link("t.me/novagram_jobs")], "email, username, t.me link")
+checkEqual(NovagramJobPostParser.parse("Email: info@example.com, @example_user_ok, t.me/novagram_jobs").contacts, [.email("info@example.com"), .username("example_user_ok"), .link("t.me/novagram_jobs")], "email, username, t.me link")
 checkEqual(NovagramJobPostParser.parse("2+ years iOS, 18 years old").experienceYears, 2, "2+ years")
 let longTitle = NovagramJobPostParser.parse("🔥🔥 " + String(repeating: "Juda uzun sarlavha ", count: 10)).title ?? ""
 check(longTitle.count <= NovagramJobPostParser.maxTitleLength && longTitle.hasPrefix("Juda"), "title stripped and clipped")
@@ -233,9 +233,9 @@ We provide a 100% profitable trading strategy. Join now: t.me/megacoin_signals
 #ios #swift #iphone
 """
 let chineseSpam = "限时优惠！苹果 iOS 手机 低价出售，正品保证，联系微信 abc123 #ios #swift 全国包邮 欢迎咨询"
-let casinoSpam = "Казино онлайн! Ставки на спорт, бонус 100%. Нужен только телефон, вывод на карту от 500 000 сум. @lucky_casino_bot"
+let casinoSpam = "Казино онлайн! Ставки на спорт, бонус 100%. Нужен только телефон, вывод на карту от 500 000 сум. @example_casino_bot"
 let airdropSpam = "Free airdrop! Claim your token now, pump x100 guaranteed. Apply here: https://example.com/claim #swift"
-let bettingSpam = "Betting tips for iOS app users: earn $500 daily, write @tipster_pro"
+let bettingSpam = "Betting tips for iOS app users: earn $500 daily, write @example_tipster"
 checkEqual(NovagramJobPostParser.parse(cryptoSpam).kind, .unknown, "crypto spam is not a job post")
 check(!acceptedForJob(cryptoSpam), "crypto spam rejected for findJob query")
 check(!acceptedForJob(cryptoSpam, query: emptyQuery), "crypto spam rejected for empty query")
@@ -246,16 +246,16 @@ checkEqual(NovagramJobPostParser.parse(airdropSpam).kind, .unknown, "airdrop spa
 checkEqual(NovagramJobPostParser.parse(bettingSpam).kind, .unknown, "betting spam is not a job post")
 checkEqual(NovagramJobPostParser.parse("Crypto birjaga backend dasturchi kerak, #vakansiya, oylik 2000$").kind, .vacancy, "crypto company vacancy survives the spam guard")
 checkEqual(NovagramJobPostParser.parse("Bizning do'konga sotuvchi kerak. Maosh 4 mln so'm, Chilonzor. Tel 90 123 45 67").kind, .vacancy, "uz latin role kerak")
-check(acceptedForJob("iOS developer kerak, remote, tajriba 2 yil, @hr_company"), "uz latin iOS developer kerak accepted")
+check(acceptedForJob("iOS developer kerak, remote, tajriba 2 yil, @example_hr_company"), "uz latin iOS developer kerak accepted")
 checkEqual(NovagramJobPostParser.parse("Ofisga kerak: 2 nafar, ish vaqti 9-18").kind, .vacancy, "bare kerak with job word and office")
 checkEqual(NovagramJobPostParser.parse("Bugun havo yaxshi, soyabon kerak").kind, .unknown, "bare kerak without job signal stays unknown")
 checkEqual(NovagramJobPostParser.parse("Дастурчи керак, ойлик 10 млн сўм").kind, .vacancy, "uz cyrillic role керак")
 checkEqual(NovagramJobPostParser.parse("Нужен водитель на доставку, оплата ежедневно, +998 93 555 44 33").kind, .vacancy, "ru нужен")
 checkEqual(NovagramJobPostParser.parse("Приглашаем Android-разработчика, удалённо").kind, .vacancy, "ru приглашаем")
 checkEqual(NovagramJobPostParser.parse("Мы в поиске SMM-специалиста на позицию в Ташкенте").kind, .vacancy, "ru в поиске and на позицию")
-check(acceptedForJob("We’re looking for a Swift engineer to join our team. Apply via @talent_hr"), "en we're looking for accepted")
+check(acceptedForJob("We’re looking for a Swift engineer to join our team. Apply via @example_talent_hr"), "en we're looking for accepted")
 checkEqual(NovagramJobPostParser.parse("Open role: Product designer (hybrid, Tashkent)").kind, .vacancy, "en open role")
-checkEqual(NovagramJobPostParser.parse("Python backend\nOylik: 1500$\nRemote\n@hr_python").kind, .vacancy, "salary, contact and format make a weak vacancy")
+checkEqual(NovagramJobPostParser.parse("Python backend\nOylik: 1500$\nRemote\n@example_hr_python").kind, .vacancy, "salary, contact and format make a weak vacancy")
 checkEqual(NovagramJobPostParser.parse("Ish kerak, 22 yosh, kompyuterni yaxshi bilaman").kind, .resume, "ish kerak is a resume")
 checkEqual(NovagramJobPostParser.parse("Нужна работа, опыт 3 года, удалённо").kind, .resume, "нужна работа is a resume")
 checkEqual(NovagramJobPostParser.parse("В поиске работы: frontend developer, 2 years").kind, .resume, "в поиске работы is a resume")

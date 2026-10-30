@@ -717,25 +717,39 @@ public func NovagramJobSearchController(context: any AccountContextProtocol, sav
         }
     }
 
+    let markShownAsSeen: (NovagramJobSearchState) -> Void = { search in
+        guard search.hasRun, !search.isLoading, let newest = search.items.filter({ $0.source != .global }).map({ $0.message.timestamp }).max() else {
+            return
+        }
+        let filter = stateValue.with { $0.filter }
+        for saved in NovagramJobStore.savedSearches(account: account) where saved.filter == filter && saved.lastSeenDate < newest {
+            var updated = saved
+            updated.lastSeenDate = newest
+            NovagramJobStore.save(updated, account: account)
+        }
+    }
+
     actionsDisposable.add((engine.stateSignal |> deliverOnMainQueue).start(next: { search in
         updateState { current in
             var current = current
             current.search = search
             return current
         }
+        markShownAsSeen(search)
     }))
 
     let storeObserver = NotificationCenter.default.addObserver(forName: NovagramJobStore.didChangeNotification, object: nil, queue: .main, using: { _ in
         reloadStore()
     })
 
-    let pageToken = NovagramJobAlertMonitor.shared.pageDidOpen(account: account, load: { searchId in
+    var pageToken: Int?
+    let loadSavedSearch: (String) -> Void = { searchId in
         guard let saved = NovagramJobStore.savedSearches(account: account).first(where: { $0.id == searchId }) else {
             return
         }
         NovagramJobAlertMonitor.shared.markSeen(account: account)
         updateFilter { $0 = saved.filter }
-    })
+    }
 
     reloadStore()
     runSearch()
@@ -756,8 +770,22 @@ public func NovagramJobSearchController(context: any AccountContextProtocol, sav
         return controller
     }
 
+    controller.didAppear = { _ in
+        if pageToken == nil {
+            pageToken = NovagramJobAlertMonitor.shared.pageDidAppear(account: account, load: loadSavedSearch)
+        }
+    }
+    controller.didDisappear = { _ in
+        if let token = pageToken {
+            NovagramJobAlertMonitor.shared.pageDidDisappear(token: token)
+            pageToken = nil
+        }
+    }
+
     controller.onDeinit = {
-        NovagramJobAlertMonitor.shared.pageDidClose(token: pageToken)
+        if let token = pageToken {
+            NovagramJobAlertMonitor.shared.pageDidDisappear(token: token)
+        }
         NotificationCenter.default.removeObserver(storeObserver)
         engine.cancel()
         actionsDisposable.dispose()

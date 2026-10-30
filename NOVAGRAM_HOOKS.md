@@ -599,7 +599,7 @@ Filters get "Convert languages": a multi-select over `NovagramSearchLanguage.all
 
 ## TGUIKit: mouse wheel on the search category bar
 
-`packages/TGUIKit/Sources/HorizontalTableView.swift` (2026-10-29, Telegram bug): `HorizontalScrollView.scrollWheel` added the vertical wheel delta as points, but a mouse wheel reports lines (1–3), so the search category bar moved 1–3 px per notch and looked stuck (Shift+wheel worked through AppKit). The two `scrollPoint.x` lines use `novagramWheelDeltaY(event)` (`NovagramWheelDelta.swift`: lines × `horizontalLineScroll` for non-precise devices, unchanged for trackpads). Manual repro: focus the chat list search, put the pointer on the category bar, turn a mouse wheel without Shift: the bar scrolls.
+`packages/TGUIKit/Sources/HorizontalTableView.swift` (2026-10-29, Telegram bug): `HorizontalScrollView.scrollWheel` added the vertical wheel delta as points, but a mouse wheel reports lines (1–3), so the search category bar moved 1–3 px per notch and looked stuck (Shift+wheel worked through AppKit). The two `scrollPoint.x` lines use `novagramWheelDeltaY(event)` (`NovagramWheelDelta.swift`: lines × `horizontalLineScroll` for non-precise devices, unchanged for trackpads). Manual repro: focus the chat list search, put the pointer on the category bar, turn a mouse wheel without Shift: the bar scrolls. The fix applies to every HorizontalScrollView with a mouse wheel (theme lists, reactions, gifts, chat theme selectors, …); trackpads are unchanged; `makeScrollPoint` is left as is.
 
 ## Job search, job channels rows and relevance (branch `feature/job-search`, 2026-10-29)
 
@@ -613,3 +613,14 @@ Filters get "Convert languages": a multi-select over `NovagramSearchLanguage.all
 - Open post bug ("open post qilsam open bo'lmayapti"): results from `searchHashtagPosts` / global posts are rendered from the server reply and not stored in Postbox. For a public channel the account has not joined, `navigateToChat` (`Telegram-Mac/app/ApplicationContext.swift:62`) reads the peer from Postbox (`engine.data.get(Peer.Peer)`), gets nil and silently does nothing. Telegram's own search calls `engine.messages.ensureMessagesAreLocallyAvailable` before opening a found message (`SearchController.selectionDidChange`). The `openMessage` hook (`NovagramJobSearchHooks`, now takes the `Message`) does the same before `navigateToChat`; Write stores the message too before opening the author. Debug builds log `NovagramJobSearch: open post <id>` there. Nothing was removed. Manual repro: Job search (`tg://novagram/jobs`), empty query, Find a job, "Open post" on a card from a channel you have not joined (e.g. "HoReCa jobs Uzbekistan"): the channel opens scrolled to that post.
 
 No Telegram file changed in this round.
+
+## Job search, pre-merge review fixes (branch `feature/job-search`, 2026-10-30)
+
+- Open page tracking: the page registers with `NovagramJobAlertMonitor` in `didAppear` and unregisters in `didDisappear` (and on deinit), not for its whole life. A Job page left in the stack under a chat opened with "Open post" no longer blocks alert runs, and a notification click loads the search into the page only while it is the visible one; otherwise it pushes a new page.
+- Seen posts: while the page shows a filter equal to a saved search's filter, that search's `lastSeenDate` moves to the newest shown post from the free sources (global posts are not counted), so alerts do not announce posts the user already saw.
+- `NovagramJobAlertMonitor.stop(context:)` compares the context object (`===`), not `account.id`: a rebuilt context of the same account cannot stop the new monitor.
+- Notification click: while `novagram_search_features` is off the click is swallowed (returns true, nothing opens).
+- Spam guard (`NovagramJobSpamGuard.swift`, same change in `novagram-search-kit-sdk` `Jobs/NovagramJobSpamGuard.swift`, commit `e618ac7`, test `testSpamGuardUsesWholeWords`): "picks" / "guide" next to a promo domain count only as whole words ("guidelines" + "company.com" is kept); coin(s), token(s), pump and trading count only as whole words and only when two of them appear together ("X Trading vakansiya" and "coinbase_careers" are kept, "coin pump club" is dropped); the strong markers (crypto, altcoin, pepe, signals, forex, binance, airdrop, casino, betting, …) are unchanged.
+- Translations (`NovagramJobTranslations.swift`): each language gets at most 8 s (after that the search runs without it), and only non-empty translations are cached, so a failure is retried next time.
+
+No Telegram file changed.
