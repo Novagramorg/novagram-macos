@@ -4,6 +4,7 @@ import SwiftSignalKit
 import TelegramCore
 import TelegramContext
 import NovagramCore
+import NovagramSearchKit
 
 struct NovagramTranslatedMessages {
     let text: String
@@ -26,11 +27,11 @@ struct NovagramTranslatedScope {
         guard target.isCommon, options.contains(.messages), tags.isEmpty else {
             return false
         }
-        return !query.hasPrefix("#") && !query.hasPrefix("$")
+        return !NovagramQueryTranslation.skippedPrefixes.contains(where: { query.hasPrefix($0) })
     }
 }
 
-private let novagramTranslatedLimit = 20
+private let novagramTranslatedLimit = NovagramSearchPaging.translatedResultLimit
 
 func novagramTranslatedSearch(
     _ context: any AccountContextProtocol,

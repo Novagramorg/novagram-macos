@@ -1,20 +1,16 @@
 import Foundation
 import SwiftSignalKit
+import NovagramSearchKit
 
 public enum NovagramSearchFeatures {
-    public static let key = "novagram_search_features"
-
-    private static let suiteName = "pro_messager"
+    public static let key = NovagramSearchSettings.Keys.searchFeatures
 
     public static var isEnabled: Bool {
         get {
-            guard let defaults = UserDefaults(suiteName: suiteName), defaults.object(forKey: key) != nil else {
-                return true
-            }
-            return defaults.bool(forKey: key)
+            return NovagramSearchSettings.shared.isSearchFeaturesEnabled
         }
         set {
-            UserDefaults(suiteName: suiteName)?.set(newValue, forKey: key)
+            NovagramSearchSettings.shared.isSearchFeaturesEnabled = newValue
         }
     }
 

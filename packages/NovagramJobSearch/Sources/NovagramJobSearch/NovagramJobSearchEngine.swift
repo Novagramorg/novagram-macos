@@ -4,6 +4,7 @@ import Postbox
 import TelegramCore
 import TelegramContext
 import NovagramCore
+import NovagramSearchKit
 
 public enum NovagramJobSource: String, Hashable {
     case hashtags
@@ -90,7 +91,7 @@ public final class NovagramJobSearchEngine {
     private var isWaiting = false
     private var generation = 0
     private var filter = NovagramJobFilter()
-    private var query = NovagramJobQuery.parse("")
+    private var query = NovagramSearchQuery.parse("")
     private var found: [MessageId: NovagramJobResult] = [:]
     private var globalFound: [MessageId: NovagramJobResult] = [:]
     private var remember = true
@@ -140,7 +141,7 @@ public final class NovagramJobSearchEngine {
             }
             self.generation += 1
             self.filter = filter
-            self.query = NovagramJobQuery.parse(filter.query, languages: filter.languages, translations: [:])
+            self.query = NovagramSearchQuery.parse(filter.query, languages: filter.languages, translations: [:])
             self.remember = remember
             let generation = self.generation
             self.cancelTasks()
@@ -253,7 +254,7 @@ public final class NovagramJobSearchEngine {
             guard let self, generation == self.generation else {
                 return
             }
-            self.query = NovagramJobQuery.parse(filter.query, languages: filter.languages, translations: translations)
+            self.query = NovagramSearchQuery.parse(filter.query, languages: filter.languages, translations: translations)
             self.begin(generation: generation, filter: filter, sources: sources)
         }))
     }

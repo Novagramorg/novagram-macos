@@ -111,7 +111,7 @@ func novagramJobSearchDidStop(context: AccountContext) {
 }
 
 func novagramJobSearchClear(accountRecordId: AccountRecordId) {
-    NovagramJobStore.clear(accountRecordId: accountRecordId.int64)
+    NovagramJobSearchData.clear(accountRecordId: accountRecordId.int64)
     NovagramJobAlertMonitor.shared.clearUnseen(accountRecordId: accountRecordId.int64)
 }
 

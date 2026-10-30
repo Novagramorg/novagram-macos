@@ -1,6 +1,7 @@
 import Foundation
 import Postbox
 import TelegramCore
+import NovagramSearchKit
 
 enum NovagramJobMessageContacts {
     static let maxContacts = 5

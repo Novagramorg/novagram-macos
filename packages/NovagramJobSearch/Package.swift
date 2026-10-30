@@ -13,6 +13,7 @@ let deps: [(String, String)] = [
     ("ShortPeerRow", "../ShortPeerRow"),
     ("InputDataUI", "../InputDataUI"),
     ("NovagramCore", "../NovagramCore"),
+    ("NovagramSearchKit", "../NovagramSearchKit"),
 ]
 
 let package = Package(

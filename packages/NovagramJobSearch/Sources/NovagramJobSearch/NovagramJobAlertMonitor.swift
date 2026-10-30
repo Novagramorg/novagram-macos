@@ -5,6 +5,7 @@ import TelegramCore
 import TelegramContext
 import UserNotifications
 import NovagramCore
+import NovagramSearchKit
 
 private struct NovagramJobAlertRequest {
     let source: NovagramJobSource
@@ -183,7 +184,7 @@ public final class NovagramJobAlertMonitor {
         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
     }
 
-    private static func requestKeys(for search: NovagramJobSavedSearch, query: NovagramJobQuery, watched: [Int64]) -> [(key: String, source: NovagramJobSource, text: String, preset: Bool)] {
+    private static func requestKeys(for search: NovagramJobSavedSearch, query: NovagramSearchQuery, watched: [Int64]) -> [(key: String, source: NovagramJobSource, text: String, preset: Bool)] {
         var keys: [(key: String, source: NovagramJobSource, text: String, preset: Bool)] = []
         let presetTags = Set(NovagramJobSearchEngine.cleanHashtags(NovagramJobPresets.hashtags(for: search.filter.mode)).map { $0.lowercased() })
         let presets = NovagramJobSearchEngine.cleanHashtags(NovagramJobSearchEngine.runHashtags(search.filter))
@@ -204,14 +205,14 @@ public final class NovagramJobAlertMonitor {
     }
 
     static func fetch(context: any AccountContextProtocol, searches: [NovagramJobSavedSearch], watched: [Int64]) -> Signal<[NovagramJobAlertOutcome], NoError> {
-        let querySignals = searches.map { search -> Signal<(String, NovagramJobQuery), NoError> in
+        let querySignals = searches.map { search -> Signal<(String, NovagramSearchQuery), NoError> in
             let filter = search.filter
             let needed = NovagramSearchConversion.plan(query: filter.query, languages: filter.languages).translationsNeeded
             guard !needed.isEmpty else {
-                return .single((search.id, NovagramJobQuery.parse(filter.query, languages: filter.languages, translations: [:])))
+                return .single((search.id, NovagramSearchQuery.parse(filter.query, languages: filter.languages, translations: [:])))
             }
             return NovagramJobTranslations.fetch(engine: context.engine, query: filter.query, needed: needed) |> map { translations in
-                (search.id, NovagramJobQuery.parse(filter.query, languages: filter.languages, translations: translations))
+                (search.id, NovagramSearchQuery.parse(filter.query, languages: filter.languages, translations: translations))
             }
         }
         return combineLatest(querySignals) |> mapToSignal { pairs -> Signal<[NovagramJobAlertOutcome], NoError> in
@@ -220,7 +221,7 @@ public final class NovagramJobAlertMonitor {
         }
     }
 
-    private static func fetchPosts(context: any AccountContextProtocol, searches: [NovagramJobSavedSearch], watched: [Int64], queries: [String: NovagramJobQuery]) -> Signal<[NovagramJobAlertOutcome], NoError> {
+    private static func fetchPosts(context: any AccountContextProtocol, searches: [NovagramJobSavedSearch], watched: [Int64], queries: [String: NovagramSearchQuery]) -> Signal<[NovagramJobAlertOutcome], NoError> {
         let engine = context.engine
         let now = NovagramJobSearchEngine.now()
         let floor = searches.map { max($0.lastSeenDate, $0.filter.period.minDate(now: now) ?? 0) }.min() ?? 0
@@ -229,7 +230,7 @@ public final class NovagramJobAlertMonitor {
         var requests: [String: NovagramJobAlertRequest] = [:]
         var keysBySearch: [String: [String]] = [:]
         for search in searches {
-            let keys = requestKeys(for: search, query: queries[search.id] ?? NovagramJobQuery.parse(search.filter.query), watched: watched)
+            let keys = requestKeys(for: search, query: queries[search.id] ?? NovagramSearchQuery.parse(search.filter.query), watched: watched)
             keysBySearch[search.id] = keys.map { $0.key }
             for item in keys {
                 if var existing = requests[item.key] {
@@ -280,7 +281,7 @@ public final class NovagramJobAlertMonitor {
                 guard !searchKeys.contains(where: failed.contains) else {
                     return NovagramJobAlertOutcome(search: search, items: [], isComplete: false)
                 }
-                let query = queries[search.id] ?? NovagramJobQuery.parse(search.filter.query)
+                let query = queries[search.id] ?? NovagramSearchQuery.parse(search.filter.query)
                 var seen = Set<MessageId>()
                 var items: [NovagramJobResult] = []
                 for key in searchKeys {

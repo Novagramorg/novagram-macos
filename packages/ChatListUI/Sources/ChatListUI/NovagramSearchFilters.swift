@@ -6,34 +6,36 @@ import SwiftSignalKit
 import GeneralRows
 import InputDataUI
 import NovagramCore
+import NovagramSearchKit
 
 // Novagram extras on the global search (SearchController): hidden and locked chats stay out of the
 // results, and the Messages section gets a date range plus "Unread only" / "Mentions only" filters
 // in its "From:" dropdown.
 struct NovagramSearchFilterState: Equatable {
-    var minDate: Int32?
-    var maxDate: Int32?
-    var unreadOnly = false
-    var mentionsOnly = false
+    var stored = NovagramSearchKit.NovagramSearchFilterState()
+
+    var active: NovagramSearchKit.NovagramSearchFilterState {
+        return stored.effective(isFeaturesEnabled: NovagramSearchFeatures.isEnabled)
+    }
 
     var hasDates: Bool {
-        return NovagramSearchFeatures.isEnabled && (minDate != nil || maxDate != nil)
+        return active.hasDates
     }
 
     var filtersMessages: Bool {
-        return NovagramSearchFeatures.isEnabled && (unreadOnly || mentionsOnly)
+        return active.filtersMessages
     }
 
     var unreadActive: Bool {
-        return NovagramSearchFeatures.isEnabled && unreadOnly
+        return active.unreadOnly
     }
 
     var mentionsActive: Bool {
-        return NovagramSearchFeatures.isEnabled && mentionsOnly
+        return active.mentionsOnly
     }
 
     var isActive: Bool {
-        return hasDates || filtersMessages
+        return active.isActive
     }
 }
 
@@ -64,25 +66,21 @@ func novagramSearchPrivateMessages(_ messages: [Message]) -> [Message] {
 
 func novagramSearchKeptMessages(_ messages: [Message], readStates: [PeerId: CombinedPeerReadState], filter: NovagramSearchFilterState) -> [Message] {
     let privacy = NovagramSearchPrivacyPass()
+    let active = filter.active
     return messages.filter { message in
         if privacy.hidesMessage(message) {
             return false
         }
-        if filter.unreadActive && !novagramIsUnread(message, readStates: readStates) {
-            return false
+        guard active.filtersMessages else {
+            return true
         }
-        if filter.mentionsActive && !novagramMentionsMe(message) {
-            return false
-        }
-        return true
+        return active.keeps(isUnread: novagramIsUnread(message, readStates: readStates), mentionsAccount: novagramMentionsMe(message))
     }
 }
 
 private func novagramIsUnread(_ message: Message, readStates: [PeerId: CombinedPeerReadState]) -> Bool {
-    guard message.flags.contains(.Incoming), let readState = readStates[message.id.peerId] else {
-        return false
-    }
-    return !readState.isIncomingMessageIndexRead(message.index)
+    let isRead = readStates[message.id.peerId].map { $0.isIncomingMessageIndexRead(message.index) }
+    return NovagramSearchKit.NovagramSearchFilterState.isUnread(isIncoming: message.flags.contains(.Incoming), isRead: isRead)
 }
 
 // The server marks a message that mentions the account with ConsumablePersonalMentionMessageAttribute.
@@ -95,56 +93,9 @@ private func novagramMentionsMe(_ message: Message) -> Bool {
 
 // "Unread only" / "Mentions only" drop most of a page: keep reading the next pages until enough
 // messages pass or a few more pages were read, so the list does not stop short.
-private let novagramFilledResultCount = 20
-private let novagramExtraPages = 5
-
 typealias NovagramSearchPage = (SearchMessagesResult, SearchMessagesState)
 
-final class NovagramFilterAutoLoad {
-    private struct State {
-        var shown = 0
-        var autoLoads = 0
-        var pending = false
-    }
-
-    private static let maxAutoLoads = 3
-    private let state = Atomic(value: State())
-
-    fileprivate func startLoad(fresh: Bool) {
-        _ = state.modify { current in
-            var current = current
-            if fresh {
-                current = State()
-            }
-            current.pending = false
-            return current
-        }
-    }
-
-    fileprivate func finishLoad(matched: Int, completed: Bool) {
-        _ = state.modify { current in
-            var current = current
-            current.shown += matched
-            let short = current.shown < novagramFilledResultCount
-            current.pending = short && !completed && current.autoLoads < NovagramFilterAutoLoad.maxAutoLoads
-            return current
-        }
-    }
-
-    func takeRequest() -> Bool {
-        var take = false
-        _ = state.modify { current in
-            var current = current
-            if current.pending {
-                current.pending = false
-                current.autoLoads += 1
-                take = true
-            }
-            return current
-        }
-        return take
-    }
-}
+typealias NovagramFilterAutoLoad = NovagramSearchAutoLoad
 
 func novagramFillFilteredPage(
     _ first: Signal<NovagramSearchPage, NoError>,
@@ -157,26 +108,21 @@ func novagramFillFilteredPage(
         return first
     }
     autoLoad.startLoad(fresh: previous == nil)
-    func step(
-        _ value: NovagramSearchPage,
-        seen: Set<MessageId>,
-        matched: Int,
-        pagesLeft: Int
-    ) -> Signal<NovagramSearchPage, NoError> {
-        let added = value.0.messages.filter { !seen.contains($0.id) }
-        let matched = matched + novagramSearchKeptMessages(added, readStates: value.0.readStates, filter: filter).count
-        if pagesLeft == 0 || value.0.completed || matched >= novagramFilledResultCount {
-            autoLoad.finishLoad(matched: matched, completed: value.0.completed)
+    func step(_ value: NovagramSearchPage, load: NovagramFilledLoad<MessageId>) -> Signal<NovagramSearchPage, NoError> {
+        var load = load
+        let keptIds = Set(novagramSearchKeptMessages(value.0.messages, readStates: value.0.readStates, filter: filter).map { $0.id })
+        guard load.add(page: value.0.messages, id: { $0.id }, completed: value.0.completed, isKept: { keptIds.contains($0.id) }) else {
+            autoLoad.finishLoad(matched: load.matched, completed: value.0.completed)
             return .single(value)
         }
-        let seenNow = Set(value.0.messages.map { $0.id })
+        let nextLoad = load
         let more = next(value.1)
             |> take(1)
-            |> mapToSignal { step($0, seen: seenNow, matched: matched, pagesLeft: pagesLeft - 1) }
+            |> mapToSignal { step($0, load: nextLoad) }
         return .single(value) |> then(more)
     }
-    let seen = Set((previous ?? []).map { $0.id })
-    return first |> mapToSignal { step($0, seen: seen, matched: 0, pagesLeft: novagramExtraPages) }
+    let load = NovagramFilledLoad<MessageId>(previousIds: Set((previous ?? []).map { $0.id }))
+    return first |> mapToSignal { step($0, load: load) }
 }
 
 func novagramWithReadStates(
@@ -222,24 +168,13 @@ extension SearchMessagesLocation {
         }
         switch self {
         case let .general(scope, groupId, tags, _, _, folderId, communityId):
-            return .general(scope: scope, groupId: groupId, tags: tags, minDate: filter.minDate, maxDate: filter.maxDate, folderId: folderId, communityId: communityId)
+            return .general(scope: scope, groupId: groupId, tags: tags, minDate: filter.active.minDate, maxDate: filter.active.maxDate, folderId: folderId, communityId: communityId)
         case let .peer(peerId, fromId, tags, reactions, threadId, _, _):
-            return .peer(peerId: peerId, fromId: fromId, tags: tags, reactions: reactions, threadId: threadId, minDate: filter.minDate, maxDate: filter.maxDate)
+            return .peer(peerId: peerId, fromId: fromId, tags: tags, reactions: reactions, threadId: threadId, minDate: filter.active.minDate, maxDate: filter.active.maxDate)
         default:
             return self
         }
     }
-}
-
-private func novagramDayStart(_ date: Date) -> Int32 {
-    return Int32(Calendar.current.startOfDay(for: date).timeIntervalSince1970)
-}
-
-// The "To" day is included: the range ends one second before the next day starts.
-private func novagramDayEnd(_ date: Date) -> Int32 {
-    let start = Calendar.current.startOfDay(for: date)
-    let next = Calendar.current.date(byAdding: .day, value: 1, to: start) ?? start
-    return Int32(next.timeIntervalSince1970) - 1
 }
 
 private func novagramShortDate(_ timestamp: Int32) -> String {
@@ -266,14 +201,19 @@ private func novagramPickDate(window: Window, current: Int32?, done: @escaping (
 func novagramSearchFilterTitle(_ base: String, _ filter: NovagramSearchFilterState) -> String {
     let l10n = NovagramL10n.current
     var parts = [base]
-    if filter.hasDates {
-        parts.append((filter.minDate.map(novagramShortDate) ?? "…") + "–" + (filter.maxDate.map(novagramShortDate) ?? "…"))
-    }
-    if filter.unreadActive {
-        parts.append(l10n.search_unreadOnly)
-    }
-    if filter.mentionsActive {
-        parts.append(l10n.search_mentionsOnly)
+    for part in filter.active.titleParts {
+        switch part {
+        case let .dates(from, to):
+            parts.append(novagramShortDate(from) + "–" + novagramShortDate(to))
+        case let .from(from):
+            parts.append(novagramShortDate(from) + "–…")
+        case let .to(to):
+            parts.append("…–" + novagramShortDate(to))
+        case .unreadOnly:
+            parts.append(l10n.search_unreadOnly)
+        case .mentionsOnly:
+            parts.append(l10n.search_mentionsOnly)
+        }
     }
     return parts.joined(separator: " · ")
 }
@@ -284,36 +224,36 @@ func novagramSearchFilterActions(_ filter: NovagramSearchFilterState, window: Wi
     }
     let l10n = NovagramL10n.current
     var actions: [SeparatorBlockState.DropdownAction] = []
-    actions.append(.init(title: filter.minDate.map { l10n.search_fromDateValue(novagramShortDate($0)) } ?? l10n.search_fromDate, selected: filter.minDate != nil, action: {
-        novagramPickDate(window: window, current: filter.minDate, done: { date in
+    let stored = filter.stored
+    actions.append(.init(title: stored.minDate.map { l10n.search_fromDateValue(novagramShortDate($0)) } ?? l10n.search_fromDate, selected: stored.minDate != nil, action: {
+        novagramPickDate(window: window, current: stored.minDate, done: { date in
             var updated = filter
-            updated.minDate = novagramDayStart(date)
+            updated.stored.setFromDay(date)
             update(updated)
         })
     }))
-    actions.append(.init(title: filter.maxDate.map { l10n.search_toDateValue(novagramShortDate($0)) } ?? l10n.search_toDate, selected: filter.maxDate != nil, action: {
-        novagramPickDate(window: window, current: filter.maxDate, done: { date in
+    actions.append(.init(title: stored.maxDate.map { l10n.search_toDateValue(novagramShortDate($0)) } ?? l10n.search_toDate, selected: stored.maxDate != nil, action: {
+        novagramPickDate(window: window, current: stored.maxDate, done: { date in
             var updated = filter
-            updated.maxDate = novagramDayEnd(date)
+            updated.stored.setToDay(date)
             update(updated)
         })
     }))
     if filter.hasDates {
         actions.append(.init(title: l10n.search_clearDates, selected: false, action: {
             var updated = filter
-            updated.minDate = nil
-            updated.maxDate = nil
+            updated.stored.clearDates()
             update(updated)
         }))
     }
-    actions.append(.init(title: l10n.search_unreadOnly, selected: filter.unreadOnly, action: {
+    actions.append(.init(title: l10n.search_unreadOnly, selected: stored.unreadOnly, action: {
         var updated = filter
-        updated.unreadOnly.toggle()
+        updated.stored.unreadOnly.toggle()
         update(updated)
     }))
-    actions.append(.init(title: l10n.search_mentionsOnly, selected: filter.mentionsOnly, action: {
+    actions.append(.init(title: l10n.search_mentionsOnly, selected: stored.mentionsOnly, action: {
         var updated = filter
-        updated.mentionsOnly.toggle()
+        updated.stored.mentionsOnly.toggle()
         update(updated)
     }))
     return actions

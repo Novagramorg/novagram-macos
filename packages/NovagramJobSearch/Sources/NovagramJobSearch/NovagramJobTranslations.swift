@@ -1,6 +1,7 @@
 import Foundation
 import SwiftSignalKit
 import TelegramCore
+import NovagramSearchKit
 
 enum NovagramJobTranslations {
     private static let maxCachedQueries = 200

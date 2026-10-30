@@ -11,6 +11,7 @@ import InputDataUI
 import GeneralRows
 import ShortPeerRow
 import NovagramCore
+import NovagramSearchKit
 
 private final class Arguments {
     let context: any AccountContextProtocol
@@ -188,7 +189,7 @@ private func globalDescription(_ state: State) -> String {
 }
 
 private func canSearchGlobal(_ state: State) -> Bool {
-    guard state.isPremium, !NovagramJobQuery.parse(state.filter.query).isEmpty else {
+    guard state.isPremium, !NovagramSearchQuery.parse(state.filter.query).isEmpty else {
         return false
     }
     if let quota = state.search.globalState, quota.remainingFreeSearches <= 0 {
@@ -519,7 +520,7 @@ private func loadChannels(context: any AccountContextProtocol, ids: [Int64]) -> 
     }
 }
 
-private func discoverChannels(context: any AccountContextProtocol, query: NovagramJobQuery) -> Signal<[JobChannel], NoError> {
+private func discoverChannels(context: any AccountContextProtocol, query: NovagramSearchQuery) -> Signal<[JobChannel], NoError> {
     let texts = NovagramJobChannelRelevance.discoveryQueries(userQuery: query.serverQueries.first)
     let signals = texts.map { text in
         NovagramJobRequestLimiter.shared.limited(context.engine.contacts.searchRemotePeers(query: text, scope: .channels) |> take(1)) |> map { $0.0 + $0.1 }
@@ -686,7 +687,7 @@ public func NovagramJobSearchController(context: any AccountContextProtocol, sav
             current.isDiscovering = true
             return current
         }
-        let query = NovagramJobQuery.parse(stateValue.with { $0.filter.query })
+        let query = NovagramSearchQuery.parse(stateValue.with { $0.filter.query })
         discoverDisposable.set((discoverChannels(context: context, query: query) |> deliverOnMainQueue).start(next: { peers in
             updateState { current in
                 var current = current

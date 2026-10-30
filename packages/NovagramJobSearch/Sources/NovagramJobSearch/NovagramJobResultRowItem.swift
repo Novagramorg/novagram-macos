@@ -9,6 +9,7 @@ import GeneralRows
 import AvatarUI
 import Localization
 import NovagramCore
+import NovagramSearchKit
 
 func novagramJobPeerTitle(_ peer: Peer?) -> String {
     if let channel = peer as? TelegramChannel {

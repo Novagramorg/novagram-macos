@@ -31,3 +31,6 @@
 [submodule "third-party/widget-sandbox"]
 	path = third-party/widget-sandbox
 	url = https://github.com/TelegramMessenger/widget-sandbox
+[submodule "packages/NovagramSearchKit"]
+	path = packages/NovagramSearchKit
+	url = https://github.com/Novagramorg/novagram-search-kit-sdk
