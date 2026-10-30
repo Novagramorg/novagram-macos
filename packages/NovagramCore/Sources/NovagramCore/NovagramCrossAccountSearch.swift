@@ -18,6 +18,23 @@ public struct NovagramForeignPeerHit: Equatable {
     }
 }
 
+private final class NovagramCrossAccountLastHits {
+    private let lock = NSLock()
+    private var hitsByAccount: [AccountRecordId: [NovagramForeignPeerHit]] = [:]
+
+    func get(_ accountId: AccountRecordId) -> [NovagramForeignPeerHit] {
+        lock.lock()
+        defer { lock.unlock() }
+        return hitsByAccount[accountId] ?? []
+    }
+
+    func set(_ hits: [NovagramForeignPeerHit], for accountId: AccountRecordId) {
+        lock.lock()
+        defer { lock.unlock() }
+        hitsByAccount[accountId] = hits
+    }
+}
+
 public enum NovagramCrossAccountSearch {
     public static let defaultsKey = "novagram_search_all_accounts"
     public static let minQueryLength = 2
@@ -27,6 +44,7 @@ public enum NovagramCrossAccountSearch {
     private static let maxAccounts = 30
     private static let maxHitsPerAccount = 3
     private static let maxHits = 15
+    private static let lastHits = NovagramCrossAccountLastHits()
 
     public static var isEnabled: Bool {
         get {
@@ -44,7 +62,7 @@ public enum NovagramCrossAccountSearch {
     ) -> Signal<[NovagramForeignPeerHit], NoError> {
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard isEnabled, query.count >= minQueryLength else {
-            return .single([])
+            return empty(currentAccountId: currentAccountId)
         }
         let search: Signal<[NovagramForeignPeerHit], NoError> = sharedContext.activeAccountsWithInfo
             |> take(1)
@@ -58,7 +76,13 @@ public enum NovagramCrossAccountSearch {
         let debounced: Signal<[NovagramForeignPeerHit], NoError> = Signal<Void, NoError>.single(Void())
             |> delay(debounceSeconds, queue: .concurrentDefaultQueue())
             |> mapToSignal { _ in search }
-        return .single([]) |> then(debounced)
+            |> beforeNext { hits in lastHits.set(hits, for: currentAccountId) }
+        return .single(lastHits.get(currentAccountId)) |> then(debounced)
+    }
+
+    public static func empty(currentAccountId: AccountRecordId) -> Signal<[NovagramForeignPeerHit], NoError> {
+        lastHits.set([], for: currentAccountId)
+        return .single([])
     }
 
     private static func hits(in info: AccountWithInfo, query: String) -> Signal<[NovagramForeignPeerHit], NoError> {

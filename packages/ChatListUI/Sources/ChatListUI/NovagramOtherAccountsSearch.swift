@@ -17,7 +17,7 @@ func novagramOtherAccountsSearch(
     options: AppSearchOptions
 ) -> Signal<[NovagramForeignPeerHit], NoError> {
     guard target.isCommon, options.contains(.chats), tags.isEmpty, !query.hasPrefix("#"), !query.hasPrefix("$") else {
-        return .single([])
+        return NovagramCrossAccountSearch.empty(currentAccountId: context.account.id)
     }
     return NovagramCrossAccountSearch.peers(
         sharedContext: context.sharedContext,
