@@ -34,15 +34,15 @@ public enum NovagramCallRecordingSettings {
     }
 
     public static var isStoredEnabled: Bool {
-        return shared.isUserEnabled
+        return shared.isEnabled
     }
 
     public static func setEnabled(_ value: Bool) {
-        shared.isUserEnabled = value
+        shared.isEnabled = value
     }
 
     public static var isAutoStored: Bool {
-        return shared.isUserAutoEnabled
+        return shared.isAutoEnabled
     }
 
     public static var isAutoEnabled: Bool {
@@ -50,7 +50,7 @@ public enum NovagramCallRecordingSettings {
     }
 
     public static func setAutoEnabled(_ value: Bool) {
-        shared.isUserAutoEnabled = value
+        shared.isAutoEnabled = value
     }
 
     public static var isDataSavingEnabled: Bool {
