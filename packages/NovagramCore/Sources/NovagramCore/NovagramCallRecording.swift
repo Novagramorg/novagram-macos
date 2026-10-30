@@ -8,25 +8,29 @@ import SwiftSignalKit
 import AlertsUI
 import TelegramTheme
 import Localization
+import NovagramCallRecordingCore
 
-// Local 1:1 call recording: the call screen's Record button (PrivateCallScreen NovagramCallRecordHooks) lands here.
-// Everything runs on the main thread except the recorder's own capture queue.
 public final class NovagramCallRecording {
     public static let shared = NovagramCallRecording()
 
     private static let screenRecordingSettingsURL = "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
-    private static let fileDateFormat = "yyyy-MM-dd HH.mm"
-    private static let fallbackFileName = "Novagram call"
     private static let log = os.Logger(subsystem: "uz.fenixuz.app", category: "NovagramCallRecording")
+    private static let videoSize = CGSize(width: 1280, height: 720)
 
     private let recordingPromise = ValuePromise<Bool>(false, ignoreRepeated: true)
     public private(set) var isRecording = false
 
-    private var recorder: AnyObject?
+    private var capture: AnyObject?
+    private var center: AnyObject?
+    private var centerDirectory: URL?
+    private var session: AnyObject?
+    private var activeCallId: UUID?
+    private var accessedFolder: URL?
+    private var savesToFolder = false
+    private var noticePolicy = CallRecordingNoticePolicy()
     private var isStarting = false
     private var stopWhenStarted = false
     private var isMuted = false
-    private var fileName = ""
     private weak var window: Window?
     private weak var autoWindow: Window?
     private var permissionAlertShown = false
@@ -37,8 +41,6 @@ public final class NovagramCallRecording {
     private static let autoStartRetries = 2
     private weak var autoRetryWindow: Window?
     private var autoRetriesLeft = 0
-    private var videoNoticeShown = false
-    private var noticeCallId: UUID?
     private let developerFlagDisposable = MetaDisposable()
 
     public var micDeviceId: () -> Signal<String?, NoError> = { .single(nil) }
@@ -55,13 +57,17 @@ public final class NovagramCallRecording {
         }))
     }
 
+    private var languageCode: String {
+        return appCurrentLanguage.languageCode
+    }
+
     private func developerFlagDidTurnOff() {
         autoWindow = nil
         if isStarting {
             stopWhenStarted = true
             return
         }
-        guard recorder != nil else {
+        guard capture != nil else {
             return
         }
         stop()
@@ -88,7 +94,7 @@ public final class NovagramCallRecording {
 
     public func autoStart(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool, callId: UUID?) {
         noteVideoUpgrade(hasVideo: hasVideo)
-        guard #available(macOS 14.0, *), NovagramCallRecordingSettings.isAutoEnabled, window.isVisible, autoWindow !== window, recorder == nil, !isStarting else {
+        guard #available(macOS 14.0, *), NovagramCallRecordingSettings.isAutoEnabled, window.isVisible, autoWindow !== window, capture == nil, !isStarting else {
             return
         }
         if autoRetryWindow !== window {
@@ -97,7 +103,7 @@ public final class NovagramCallRecording {
         }
         autoWindow = window
         confirmConsent(window: window, proceed: { [weak self, weak window] in
-            guard let self, let window, NovagramCallRecordingSettings.isAutoEnabled, self.autoWindow === window, self.recorder == nil, !self.isStarting, self.ensurePermission(window: window, isAuto: true) else {
+            guard let self, let window, NovagramCallRecordingSettings.isAutoEnabled, self.autoWindow === window, self.capture == nil, !self.isStarting, self.ensurePermission(window: window, isAuto: true) else {
                 return
             }
             self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo, isAuto: true, callId: callId)
@@ -107,15 +113,18 @@ public final class NovagramCallRecording {
         })
     }
 
-    public func callDidUpdate(window: Window?, isEnded: Bool, isMuted: Bool) {
+    public func callDidUpdate(window: Window?, callId: UUID?, isEnded: Bool, isMuted: Bool) {
         self.isMuted = isMuted
         if isEnded, let window, window === autoWindow {
             autoWindow = nil
         }
-        if #available(macOS 14.0, *), let recorder = recorder as? NovagramCallRecorder {
-            recorder.setMicMuted(isMuted)
+        if #available(macOS 14.0, *), let session = session as? CallRecordingSession {
+            session.setMuted(isMuted)
         }
-        guard isEnded, recorder != nil else {
+        if isEnded, let callId, activeCallId != callId {
+            noticePolicy.forget(callSessionId: callId)
+        }
+        guard isEnded, capture != nil else {
             return
         }
         if let window, let own = self.window, window !== own {
@@ -184,46 +193,42 @@ public final class NovagramCallRecording {
             guard let self else {
                 return
             }
-            guard let window else {
+            guard let window, let callId else {
                 self.isStarting = false
                 return
             }
-            let alreadyNotified = callId != nil && self.noticeCallId == callId
-            guard alreadyNotified || (callId != nil && NovagramCallRecording.canNotify(peer: peer, isBlocked: messaging.0, isPremiumRequired: messaging.1, paidStars: messaging.2)) else {
+            let status = self.noticePolicy.status(callSessionId: callId)
+            let alreadyNotified = status == .delivered || status == .sending
+            guard alreadyNotified || NovagramCallRecording.canNotify(peer: peer, isBlocked: messaging.0, isPremiumRequired: messaging.1, paidStars: messaging.2) else {
                 self.isStarting = false
-                self.showToast(NovagramL10n.current.callRecording_noticeFailed)
+                self.showToast(CallRecordingNoticePolicy.failureMessage(languageCode: self.languageCode))
                 return
             }
-            self.begin(window: window, title: peer?.debugDisplayTitle ?? "", hasVideo: hasVideo, micDeviceId: micDeviceId, isAuto: isAuto, onStarted: { [weak self] in
+            self.begin(window: window, title: peer?.debugDisplayTitle ?? "", hasVideo: hasVideo, micDeviceId: micDeviceId, isAuto: isAuto, callId: callId, onStarted: { [weak self] in
                 self?.sendNotice(engine: engine, peerId: peerId, callId: callId)
             })
         }))
     }
 
     @available(macOS 14.0, *)
-    private func begin(window: Window, title: String, hasVideo: Bool, micDeviceId: String?, isAuto: Bool, onStarted: @escaping () -> Void) {
-        videoNoticeShown = false
-        let fileExtension = hasVideo ? "mp4" : "m4a"
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("novagram-call-\(UUID().uuidString).\(fileExtension)")
-        let recorder = NovagramCallRecorder(outputURL: tempURL, hasVideo: hasVideo, window: window, micDeviceId: micDeviceId)
-        recorder.setMicMuted(isMuted)
-        recorder.onStreamStop = { [weak self, weak recorder] in
-            guard let self, let recorder, self.recorder === recorder, !self.isStarting else {
+    private func begin(window: Window, title: String, hasVideo: Bool, micDeviceId: String?, isAuto: Bool, callId: UUID, onStarted: @escaping () -> Void) {
+        let capture = NovagramCallCapture(window: window, micDeviceId: micDeviceId, hasVideo: hasVideo)
+        capture.onStreamStop = { [weak self, weak capture] in
+            guard let self, let capture, self.capture === capture, !self.isStarting else {
                 return
             }
             self.stop()
         }
-        self.recorder = recorder
+        self.capture = capture
         self.window = window
-        self.fileName = NovagramCallRecording.fileName(title: title, fileExtension: fileExtension)
-        recorder.start { [weak self, weak window] error in
-            guard let self, self.recorder === recorder else {
+        capture.start { [weak self, weak window] error in
+            guard let self, self.capture === capture else {
                 return
             }
             self.isStarting = false
             if let error {
                 NovagramCallRecording.log.error("start failed: \(String(describing: error), privacy: .public)")
-                self.recorder = nil
+                self.capture = nil
                 if isAuto, let window, self.autoWindow === window, self.autoRetriesLeft > 0 {
                     self.autoRetriesLeft -= 1
                     self.autoWindow = nil
@@ -232,6 +237,15 @@ public final class NovagramCallRecording {
                 self.showToast(NovagramL10n.current.callRecording_failed)
                 return
             }
+            guard let session = self.startSession(callId: callId, peerName: title) else {
+                capture.stop()
+                self.capture = nil
+                self.showToast(NovagramL10n.current.callRecording_failed)
+                return
+            }
+            capture.attach(session)
+            self.session = session
+            self.activeCallId = callId
             self.isRecording = true
             self.recordingPromise.set(true)
             onStarted()
@@ -244,6 +258,75 @@ public final class NovagramCallRecording {
         }
     }
 
+    @available(macOS 14.0, *)
+    private func startSession(callId: UUID, peerName: String) -> CallRecordingSession? {
+        if let folder = NovagramCallRecordingSettings.resolveFolder() {
+            let accessing = folder.startAccessingSecurityScopedResource()
+            if let session = makeSession(directory: folder, callId: callId, peerName: peerName) {
+                accessedFolder = accessing ? folder : nil
+                savesToFolder = true
+                return session
+            }
+            if accessing {
+                folder.stopAccessingSecurityScopedResource()
+            }
+        }
+        savesToFolder = false
+        return makeSession(directory: CallRecordingStorage.defaultDirectory, callId: callId, peerName: peerName)
+    }
+
+    @available(macOS 14.0, *)
+    private func makeSession(directory: URL, callId: UUID, peerName: String) -> CallRecordingSession? {
+        let center: CallRecordingCenter
+        if let current = self.center as? CallRecordingCenter, centerDirectory == directory {
+            center = current
+        } else {
+            center = MainActor.assumeIsolated {
+                CallRecordingCenter(storage: CallRecordingStorage(directory: directory), configuration: CallRecordingConfiguration(videoSize: NovagramCallRecording.videoSize))
+            }
+            self.center = center
+            self.centerDirectory = directory
+        }
+        let isMuted = self.isMuted
+        do {
+            let session = try MainActor.assumeIsolated {
+                try center.start(callId: callId, peerName: peerName, onDetach: { [weak self] in
+                    self?.sessionDidDetach(callId: callId)
+                })
+            }
+            session.setMuted(isMuted)
+            return session
+        } catch {
+            NovagramCallRecording.log.error("session failed: \(String(describing: error), privacy: .public)")
+            return nil
+        }
+    }
+
+    private func sessionDidDetach(callId: UUID) {
+        guard #available(macOS 14.0, *), activeCallId == callId, let capture = capture as? NovagramCallCapture else {
+            return
+        }
+        capture.stop()
+        self.capture = nil
+        session = nil
+        activeCallId = nil
+        isRecording = false
+        recordingPromise.set(false)
+        detachBadge()
+        releaseFolder(takeAccessedFolder())
+        showToast(NovagramL10n.current.callRecording_failed)
+    }
+
+    private func takeAccessedFolder() -> URL? {
+        let folder = accessedFolder
+        accessedFolder = nil
+        return folder
+    }
+
+    private func releaseFolder(_ folder: URL?) {
+        folder?.stopAccessingSecurityScopedResource()
+    }
+
     private static func canNotify(peer: EnginePeer?, isBlocked: EnginePeerCachedInfoItem<Bool>, isPremiumRequired: Bool, paidStars: StarsAmount?) -> Bool {
         guard let peer, peer.id.namespace == Namespaces.Peer.CloudUser, canSendMessagesToPeer(peer) else {
             return false
@@ -251,64 +334,80 @@ public final class NovagramCallRecording {
         return isBlocked.knownValue != true && !isPremiumRequired && (paidStars?.value ?? 0) <= 0
     }
 
-    private func sendNotice(engine: TelegramEngine, peerId: PeerId, callId: UUID?) {
-        guard let callId, noticeCallId != callId, peerId.namespace == Namespaces.Peer.CloudUser else {
+    private func sendNotice(engine: TelegramEngine, peerId: PeerId, callId: UUID) {
+        guard noticePolicy.beginSending(callSessionId: callId, isOneToOneUser: peerId.namespace == Namespaces.Peer.CloudUser, recorderDidStart: true) else {
             return
         }
-        noticeCallId = callId
-        let current = recorder
-        let message = EnqueueMessage.message(text: NovagramL10n.current.callRecording_notice, attributes: [], inlineStickers: [:], mediaReference: nil, threadId: nil, replyToMessageId: nil, replyToStoryId: nil, localGroupingKey: nil, correlationId: nil, bubbleUpEmojiOrStickersets: [])
+        let current = capture
+        let languageCode = self.languageCode
+        let message = EnqueueMessage.message(text: CallRecordingNoticePolicy.message(languageCode: languageCode), attributes: [], inlineStickers: [:], mediaReference: nil, threadId: nil, replyToMessageId: nil, replyToStoryId: nil, localGroupingKey: nil, correlationId: nil, bubbleUpEmojiOrStickersets: [])
         let _ = (enqueueMessages(account: engine.account, peerId: peerId, messages: [message]) |> deliverOnMainQueue).start(next: { [weak self] ids in
+            guard let self else {
+                return
+            }
             guard ids.isEmpty || ids.contains(where: { $0 == nil }) else {
+                self.noticePolicy.markDelivered(callSessionId: callId)
                 return
             }
             #if DEBUG
             NovagramCallRecording.log.error("recording notice was not sent")
             #endif
-            guard let self else {
-                return
-            }
-            if self.noticeCallId == callId {
-                self.noticeCallId = nil
-            }
-            guard let current, self.recorder === current else {
+            self.noticePolicy.markFailed(callSessionId: callId)
+            guard let current, self.capture === current else {
                 return
             }
             self.stop(discard: true)
-            self.showToast(NovagramL10n.current.callRecording_noticeFailed)
+            self.showToast(CallRecordingNoticePolicy.failureMessage(languageCode: languageCode))
         })
     }
 
     private func noteVideoUpgrade(hasVideo: Bool) {
-        guard #available(macOS 14.0, *), hasVideo, isRecording, !videoNoticeShown, let recorder = recorder as? NovagramCallRecorder, !recorder.hasVideo else {
+        guard #available(macOS 14.0, *), hasVideo, isRecording, let capture = capture as? NovagramCallCapture else {
             return
         }
-        videoNoticeShown = true
-        showToast(NovagramL10n.current.callRecording_audioOnly)
+        capture.enableVideo()
     }
 
     private func stop(discard: Bool = false) {
-        guard #available(macOS 14.0, *), let recorder = recorder as? NovagramCallRecorder else {
+        guard #available(macOS 14.0, *), let capture = capture as? NovagramCallCapture else {
             return
         }
-        self.recorder = nil
+        self.capture = nil
+        session = nil
         isRecording = false
         recordingPromise.set(false)
         detachBadge()
-        let fileName = self.fileName
-        recorder.stop { [weak self] result in
-            switch result {
-            case let .success(url):
-                if discard {
-                    NovagramCallRecording.discardFile(url)
-                } else {
-                    self?.save(tempURL: url, fileName: fileName, hasVideo: recorder.hasVideo)
-                }
-            case let .failure(error):
-                NovagramCallRecording.log.error("stop failed: \(String(describing: error), privacy: .public)")
-                if !discard {
-                    self?.showToast(NovagramL10n.current.callRecording_failed)
-                }
+        capture.stop()
+        let folder = takeAccessedFolder()
+        guard let callId = activeCallId, let center = center as? CallRecordingCenter else {
+            releaseFolder(folder)
+            return
+        }
+        activeCallId = nil
+        let savesToFolder = self.savesToFolder
+        MainActor.assumeIsolated {
+            center.stop(callId: callId) { [weak self] result in
+                self?.recordingDidFinish(result, discard: discard, savesToFolder: savesToFolder, folder: folder)
+            }
+        }
+    }
+
+    @available(macOS 14.0, *)
+    private func recordingDidFinish(_ result: Result<URL, CallRecordingError>, discard: Bool, savesToFolder: Bool, folder: URL?) {
+        releaseFolder(folder)
+        switch result {
+        case let .success(url):
+            if discard {
+                NovagramCallRecording.discardFile(url)
+            } else if savesToFolder {
+                showSaved(url)
+            } else {
+                askWhereToSave(tempURL: url, fileName: url.lastPathComponent, hasVideo: url.pathExtension.lowercased() == "mp4")
+            }
+        case let .failure(error):
+            NovagramCallRecording.log.error("stop failed: \(String(describing: error), privacy: .public)")
+            if !discard {
+                showToast(NovagramL10n.current.callRecording_failed)
             }
         }
     }
@@ -322,20 +421,31 @@ public final class NovagramCallRecording {
     }
 
     public func stopForQuit() {
-        guard #available(macOS 14.0, *), let recorder = recorder as? NovagramCallRecorder else {
+        guard #available(macOS 14.0, *), let capture = capture as? NovagramCallCapture, let center = center as? CallRecordingCenter else {
             return
         }
-        self.recorder = nil
+        self.capture = nil
+        session = nil
+        activeCallId = nil
         isRecording = false
         detachBadge()
-        guard let url = recorder.stopAndWait(timeout: NovagramCallRecording.quitSaveTimeout) else {
-            return
+        capture.stop()
+        let folder = takeAccessedFolder()
+        let storage = CallRecordingStorage(directory: centerDirectory ?? CallRecordingStorage.defaultDirectory)
+        let before = Set(storage.list().map { $0.url })
+        let done = DispatchSemaphore(value: 0)
+        MainActor.assumeIsolated {
+            center.stopAll(timeout: NovagramCallRecording.quitSaveTimeout) {
+                done.signal()
+            }
         }
-        if let folder = NovagramCallRecordingSettings.resolveFolder(), let saved = NovagramCallRecording.move(url, to: folder, fileName: fileName) {
-            NovagramCallRecording.log.info("saved on quit: \(saved.lastPathComponent, privacy: .public)")
-            return
+        _ = done.wait(timeout: .now() + NovagramCallRecording.quitSaveTimeout + 1)
+        if !savesToFolder {
+            for recording in storage.list() where !before.contains(recording.url) {
+                _ = NovagramCallRecording.moveToDownloads(recording.url, fileName: recording.url.lastPathComponent)
+            }
         }
-        _ = NovagramCallRecording.moveToDownloads(url, fileName: fileName)
+        releaseFolder(folder)
     }
 
     private func attachBadge(to window: Window) {
@@ -359,18 +469,6 @@ public final class NovagramCallRecording {
             NotificationCenter.default.removeObserver(closeObserver)
         }
         closeObserver = nil
-    }
-
-    private func save(tempURL: URL, fileName: String, hasVideo: Bool) {
-        guard let folder = NovagramCallRecordingSettings.resolveFolder() else {
-            askWhereToSave(tempURL: tempURL, fileName: fileName, hasVideo: hasVideo)
-            return
-        }
-        if let destination = NovagramCallRecording.move(tempURL, to: folder, fileName: fileName) {
-            showSaved(destination)
-        } else {
-            saveToDownloads(tempURL: tempURL, fileName: fileName)
-        }
     }
 
     private func saveToDownloads(tempURL: URL, fileName: String) {
@@ -458,15 +556,6 @@ public final class NovagramCallRecording {
             return key
         }
         return NSApp.windows.first(where: { $0.isVisible && $0 is Window }) as? Window
-    }
-
-    static func fileName(title: String, fileExtension: String) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = fileDateFormat
-        let cleaned = title.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-").trimmingCharacters(in: .whitespacesAndNewlines)
-        let name = cleaned.isEmpty ? fallbackFileName : cleaned
-        return "\(name) \(formatter.string(from: Date())).\(fileExtension)"
     }
 
     static func uniqueURL(in folder: URL, fileName: String) -> URL {

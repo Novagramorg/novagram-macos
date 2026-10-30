@@ -34,6 +34,7 @@ func novagramCallId(_ arguments: PeerCallArguments) -> UUID? {
 }
 
 public struct NovagramCallRecordCallState: Equatable {
+    public let callId: UUID?
     public let isEnded: Bool
     public let isMuted: Bool
 }
@@ -117,7 +118,7 @@ func novagramCallCanAutoRecord(_ external: ExternalPeerCallState) -> Bool {
 func novagramCallRecordState(_ signal: Signal<ExternalPeerCallState, NoError>, window: Window?, arguments: @escaping () -> PeerCallArguments?) -> Signal<ExternalPeerCallState, NoError> {
     let hooks = NovagramCallRecordHooks.shared
     return combineLatest(signal, hooks.recordingSignal()) |> map { [weak window] external, _ in
-        hooks.callDidUpdate(window, NovagramCallRecordCallState(isEnded: novagramCallIsEnded(external), isMuted: external.isMuted))
+        hooks.callDidUpdate(window, NovagramCallRecordCallState(callId: arguments().flatMap(novagramCallId), isEnded: novagramCallIsEnded(external), isMuted: external.isMuted))
         if let window, let arguments = arguments() {
             if novagramCallCanAutoRecord(external) {
                 hooks.autoStart(NovagramCallRecordRequest(window: window, engine: arguments.engine, peerId: arguments.peerId, hasVideo: novagramCallHasVideo(external), callId: novagramCallId(arguments)))

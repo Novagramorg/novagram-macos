@@ -7,6 +7,7 @@
 //  iOS keys. "Remove all ads" is the third switch there; the app reads it through NovagramAdsGate.
 //
 
+import NovagramCallRecordingCore
 import Cocoa
 import SwiftSignalKit
 
@@ -23,7 +24,7 @@ public enum NovagramDeveloperFlags {
     // Read by TelegramCore too (fork-patches/telegramcore/NovagramAdEvents.swift): keep the name in sync.
     private static let adEventsOffKey = "novagram_ads_events_off"
     public static let jobSearchKey = "novagram_dev_job_search"
-    private static let callRecordingKey = "novagram_dev_call_recording"
+    private static let callRecordingKey = CallRecordingSettings.developerFlagKey
     private static let callDataSavingKey = "novagram_dev_call_data_saving"
 
     public static var isCallDataSavingEnabled: Bool {

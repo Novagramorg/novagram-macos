@@ -238,7 +238,7 @@ private enum NovagramEntryId: Hashable {
     case appearanceAccent, appearanceFooter
     case remindersUnread, remindersTime, remindersSound, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoFolderStyle, autoChannelHistory, autoStoryUnlock, autoTranslateChats, actionShareLink, autoFooter
     case adsRemoveAll, devAdEventsOff, devCurrencyRates, devAdsPanel, devStickerPackSave, devJobSearch, devCallRecording, devCallDataSaving, devFooter
-    case callRecording, callRecordingFolder, callRecordingFooter, callRecordingAuto, callDataSaving
+    case callRecording, callRecordingFolder, callRecordingFooter, callRecordingAuto, callRecordingList, callDataSaving
 }
 
 // iOS 1:1 — har bir row uchun rangli kvadrat ikonka (NovagramIconColor + SF Symbol).
@@ -301,6 +301,7 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .callRecording:            map = ("record.circle", .red)
     case .callRecordingFolder:      map = ("folder.fill", .blue)
     case .callRecordingAuto:        map = ("record.circle.fill", .orange)
+    case .callRecordingList:        map = ("waveform", .red)
     case .callDataSaving:           map = ("antenna.radiowaves.left.and.right", .green)
     default:                        map = nil
     }
@@ -580,7 +581,8 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
         entries.append(.section(sectionId)); sectionId += 1
         entries.append(.header(next(), .header(9), l10n.callRecording_section))
         if showsCallRecording {
-            entries.append(.toggle(next(), .callRecording, l10n.callRecording_title, l10n.callRecording_subtitle, state.callRecording, state.callRecording ? .firstItem : .singleItem, NovagramDefaultsKey.callRecording))
+            entries.append(.toggle(next(), .callRecording, l10n.callRecording_title, l10n.callRecording_subtitle, state.callRecording, .firstItem, NovagramDefaultsKey.callRecording))
+            entries.append(.disclosurePlaceholder(next(), .callRecordingList, l10n.callRecording_list, "", state.callRecording ? .innerItem : .lastItem, "call_recordings"))
             if state.callRecording {
                 entries.append(.toggle(next(), .callRecordingAuto, l10n.callRecording_auto_title, l10n.callRecording_auto_subtitle, state.callRecordingAuto, .innerItem, NovagramDefaultsKey.callRecordingAuto))
                 entries.append(.disclosurePlaceholder(next(), .callRecordingFolder, l10n.callRecording_saveTo, state.callRecordingFolder ?? l10n.callRecording_askEveryTime, .lastItem, "call_recording_folder"))
@@ -841,6 +843,10 @@ class NovagramSettingsController: TableViewController {
                             updateState { $0.folderStyle = style }
                         })
                     }, window: window)
+                case "call_recordings":
+                    if let controller = makeNovagramCallRecordingsController() {
+                        nav?.push(controller)
+                    }
                 case "call_recording_folder":
                     NovagramCallRecordingSettings.changeFolder(window: window, completion: {
                         updateState { $0.callRecordingFolder = NovagramCallRecordingSettings.folderDisplayPath }

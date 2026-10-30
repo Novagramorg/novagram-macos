@@ -79,7 +79,7 @@ private func installNovagramCallRecordHooks() {
         NovagramCallRecording.shared.autoStart(window: request.window, engine: request.engine, peerId: request.peerId, hasVideo: request.hasVideo, callId: request.callId)
     }
     hooks.callDidUpdate = { window, state in
-        NovagramCallRecording.shared.callDidUpdate(window: window, isEnded: state.isEnded, isMuted: state.isMuted)
+        NovagramCallRecording.shared.callDidUpdate(window: window, callId: state.callId, isEnded: state.isEnded, isMuted: state.isMuted)
     }
     NovagramCallRecordHooks.install(hooks)
     NovagramCallRecording.shared.micDeviceId = {

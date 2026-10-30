@@ -1,18 +1,22 @@
 import AppKit
 import TGUIKit
 import AlertsUI
+import NovagramCallRecordingCore
 
 // Mac-only local call recording settings (pro_messager suite). The folder is an app-scoped security-scoped bookmark.
 public enum NovagramCallRecordingSettings {
-    public static let enabledKey = "novagram_call_recording"
+    public static let enabledKey = CallRecordingSettings.enabledKey
     public static let folderKey = "novagram_call_recording_folder"
-    public static let autoKey = "novagram_call_recording_auto"
+    public static let autoKey = CallRecordingSettings.autoKey
     public static let dataSavingKey = "novagram_call_data_saving"
-    static let warnedKey = "novagram_call_recording_warned"
     static let captureRequestedKey = "novagram_call_recording_capture_requested"
 
     private static var defaults: UserDefaults? {
         return UserDefaults(suiteName: "pro_messager")
+    }
+
+    private static var shared: CallRecordingSettings {
+        return CallRecordingSettings()
     }
 
     public static var isSupported: Bool {
@@ -27,15 +31,15 @@ public enum NovagramCallRecordingSettings {
     }
 
     public static var isStoredEnabled: Bool {
-        return defaults?.bool(forKey: enabledKey) ?? false
+        return shared.isUserEnabled
     }
 
     public static func setEnabled(_ value: Bool) {
-        defaults?.set(value, forKey: enabledKey)
+        shared.isUserEnabled = value
     }
 
     public static var isAutoStored: Bool {
-        return defaults?.bool(forKey: autoKey) ?? false
+        return shared.isUserAutoEnabled
     }
 
     public static var isAutoEnabled: Bool {
@@ -43,7 +47,7 @@ public enum NovagramCallRecordingSettings {
     }
 
     public static func setAutoEnabled(_ value: Bool) {
-        defaults?.set(value, forKey: autoKey)
+        shared.isUserAutoEnabled = value
     }
 
     public static var isDataSavingEnabled: Bool {
@@ -52,10 +56,10 @@ public enum NovagramCallRecordingSettings {
 
     static var wasWarned: Bool {
         get {
-            return defaults?.bool(forKey: warnedKey) ?? false
+            return shared.wasWarned
         }
         set {
-            defaults?.set(newValue, forKey: warnedKey)
+            shared.wasWarned = newValue
         }
     }
 
