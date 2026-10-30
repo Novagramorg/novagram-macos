@@ -51,7 +51,7 @@ public enum NovagramJobPostParser {
     }
 
     private static let vacancyPhraseRegex = NovagramJobRegex.make(
-        NovagramJobRegex.wordStart + "(?:нужен|нужна(?!\\s+(?:работ|подработ))|нужны|открыта вакансия|в поиске(?!\\s+работ)|приглашаем"
+        NovagramJobRegex.wordStart + "(?:нужен|нужна(?!\\s+(?:работ|подработ))|нужны|открыта вакансия|в поиске\\s+(?:\\p{L}+\\s+){0,2}?(?:сотрудник|специалист|кандидат|менеджер|продав|водител|бухгалтер|оператор|разработчик|программист|дизайнер|администратор|повар|мастер|курьер|помощник|ассистент|smm|hr|юрист|маркетолог|человек|людей)|приглашаем"
             + "|на позицию|we're looking for|join our team|position|open role|apply)"
     )
     private static let roleKerakRegex = NovagramJobRegex.make(

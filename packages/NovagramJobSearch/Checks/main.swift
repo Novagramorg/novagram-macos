@@ -259,6 +259,8 @@ checkEqual(NovagramJobPostParser.parse("Python backend\nOylik: 1500$\nRemote\n@h
 checkEqual(NovagramJobPostParser.parse("Ish kerak, 22 yosh, kompyuterni yaxshi bilaman").kind, .resume, "ish kerak is a resume")
 checkEqual(NovagramJobPostParser.parse("Нужна работа, опыт 3 года, удалённо").kind, .resume, "нужна работа is a resume")
 checkEqual(NovagramJobPostParser.parse("В поиске работы: frontend developer, 2 years").kind, .resume, "в поиске работы is a resume")
+checkEqual(NovagramJobPostParser.parse("Вы работаете на фрилансе и сейчас в поиске клиентов? Тогда стоит обратить внимание на этого бота").kind, .unknown, "в поиске клиентов is not a vacancy")
+checkEqual(NovagramJobPostParser.parse("Мы в поиске опытного продавца-консультанта, Ташкент").kind, .vacancy, "в поиске опытного продавца is a vacancy")
 check(NovagramJobFilter(mode: .findCandidates).accepts(text: enResume, info: info4, date: now, now: now, query: emptyQuery), "en resume accepted for findCandidates")
 
 checkEqual(NovagramSearchLanguage.detect("dasturchi kerak toshkentda"), .uzLatin, "detect uz latin words")
