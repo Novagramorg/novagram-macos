@@ -56,14 +56,14 @@ public final class NovagramCallRecording {
 
     private func developerFlagDidTurnOff() {
         autoWindow = nil
+        if isStarting {
+            stopWhenStarted = true
+            return
+        }
         guard recorder != nil else {
             return
         }
-        if isStarting {
-            stopWhenStarted = true
-        } else {
-            stop()
-        }
+        stop()
     }
 
     public func toggle(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool) {
@@ -78,7 +78,7 @@ public final class NovagramCallRecording {
             return
         }
         confirmConsent(window: window, proceed: { [weak self, weak window] in
-            guard let self, let window, self.ensurePermission(window: window) else {
+            guard let self, let window, NovagramCallRecordingSettings.isEnabled, self.ensurePermission(window: window) else {
                 return
             }
             self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo, isAuto: false)
@@ -96,7 +96,7 @@ public final class NovagramCallRecording {
         }
         autoWindow = window
         confirmConsent(window: window, proceed: { [weak self, weak window] in
-            guard let self, let window, self.autoWindow === window, self.recorder == nil, !self.isStarting, self.ensurePermission(window: window, isAuto: true) else {
+            guard let self, let window, NovagramCallRecordingSettings.isAutoEnabled, self.autoWindow === window, self.recorder == nil, !self.isStarting, self.ensurePermission(window: window, isAuto: true) else {
                 return
             }
             self.start(window: window, engine: engine, peerId: peerId, hasVideo: hasVideo, isAuto: true)

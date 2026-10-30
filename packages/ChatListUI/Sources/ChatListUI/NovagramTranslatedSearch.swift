@@ -125,7 +125,9 @@ private func novagramTranslatedSections(
     let routes = allTargets.compactMap { novagramTranslateRoute($0, plan: plan) }
     var translations: [String: Signal<String?, NoError>] = [:]
     for code in NovagramQueryTranslator.serverCodes(for: routes.compactMap { $0.serverTarget }) {
-        translations[code] = NovagramQueryTranslator.translatedQuery(engine: engine, query: query, language: code)
+        let shared = Promise<String?>()
+        shared.set(NovagramQueryTranslator.translatedQuery(engine: engine, query: query, language: code))
+        translations[code] = shared.get()
     }
     var targets: [String] = []
     var sections: [Signal<NovagramTranslatedMessages?, NoError>] = []
