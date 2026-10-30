@@ -129,12 +129,18 @@ func novagramIsArchiveSearchRow(_ item: TableRowItem) -> Bool {
 }
 
 func novagramOpenArchiveSearchRow(_ item: TableRowItem, context: any AccountContextProtocol) -> Bool {
+    guard novagramIsArchiveSearchRow(item) else {
+        return false
+    }
+    guard novagramIsOpenGesture() else {
+        return true
+    }
     if let item = item as? NovagramArchiveSearchMoreRowItem {
         item.session.loadMore()
         return true
     }
     guard let item = item as? NovagramArchiveSearchRowItem else {
-        return false
+        return true
     }
     if item.record.hit.isDeleted {
         novagramPresentDeletedArchiveRecord(item.record, context: context)

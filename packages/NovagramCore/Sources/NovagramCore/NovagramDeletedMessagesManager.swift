@@ -29,6 +29,11 @@ import Foundation
 import Postbox
 import TelegramCore
 
+private struct NovagramDeletedChatKey: Hashable {
+    let accountId: AccountRecordId
+    let peerId: PeerId
+}
+
 public final class NovagramDeletedMessages {
     public static let shared = NovagramDeletedMessages()
     private init() {}
@@ -37,10 +42,10 @@ public final class NovagramDeletedMessages {
     private let lock = NSLock()
 
     // Recently-loaded entries per peer — the source of content when a delete fires.
-    private var live: [PeerId: [MessageId: MessageHistoryEntry]] = [:]
-    private var liveOrder: [PeerId: [MessageId]] = [:]  // insertion order for bounded eviction
+    private var live: [NovagramDeletedChatKey: [MessageId: MessageHistoryEntry]] = [:]
+    private var liveOrder: [NovagramDeletedChatKey: [MessageId]] = [:]  // insertion order for bounded eviction
     // Deleted entries per peer, already 🗑-marked and ready to re-inject.
-    private var tombstones: [PeerId: [MessageId: MessageHistoryEntry]] = [:]
+    private var tombstones: [NovagramDeletedChatKey: [MessageId: MessageHistoryEntry]] = [:]
 
     private let liveCap = 600
     private let tombstoneCap = 300
@@ -57,16 +62,17 @@ public final class NovagramDeletedMessages {
     /// `hasLater` = there are newer messages below the loaded window (view.laterId != nil).
     /// When false the chat bottom is loaded, so a tombstone newer than everything on screen
     /// (the just-sent-then-deleted case) belongs at the end and must still be shown.
-    public func process(_ entries: [MessageHistoryEntry], peerId: PeerId, hasEarlier: Bool, hasLater: Bool) -> [MessageHistoryEntry] {
-        cache(entries, peerId: peerId)
+    public func process(_ entries: [MessageHistoryEntry], peerId: PeerId, account: Account, hasEarlier: Bool, hasLater: Bool) -> [MessageHistoryEntry] {
+        let key = NovagramDeletedChatKey(accountId: account.id, peerId: peerId)
+        cache(entries, key: key)
         guard isEnabled else { return entries }
-        return merge(entries, peerId: peerId, hasEarlier: hasEarlier, hasLater: hasLater)
+        return merge(entries, key: key, hasEarlier: hasEarlier, hasLater: hasLater)
     }
 
     /// Records deletions from `stateManager.deletedMessages`. Returns true if a tombstone
     /// was newly created for `peerId` (so the caller can nudge that chat to refresh).
     @discardableResult
-    public func recordDeleted(_ ids: [DeletedMessageId], peerId: PeerId, account: Account? = nil) -> Bool {
+    public func recordDeleted(_ ids: [DeletedMessageId], peerId: PeerId, account: Account) -> Bool {
         lock.lock(); defer { lock.unlock() }
         var createdForPeer = false
         var archived: [Message] = []
@@ -79,25 +85,27 @@ public final class NovagramDeletedMessages {
             case let .messageId(mid):
                 targets = [mid]
             case let .global(gid):
-                targets = live.compactMap { (peer, msgs) -> MessageId? in
-                    guard peer.namespace == Namespaces.Peer.CloudUser || peer.namespace == Namespaces.Peer.CloudGroup else { return nil }
+                targets = live.compactMap { (key, msgs) -> MessageId? in
+                    let peer = key.peerId
+                    guard key.accountId == account.id, peer.namespace == Namespaces.Peer.CloudUser || peer.namespace == Namespaces.Peer.CloudGroup else { return nil }
                     return msgs.values.first(where: { $0.message.id.id == gid })?.message.id
                 }
             }
             for mid in targets {
-                guard tombstones[mid.peerId]?[mid] == nil else { continue }
-                guard let entry = live[mid.peerId]?[mid] else {
+                let key = NovagramDeletedChatKey(accountId: account.id, peerId: mid.peerId)
+                guard tombstones[key]?[mid] == nil else { continue }
+                guard let entry = live[key]?[mid] else {
                     continue
                 }
-                tombstones[mid.peerId, default: [:]][mid] = markDeleted(entry)
+                tombstones[key, default: [:]][mid] = markDeleted(entry)
                 archived.append(entry.message)
-                enforceTombstoneCap(mid.peerId)
+                enforceTombstoneCap(key)
                 if mid.peerId == peerId {
                     createdForPeer = true
                 }
             }
         }
-        if let account, !archived.isEmpty {
+        if !archived.isEmpty {
             NovagramMessageArchive.shared.recordDeleted(archived, account: account)
         }
         return createdForPeer
@@ -105,35 +113,35 @@ public final class NovagramDeletedMessages {
 
     // MARK: - Internals
 
-    private func cache(_ entries: [MessageHistoryEntry], peerId: PeerId) {
+    private func cache(_ entries: [MessageHistoryEntry], key: NovagramDeletedChatKey) {
         lock.lock(); defer { lock.unlock() }
         for e in entries {
             let id = e.message.id
-            if live[peerId]?[id] == nil {
-                liveOrder[peerId, default: []].append(id)
+            if live[key]?[id] == nil {
+                liveOrder[key, default: []].append(id)
             }
-            live[peerId, default: [:]][id] = e
+            live[key, default: [:]][id] = e
         }
-        guard var order = liveOrder[peerId], order.count > liveCap else { return }
+        guard var order = liveOrder[key], order.count > liveCap else { return }
         // Evict oldest, but never drop an id we've tombstoned (we still need its content).
         var overflow = order.count - liveCap
         var i = 0
         while overflow > 0 && i < order.count {
             let id = order[i]
-            if tombstones[peerId]?[id] == nil {
-                live[peerId]?.removeValue(forKey: id)
+            if tombstones[key]?[id] == nil {
+                live[key]?.removeValue(forKey: id)
                 order.remove(at: i)
                 overflow -= 1
             } else {
                 i += 1
             }
         }
-        liveOrder[peerId] = order
+        liveOrder[key] = order
     }
 
-    private func merge(_ entries: [MessageHistoryEntry], peerId: PeerId, hasEarlier: Bool, hasLater: Bool) -> [MessageHistoryEntry] {
+    private func merge(_ entries: [MessageHistoryEntry], key: NovagramDeletedChatKey, hasEarlier: Bool, hasLater: Bool) -> [MessageHistoryEntry] {
         lock.lock(); defer { lock.unlock() }
-        guard let tomb = tombstones[peerId], !tomb.isEmpty else { return entries }
+        guard let tomb = tombstones[key], !tomb.isEmpty else { return entries }
         // Need at least one loaded message to anchor positions against.
         guard let lower = entries.first?.index else {
             return entries
@@ -168,13 +176,13 @@ public final class NovagramDeletedMessages {
                                    attributes: entry.attributes)
     }
 
-    private func enforceTombstoneCap(_ peerId: PeerId) {
-        guard var dict = tombstones[peerId], dict.count > tombstoneCap else { return }
+    private func enforceTombstoneCap(_ key: NovagramDeletedChatKey) {
+        guard var dict = tombstones[key], dict.count > tombstoneCap else { return }
         let dropCount = dict.count - tombstoneCap
         let oldest = dict.values.sorted(by: { $0.index < $1.index }).prefix(dropCount)
         for e in oldest {
             dict.removeValue(forKey: e.message.id)
         }
-        tombstones[peerId] = dict
+        tombstones[key] = dict
     }
 }

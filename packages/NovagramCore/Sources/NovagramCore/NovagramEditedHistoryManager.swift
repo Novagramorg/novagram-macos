@@ -74,12 +74,17 @@ private struct NovagramSeenVersion {
     }
 }
 
+private struct NovagramSeenKey: Hashable {
+    let accountId: AccountRecordId
+    let messageId: MessageId
+}
+
 public final class NovagramEditedHistoryManager {
     public static let shared = NovagramEditedHistoryManager()
 
     private let defaults = UserDefaults(suiteName: "uz.fenixuz.app.editedHistory")
     private let lock = NSLock()
-    private var lastSeen: [MessageId: NovagramSeenVersion] = [:]
+    private var lastSeen: [NovagramSeenKey: NovagramSeenVersion] = [:]
 
     private init() {}
 
@@ -87,14 +92,15 @@ public final class NovagramEditedHistoryManager {
 
     /// Process a batch of messages to observe and record edits: a changed text or changed media
     /// (iOS records both). The saved version keeps its own time, as on iOS.
-    public func processMessages(_ messages: [Message], account: Account? = nil) {
+    public func processMessages(_ messages: [Message], account: Account) {
         lock.lock(); defer { lock.unlock() }
         var archived: [NovagramArchiveEdit] = []
         for message in messages {
             let msgId = message.id
             let edited = message.attributes.compactMap({ $0 as? EditedMessageAttribute }).first
             let current = NovagramSeenVersion(text: message.text, media: message.media.filter { !($0 is TelegramMediaWebpage) }, timestamp: edited?.date ?? message.timestamp)
-            if let previous = lastSeen[msgId], edited != nil {
+            let seenKey = NovagramSeenKey(accountId: account.id, messageId: msgId)
+            if let previous = lastSeen[seenKey], edited != nil {
                 let textChanged = previous.text != current.text
                 let mediaChanged = previous.mediaIds != current.mediaIds
                 if textChanged || (mediaChanged && !previous.hasLocalMedia) {
@@ -110,9 +116,9 @@ public final class NovagramEditedHistoryManager {
                     }
                 }
             }
-            lastSeen[msgId] = current
+            lastSeen[seenKey] = current
         }
-        if let account, !archived.isEmpty {
+        if !archived.isEmpty {
             NovagramMessageArchive.shared.recordEdited(archived, account: account)
         }
     }

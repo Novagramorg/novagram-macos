@@ -116,6 +116,7 @@ func novagramJobSearchDidStart(context: AccountContext) {
 }
 
 func novagramMessageArchiveDidStart(context: AccountContext) {
+    NovagramMessageArchive.shared.removeOrphans(sharedContext: context.sharedContext)
     NovagramMessageArchive.shared.migrateLegacyIfNeeded(sharedContext: context.sharedContext, currentAccount: context.account)
 }
 

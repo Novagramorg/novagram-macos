@@ -8,6 +8,22 @@ import TelegramTheme
 import NovagramCore
 
 private let novagramOtherAccountsSeparatorIndex = 5000
+private let novagramReturnKeyCode: UInt16 = 36
+private let novagramEnterKeyCode: UInt16 = 76
+
+func novagramIsOpenGesture() -> Bool {
+    guard let event = NSApp.currentEvent else {
+        return false
+    }
+    switch event.type {
+    case .leftMouseDown, .leftMouseUp:
+        return true
+    case .keyDown:
+        return event.keyCode == novagramReturnKeyCode || event.keyCode == novagramEnterKeyCode
+    default:
+        return false
+    }
+}
 
 func novagramOtherAccountsSearch(
     _ context: any AccountContextProtocol,
@@ -101,6 +117,8 @@ func novagramOpenOtherAccountsRow(_ item: TableRowItem, context: any AccountCont
     guard let (accountId, peerId) = novagramOtherAccountsTarget(item) else {
         return false
     }
-    context.sharedContext.switchToAccount(id: accountId, action: .chat(peerId, necessary: true))
+    if novagramIsOpenGesture() {
+        context.sharedContext.switchToAccount(id: accountId, action: .chat(peerId, necessary: true))
+    }
     return true
 }

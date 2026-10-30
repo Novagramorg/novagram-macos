@@ -62,6 +62,8 @@ public final class NovagramMessageArchive {
     private static let editedKey = "edited_history_enabled"
     private static let migratedKey = "novagram_archive_migrated_v1"
     private static let debounceSeconds: Double = 0.25
+    private static let filePrefix = "novagram-message-archive-"
+    private static let fileExtension = "jsonl"
 
     private let queue = Queue(name: "uz.novagram.messageArchive", qos: .utility)
     private let lock = NSLock()
@@ -70,6 +72,9 @@ public final class NovagramMessageArchive {
     private var lastRecords: [Int64: [NovagramArchivedMessage]] = [:]
     private var migrationStarted = false
     private let migrationDisposable = MetaDisposable()
+    private var clearedAccounts = Set<Int64>()
+    private var orphanCleanupStarted = false
+    private let orphanDisposable = MetaDisposable()
 
     private init() {}
 
@@ -124,8 +129,59 @@ public final class NovagramMessageArchive {
     public func clear(accountRecordId: Int64) {
         setLastRecords([], accountRecordId: accountRecordId)
         queue.async {
-            self.store?.clear(accountRecordId: accountRecordId)
-            self.indexes[accountRecordId] = nil
+            self.clearOnQueue(accountRecordId: accountRecordId)
+        }
+    }
+
+    private func clearOnQueue(accountRecordId: Int64) {
+        clearedAccounts.insert(accountRecordId)
+        store?.clear(accountRecordId: accountRecordId)
+        indexes[accountRecordId] = nil
+        setLastRecords([], accountRecordId: accountRecordId)
+    }
+
+    public func removeOrphans(sharedContext: any SharedAccountContextProtocol) {
+        lock.lock()
+        let started = orphanCleanupStarted
+        orphanCleanupStarted = true
+        lock.unlock()
+        guard !started else {
+            return
+        }
+        let active = sharedContext.activeAccountsWithInfo
+            |> take(1)
+            |> map { _, accounts -> Set<Int64> in
+                return Set(accounts.map { $0.account.id.int64 })
+            }
+        let records = sharedContext.accountManager.accountRecords()
+            |> take(1)
+            |> map { view -> Set<Int64> in
+                let loggedIn = view.records.filter { record in
+                    !record.attributes.contains(where: { attribute in
+                        if case .loggedOut = attribute {
+                            return true
+                        }
+                        return false
+                    })
+                }
+                return Set(loggedIn.map { $0.id.int64 })
+            }
+        let signal = combineLatest(active, records) |> deliverOn(queue)
+        orphanDisposable.set(signal.start(next: { active, records in
+            self.removeOrphanFiles(keeping: active.union(records))
+        }))
+    }
+
+    private func removeOrphanFiles(keeping kept: Set<Int64>) {
+        guard let store = store, let files = try? FileManager.default.contentsOfDirectory(at: store.directory, includingPropertiesForKeys: nil) else {
+            return
+        }
+        for file in files where file.pathExtension == NovagramMessageArchive.fileExtension {
+            let name = file.deletingPathExtension().lastPathComponent
+            guard name.hasPrefix(NovagramMessageArchive.filePrefix), let accountRecordId = Int64(name.dropFirst(NovagramMessageArchive.filePrefix.count)), !kept.contains(accountRecordId) else {
+                continue
+            }
+            clearOnQueue(accountRecordId: accountRecordId)
         }
     }
 
@@ -213,7 +269,7 @@ public final class NovagramMessageArchive {
                 return isCurrent
             })
         }
-        store.save(records)
+        store.save(records.filter { !clearedAccounts.contains($0.accountRecordId) })
         indexes.removeAll()
         NovagramMessageArchive.markMigrated(marker)
     }
@@ -251,7 +307,7 @@ public final class NovagramMessageArchive {
             return
         }
         queue.async {
-            guard let store = self.store, store.save(records) > 0 else {
+            guard !self.clearedAccounts.contains(accountRecordId), let store = self.store, store.save(records) > 0 else {
                 return
             }
             self.indexes[accountRecordId] = nil

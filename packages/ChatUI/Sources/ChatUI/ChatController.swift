@@ -4137,7 +4137,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                 if let peerView = peerView as? PeerView, let peer = peerView.peers[peerView.peerId], peer.isRestrictedChannel(context.contentSettings) {
                     proccesedView = ChatHistoryView(originalView: view, filteredEntries: [], theme: chatTheme)
                 } else {
-                    let msgEntries = NovagramDeletedMessages.shared.process(view.entries, peerId: chatInteraction.peerId, hasEarlier: view.earlierId != nil, hasLater: view.laterId != nil) // Novagram
+                    let msgEntries = NovagramDeletedMessages.shared.process(view.entries, peerId: chatInteraction.peerId, account: context.account, hasEarlier: view.earlierId != nil, hasLater: view.laterId != nil) // Novagram
                     NovagramEditedHistoryManager.shared.processMessages(view.entries.map { $0.message }, account: context.account) // Novagram
                     
                     let topMessages: [Message]?
