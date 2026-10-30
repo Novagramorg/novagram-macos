@@ -58,7 +58,7 @@ private func installNovagramCallRecordHooks() {
         NovagramCallRecording.shared.isRecording
     }
     hooks.recordingSignal = {
-        NovagramCallRecording.shared.recordingSignal
+        combineLatest(NovagramCallRecording.shared.recordingSignal, NovagramDeveloperFlags.callRecordingSignal) |> map { isRecording, _ in isRecording }
     }
     hooks.title = { isRecording in
         NovagramL10n.current.callRecording_action(isRecording)

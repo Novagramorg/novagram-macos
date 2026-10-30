@@ -23,7 +23,11 @@ public enum NovagramCallRecordingSettings {
     }
 
     public static var isEnabled: Bool {
-        return isSupported && (defaults?.bool(forKey: enabledKey) ?? false)
+        return isSupported && NovagramDeveloperFlags.isCallRecordingEnabled && isStoredEnabled
+    }
+
+    public static var isStoredEnabled: Bool {
+        return defaults?.bool(forKey: enabledKey) ?? false
     }
 
     public static func setEnabled(_ value: Bool) {

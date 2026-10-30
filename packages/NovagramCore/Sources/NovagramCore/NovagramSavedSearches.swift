@@ -22,6 +22,9 @@ public enum NovagramSavedSearches {
     }
 
     public static func record(_ query: String?, accountPeerId: PeerId, accountRecordId: AccountRecordId) {
+        guard NovagramSearchFeatures.isEnabled else {
+            return
+        }
         store.record(query, accountPeerId: accountPeerId.toInt64(), accountRecordId: accountRecordId.int64)
     }
 

@@ -6,11 +6,14 @@ import GeneralRows
 import NovagramCore
 
 struct NovagramSavedSearchRow: Equatable {
+    static let translateChipsKey = "\u{1}novagram_translate_chips"
+
     let search: NovagramSavedSearch?
     let index: Int
+    var chips: NovagramTranslateChips? = nil
 
     var stableKey: String {
-        return search?.query ?? ""
+        return chips == nil ? search?.query ?? "" : NovagramSavedSearchRow.translateChipsKey
     }
 }
 
@@ -33,11 +36,17 @@ func novagramSavedSearchSelect(_ item: TableRowItem, context: any AccountContext
     guard let stableId = item.stableId.base as? ChatListSearchEntryStableId, case let .novagramSavedSearch(query) = stableId, !query.isEmpty else {
         return false
     }
+    guard query != NovagramSavedSearchRow.translateChipsKey else {
+        return true
+    }
     setQuery?(query)
     return true
 }
 
 func novagramSavedSearchRowItem(_ initialSize: NSSize, row: NovagramSavedSearchRow, stableId: AnyHashable, context: any AccountContextProtocol) -> TableRowItem {
+    if let chips = row.chips {
+        return NovagramTranslateChipsRowItem(initialSize, stableId: stableId, chips: chips)
+    }
     let strings = NovagramL10n.current
     guard let search = row.search else {
         return SeparatorRowItem(initialSize, stableId, string: strings.search_savedTitle.uppercased(), border: [.Right])

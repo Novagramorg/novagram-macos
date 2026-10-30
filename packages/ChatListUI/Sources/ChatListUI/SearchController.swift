@@ -1391,7 +1391,7 @@ public class SearchController<Context: AccountContextProtocol>: GenericViewContr
                         }
                         
                         
-                        if let novagramTranslated = novagramTranslatedRows(novagramTranslated, shown: remoteMessages.0.map { $0.stableId }) { entries.append(.separator(text: novagramTranslated.title, index: 19000, state: .none)); entries += novagramTranslated.messages.enumerated().map { .message($0.element, novagramTranslated.text, novagramTranslated.readStates[$0.element.id.peerId], novagramTranslated.threadInfo[$0.element.id], 19001 + $0.offset) } } // Novagram
+                        for novagramBlock in novagramTranslatedBlocks(novagramTranslated, shown: remoteMessages.0.map { $0.stableId }) { entries.append(.separator(text: novagramBlock.title, index: novagramBlock.index, state: .none)); if let chips = novagramBlock.chips { entries.append(.novagramSavedSearch(chips)) }; entries += novagramBlock.messages.enumerated().map { .message($0.element, novagramBlock.text, novagramBlock.readStates[$0.element.id.peerId], novagramBlock.threadInfo[$0.element.id], novagramBlock.firstMessageIndex + $0.offset) } } // Novagram
                         if !remoteMessages.0.isEmpty || novagramFilter.isActive { // Novagram
                             let blockState: SeparatorBlockState
                             if globalTags.publicPosts || globalTags.myMessages {

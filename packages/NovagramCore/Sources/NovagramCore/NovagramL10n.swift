@@ -1265,6 +1265,30 @@ public struct NovagramL10n {
         pick(en: "Show the Novagram ads panel", uz: "Novagram reklama panelini ko'rsatish", ru: "Показывать рекламную панель Novagram")
     }
 
+    public var developer_searchFeaturesTitle: String {
+        pick(en: "Search features (beta)", uz: "Qidiruv imkoniyatlari (beta)", ru: "Возможности поиска (бета)")
+    }
+
+    public var developer_searchFeaturesTip: String {
+        pick(
+            en: "Search section in Novagram Settings, the Jobs tab, exact phrase and re: search",
+            uz: "Novagram sozlamalaridagi Qidiruv bo'limi, Ish tabi, aniq ibora va re: qidiruvi",
+            ru: "Раздел «Поиск» в настройках Novagram, вкладка «Работа», поиск точной фразы и re:"
+        )
+    }
+
+    public var developer_callRecordingTitle: String {
+        pick(en: "Call recording (beta)", uz: "Qo'ng'iroqni yozib olish (beta)", ru: "Запись звонков (бета)")
+    }
+
+    public var developer_callRecordingTip: String {
+        pick(
+            en: "Record button in calls and the recording rows in Settings → Calls",
+            uz: "Qo'ng'iroqdagi yozish tugmasi va Sozlamalar → Qo'ng'iroqlardagi yozish qatorlari",
+            ru: "Кнопка записи в звонке и строки записи в Настройки → Звонки"
+        )
+    }
+
     public var developer_stickerPackSaveTitle: String {
         pick(en: "Save sticker packs", uz: "Stiker paketlarini saqlash", ru: "Сохранение наборов стикеров")
     }

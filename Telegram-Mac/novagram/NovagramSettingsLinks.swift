@@ -48,6 +48,9 @@ func openNovagramSettings(context: AccountContext, feature: String?) {
         }
         return
     }
+    if let slug = feature?.replacingOccurrences(of: "_", with: "-"), !novagramSettingsSlugAllowed(slug) {
+        return
+    }
     let navigation = context.bindings.rootNavigation()
     let controller = NovagramSettingsController(context)
     navigation.push(controller)

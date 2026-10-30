@@ -907,8 +907,13 @@ private func allFeatureSpecs() -> [FeatureSpec] {
 }
 
 
+private let novagramSearchFeatureTitles: Set<String> = ["Exact phrase search in a chat", "Regex search in a chat"]
+
 private func novagramAboutFeatures(langCode: String) -> [AboutFeature] {
-    return allFeatureSpecs().map { $0.asAboutFeature(langCode: langCode) }
+    let showsSearch = NovagramDeveloperFlags.isSearchFeaturesEnabled
+    return allFeatureSpecs()
+        .filter { showsSearch || !novagramSearchFeatureTitles.contains($0.title.text("en")) }
+        .map { $0.asAboutFeature(langCode: langCode) }
 }
 
 private enum NovagramAboutEntry: Comparable, Identifiable {

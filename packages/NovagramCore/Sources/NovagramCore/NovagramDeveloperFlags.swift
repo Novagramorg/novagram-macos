@@ -22,6 +22,26 @@ public enum NovagramDeveloperFlags {
     private static let stickerPackSaveKey = "novagram_sticker_pack_save"
     // Read by TelegramCore too (fork-patches/telegramcore/NovagramAdEvents.swift): keep the name in sync.
     private static let adEventsOffKey = "novagram_ads_events_off"
+    private static let searchFeaturesKey = "novagram_dev_search_features"
+    private static let callRecordingKey = "novagram_dev_call_recording"
+
+    public static var isSearchFeaturesEnabled: Bool {
+        get { return self.value(forKey: self.searchFeaturesKey) }
+        set { self.setValue(newValue, forKey: self.searchFeaturesKey) }
+    }
+
+    public static var isCallRecordingEnabled: Bool {
+        get { return self.value(forKey: self.callRecordingKey) }
+        set { self.setValue(newValue, forKey: self.callRecordingKey) }
+    }
+
+    public static var searchFeaturesSignal: Signal<Bool, NoError> {
+        return self.signal { self.isSearchFeaturesEnabled }
+    }
+
+    public static var callRecordingSignal: Signal<Bool, NoError> {
+        return self.signal { self.isCallRecordingEnabled }
+    }
 
     /// Show the currency rates row (Settings, under Analytics).
     public static var isCurrencyRatesViewEnabled: Bool {
@@ -102,6 +122,8 @@ public enum NovagramDeveloperRole: String {
         case currencyRatesView
         case adsPanel
         case stickerPackSave
+        case searchFeatures
+        case callRecording
     }
 
     private static let udSuite = "pro_messager"
@@ -116,7 +138,7 @@ public enum NovagramDeveloperRole: String {
             switch item {
             case .adEventsOff, .adsPanel:
                 return true
-            case .removeAllAds, .currencyRatesView, .stickerPackSave:
+            case .removeAllAds, .currencyRatesView, .stickerPackSave, .searchFeatures, .callRecording:
                 return false
             }
         }
@@ -157,6 +179,12 @@ public enum NovagramDeveloperRole: String {
         }
         if !role.canUse(.stickerPackSave) && NovagramDeveloperFlags.isStickerPackSaveEnabled {
             NovagramDeveloperFlags.isStickerPackSaveEnabled = false
+        }
+        if !role.canUse(.searchFeatures) && NovagramDeveloperFlags.isSearchFeaturesEnabled {
+            NovagramDeveloperFlags.isSearchFeaturesEnabled = false
+        }
+        if !role.canUse(.callRecording) && NovagramDeveloperFlags.isCallRecordingEnabled {
+            NovagramDeveloperFlags.isCallRecordingEnabled = false
         }
         NotificationCenter.default.post(name: .novagramDeveloperFlagsChanged, object: nil)
     }

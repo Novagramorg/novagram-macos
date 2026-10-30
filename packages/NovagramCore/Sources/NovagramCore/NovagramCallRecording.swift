@@ -38,6 +38,7 @@ public final class NovagramCallRecording {
     private weak var autoRetryWindow: Window?
     private var autoRetriesLeft = 0
     private var videoNoticeShown = false
+    private let developerFlagDisposable = MetaDisposable()
 
     public var micDeviceId: () -> Signal<String?, NoError> = { .single(nil) }
 
@@ -45,9 +46,32 @@ public final class NovagramCallRecording {
         return recordingPromise.get()
     }
 
+    init() {
+        developerFlagDisposable.set((NovagramDeveloperFlags.callRecordingSignal |> deliverOnMainQueue).start(next: { [weak self] enabled in
+            if !enabled {
+                self?.developerFlagDidTurnOff()
+            }
+        }))
+    }
+
+    private func developerFlagDidTurnOff() {
+        autoWindow = nil
+        guard recorder != nil else {
+            return
+        }
+        if isStarting {
+            stopWhenStarted = true
+        } else {
+            stop()
+        }
+    }
+
     public func toggle(window: Window, engine: TelegramEngine, peerId: PeerId, hasVideo: Bool) {
         if isRecording {
             stop()
+            return
+        }
+        guard NovagramCallRecordingSettings.isEnabled else {
             return
         }
         guard #available(macOS 14.0, *), !isStarting else {
