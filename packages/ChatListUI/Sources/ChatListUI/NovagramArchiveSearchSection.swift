@@ -414,3 +414,20 @@ final class NovagramArchiveSearchMoreRowView: TableRowView {
         textView.centerY(x: novagramArchiveTextInset)
     }
 }
+
+private let novagramReturnKeyCode: UInt16 = 36
+private let novagramEnterKeyCode: UInt16 = 76
+
+func novagramIsOpenGesture() -> Bool {
+    guard let event = NSApp.currentEvent else {
+        return false
+    }
+    switch event.type {
+    case .leftMouseDown, .leftMouseUp:
+        return true
+    case .keyDown:
+        return event.keyCode == novagramReturnKeyCode || event.keyCode == novagramEnterKeyCode
+    default:
+        return false
+    }
+}

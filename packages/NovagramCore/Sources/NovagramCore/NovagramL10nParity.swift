@@ -72,7 +72,6 @@ public extension NovagramL10n {
     var developer_adEventsOffTip: String { pick(en: "Views, clicks and actions of Novagram and Telegram ads are not sent, so an ad shown once per user keeps showing while you test. This device only.", uz: "Novagram va Telegram reklamalarining ko'rish, bosish va harakat hodisalari serverga yuborilmaydi, shuning uchun bir marta ko'rsatiladigan reklama test paytida qayta chiqaveradi. Faqat shu qurilmada.", ru: "Просмотры, клики и действия по рекламе Novagram и Telegram не отправляются, поэтому реклама с одним показом на пользователя продолжает показываться во время теста. Только на этом устройстве.") }
     var editedHistory_file: String { pick(en: "File", uz: "Fayl", ru: "Файл") }
     var editedHistory_media: String { pick(en: "Media", uz: "Media", ru: "Медиа") }
-    var search_otherAccounts: String { pick(en: "Other accounts", uz: "Boshqa akkauntlar", ru: "Другие аккаунты") }
     var search_archiveSection: String { pick(en: "Edited & deleted", uz: "Tahrirlangan va o'chirilgan", ru: "Изменённые и удалённые") }
     var search_archiveEdited: String { pick(en: "edited", uz: "tahrirlangan", ru: "изменено") }
     var search_archiveDeleted: String { pick(en: "deleted", uz: "o'chirilgan", ru: "удалено") }
@@ -80,8 +79,6 @@ public extension NovagramL10n {
     func search_archiveDeletedAt(_ date: String) -> String { pick(en: "Deleted \(date)", uz: "O'chirilgan: \(date)", ru: "Удалено \(date)") }
     var search_archiveOpenChat: String { pick(en: "Open chat", uz: "Chatni ochish", ru: "Открыть чат") }
     var search_archiveClose: String { pick(en: "Close", uz: "Yopish", ru: "Закрыть") }
-    var settings_searchAllAccounts_title: String { pick(en: "Search all accounts", uz: "Barcha akkauntlardan qidirish", ru: "Поиск по всем аккаунтам") }
-    var settings_searchAllAccounts_subtitle: String { pick(en: "Show chats and contacts from your other accounts in search", uz: "Qidiruvda boshqa akkauntlaringizdagi chat va kontaktlarni ko'rsatish", ru: "Показывать в поиске чаты и контакты из других аккаунтов") }
     var settings_unlimitedPins_title: String { pick(en: "Unlimited Pins", uz: "Cheksiz pin", ru: "Безлимитные закрепы") }
     var settings_unlimitedPins_subtitle: String { pick(en: "Pin up to 1000 chats. Only the first few sync to Telegram, the rest live on this Mac only. Turning this off unpins them.", uz: "1000 tagacha chat pin qiling. Faqat dastlabki bir nechtasi Telegram bilan sinxronlanadi, qolganlari faqat shu Mac'da. O'chirsangiz ular pindan olinadi.", ru: "Закрепляйте до 1000 чатов. С Telegram синхронизируются только первые несколько, остальные только на этом Mac. При отключении они открепляются.") }
     var settings_folderStyle_title: String { pick(en: "Folder display style", uz: "Papka ko'rinishi", ru: "Стиль папок") }
