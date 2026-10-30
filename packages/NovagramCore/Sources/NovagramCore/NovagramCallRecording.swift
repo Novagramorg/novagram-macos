@@ -178,13 +178,20 @@ public final class NovagramCallRecording {
         isStarting = true
         stopWhenStarted = false
         let peer = engine.data.get(TelegramEngine.EngineData.Item.Peer.Peer(id: peerId))
-        let signal = combineLatest(peer, micDeviceId() |> take(1)) |> take(1) |> deliverOnMainQueue
-        peerDisposable.set(signal.start(next: { [weak self, weak window] peer, micDeviceId in
+        let messaging = engine.data.get(TelegramEngine.EngineData.Item.Peer.IsBlocked(id: peerId), TelegramEngine.EngineData.Item.Peer.IsPremiumRequiredForMessaging(id: peerId), TelegramEngine.EngineData.Item.Peer.SendPaidMessageStars(id: peerId))
+        let signal = combineLatest(peer, micDeviceId() |> take(1), messaging) |> take(1) |> deliverOnMainQueue
+        peerDisposable.set(signal.start(next: { [weak self, weak window] peer, micDeviceId, messaging in
             guard let self else {
                 return
             }
             guard let window else {
                 self.isStarting = false
+                return
+            }
+            let alreadyNotified = callId != nil && self.noticeCallId == callId
+            guard alreadyNotified || (callId != nil && NovagramCallRecording.canNotify(peer: peer, isBlocked: messaging.0, isPremiumRequired: messaging.1, paidStars: messaging.2)) else {
+                self.isStarting = false
+                self.showToast(NovagramL10n.current.callRecording_noticeFailed)
                 return
             }
             self.begin(window: window, title: peer?.debugDisplayTitle ?? "", hasVideo: hasVideo, micDeviceId: micDeviceId, isAuto: isAuto, onStarted: { [weak self] in
@@ -237,18 +244,38 @@ public final class NovagramCallRecording {
         }
     }
 
+    private static func canNotify(peer: EnginePeer?, isBlocked: EnginePeerCachedInfoItem<Bool>, isPremiumRequired: Bool, paidStars: StarsAmount?) -> Bool {
+        guard let peer, peer.id.namespace == Namespaces.Peer.CloudUser, canSendMessagesToPeer(peer) else {
+            return false
+        }
+        return isBlocked.knownValue != true && !isPremiumRequired && (paidStars?.value ?? 0) <= 0
+    }
+
     private func sendNotice(engine: TelegramEngine, peerId: PeerId, callId: UUID?) {
         guard let callId, noticeCallId != callId, peerId.namespace == Namespaces.Peer.CloudUser else {
             return
         }
         noticeCallId = callId
+        let current = recorder
         let message = EnqueueMessage.message(text: NovagramL10n.current.callRecording_notice, attributes: [], inlineStickers: [:], mediaReference: nil, threadId: nil, replyToMessageId: nil, replyToStoryId: nil, localGroupingKey: nil, correlationId: nil, bubbleUpEmojiOrStickersets: [])
-        let _ = (enqueueMessages(account: engine.account, peerId: peerId, messages: [message]) |> deliverOnMainQueue).start(next: { ids in
-            #if DEBUG
-            if ids.isEmpty || ids.contains(where: { $0 == nil }) {
-                NovagramCallRecording.log.error("recording notice was not sent")
+        let _ = (enqueueMessages(account: engine.account, peerId: peerId, messages: [message]) |> deliverOnMainQueue).start(next: { [weak self] ids in
+            guard ids.isEmpty || ids.contains(where: { $0 == nil }) else {
+                return
             }
+            #if DEBUG
+            NovagramCallRecording.log.error("recording notice was not sent")
             #endif
+            guard let self else {
+                return
+            }
+            if self.noticeCallId == callId {
+                self.noticeCallId = nil
+            }
+            guard let current, self.recorder === current else {
+                return
+            }
+            self.stop(discard: true)
+            self.showToast(NovagramL10n.current.callRecording_noticeFailed)
         })
     }
 
@@ -260,7 +287,7 @@ public final class NovagramCallRecording {
         showToast(NovagramL10n.current.callRecording_audioOnly)
     }
 
-    private func stop() {
+    private func stop(discard: Bool = false) {
         guard #available(macOS 14.0, *), let recorder = recorder as? NovagramCallRecorder else {
             return
         }
@@ -272,11 +299,25 @@ public final class NovagramCallRecording {
         recorder.stop { [weak self] result in
             switch result {
             case let .success(url):
-                self?.save(tempURL: url, fileName: fileName, hasVideo: recorder.hasVideo)
+                if discard {
+                    NovagramCallRecording.discardFile(url)
+                } else {
+                    self?.save(tempURL: url, fileName: fileName, hasVideo: recorder.hasVideo)
+                }
             case let .failure(error):
                 NovagramCallRecording.log.error("stop failed: \(String(describing: error), privacy: .public)")
-                self?.showToast(NovagramL10n.current.callRecording_failed)
+                if !discard {
+                    self?.showToast(NovagramL10n.current.callRecording_failed)
+                }
             }
+        }
+    }
+
+    private static func discardFile(_ url: URL) {
+        do {
+            try FileManager.default.removeItem(at: url)
+        } catch {
+            log.error("discard failed: \(String(describing: error), privacy: .public)")
         }
     }
 
