@@ -74,7 +74,7 @@ func novagramJobIsSpam(_ message: Message, text: String) -> Bool {
 public final class NovagramJobSearchEngine {
     public static let maxConcurrentRequests = 6
     private static let debounceDelay: Double = 0.4
-    private static let presetHashtagCount = 4
+    static let maxRunHashtags = 8
     private static let presetKeywordCount = 3
     private static let watchedChannelLimit = 15
     static let pageLimit: Int32 = 50
@@ -382,11 +382,11 @@ public final class NovagramJobSearchEngine {
     }
 
     private func hashtags() -> [String] {
-        return NovagramJobSearchEngine.cleanHashtags(NovagramJobSearchEngine.presetHashtags(for: filter.mode) + query.hashtagTerms)
+        return NovagramJobSearchEngine.cleanHashtags(NovagramJobSearchEngine.runHashtags(filter) + query.hashtagTerms)
     }
 
-    static func presetHashtags(for mode: NovagramJobMode) -> [String] {
-        return Array(NovagramJobPresets.hashtags(for: mode).prefix(presetHashtagCount))
+    static func runHashtags(_ filter: NovagramJobFilter) -> [String] {
+        return Array(filter.hashtags(for: filter.mode).prefix(maxRunHashtags))
     }
 
     static func presetKeywords(for mode: NovagramJobMode) -> [String] {

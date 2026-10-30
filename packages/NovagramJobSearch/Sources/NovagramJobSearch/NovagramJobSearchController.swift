@@ -35,6 +35,9 @@ private final class Arguments {
     let removeSaved: (NovagramJobSavedSearch) -> Void
     var toggleLanguage: (NovagramSearchLanguage?) -> Void = { _ in }
     var selectRole: (String) -> Void = { _ in }
+    var removeHashtag: (String) -> Void = { _ in }
+    var addHashtag: () -> Void = {}
+    var resetHashtags: () -> Void = {}
 
     init(context: any AccountContextProtocol, setMode: @escaping (NovagramJobMode) -> Void, toggleCity: @escaping (String) -> Void, toggleFormat: @escaping (NovagramJobWorkFormat) -> Void, setPeriod: @escaping (NovagramJobPeriod) -> Void, toggleSalary: @escaping () -> Void, toggleSource: @escaping (NovagramJobSource) -> Void, searchGlobal: @escaping () -> Void, loadMore: @escaping () -> Void, openPost: @escaping (NovagramJobResult) -> Void, write: @escaping (NovagramJobResult) -> Void, copyContact: @escaping (NovagramJobResult) -> Void, findChannels: @escaping () -> Void, setWatched: @escaping (PeerId, Bool) -> Void, join: @escaping (PeerId) -> Void, openPeer: @escaping (PeerId) -> Void, saveCurrent: @escaping () -> Void, loadSaved: @escaping (NovagramJobSavedSearch) -> Void, toggleAlerts: @escaping (NovagramJobSavedSearch) -> Void, removeSaved: @escaping (NovagramJobSavedSearch) -> Void) {
         self.context = context
@@ -90,6 +93,7 @@ private let _id_period = InputDataIdentifier("_id_period")
 private let _id_salary = InputDataIdentifier("_id_salary")
 private let _id_languages = InputDataIdentifier("_id_languages")
 private let _id_roles = InputDataIdentifier("_id_roles")
+private let _id_hashtags = InputDataIdentifier("_id_hashtags")
 private let _id_global = InputDataIdentifier("_id_global")
 private let _id_loading = InputDataIdentifier("_id_loading")
 private let _id_load_more = InputDataIdentifier("_id_load_more")
@@ -267,6 +271,32 @@ private func languageTitle(_ language: NovagramSearchLanguage) -> String {
     }
 }
 
+private func hashtagChipsEntry(_ state: State, arguments: Arguments, sectionId: Int32, index: Int32) -> InputDataEntry {
+    let strings = NovagramL10n.current
+    let mode = state.filter.mode
+    let tags = state.filter.hashtags(for: mode)
+    var titles: [String] = []
+    var actions: [String: () -> Void] = [:]
+    for tag in tags {
+        let title = "#\(tag) ×"
+        titles.append(title)
+        actions[title] = { arguments.removeHashtag(tag) }
+    }
+    if tags.count < NovagramJobFilter.maxHashtags {
+        titles.append("+")
+        actions["+"] = arguments.addHashtag
+    }
+    if state.filter.hasCustomHashtags(for: mode) {
+        titles.append(strings.jobSearch_hashtagsReset)
+        actions[strings.jobSearch_hashtagsReset] = arguments.resetHashtags
+    }
+    return .custom(sectionId: sectionId, index: index, value: .none, identifier: _id_hashtags, equatable: InputDataEquatable(titles), comparable: nil, item: { initialSize, stableId in
+        NovagramJobRoleChipsRowItem(initialSize, stableId: stableId, roles: titles, viewType: .innerItem, select: { title in
+            actions[title]?()
+        })
+    })
+}
+
 private func sourceEntries(_ state: State, arguments: Arguments, sectionId: inout Int32, index: inout Int32) -> [InputDataEntry] {
     let strings = NovagramL10n.current
     var entries: [InputDataEntry] = []
@@ -279,9 +309,13 @@ private func sourceEntries(_ state: State, arguments: Arguments, sectionId: inou
             arguments.toggleSource(source)
         })))
         index += 1
+        if source == .hashtags && state.sources.hashtags {
+            entries.append(hashtagChipsEntry(state, arguments: arguments, sectionId: sectionId, index: index))
+            index += 1
+        }
     }
     let enabled = canSearchGlobal(state)
-    entries.append(.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_global, data: .init(name: strings.jobSearch_globalSearch, color: enabled ? theme.colors.accent : theme.colors.grayText, type: state.search.isGlobalLoading ? .loading : .none, viewType: .lastItem, enabled: enabled, description: globalDescription(state), action: arguments.searchGlobal)))
+    entries.append(.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_global, data: .init(name: strings.jobSearch_globalSearch, color: enabled ? theme.colors.text : theme.colors.text.withAlphaComponent(0.5), type: state.search.isGlobalLoading ? .loading : .none, viewType: .lastItem, enabled: enabled, description: globalDescription(state), descTextColor: theme.colors.grayText, action: arguments.searchGlobal)))
     index += 1
     return entries
 }
@@ -404,7 +438,7 @@ private func savedEntries(_ state: State, arguments: Arguments, sectionId: inout
     index += 1
     let total = state.saved.count + 1
     for (offset, saved) in state.saved.enumerated() {
-        entries.append(.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_saved(saved.id), data: .init(name: saved.title, color: theme.colors.text, type: .switchable(saved.alertsEnabled), viewType: bestGeneralViewType(Array(0 ..< total), for: offset), description: saved.alertsEnabled ? strings.jobSearch_alertsOn : strings.jobSearch_alertsOff, action: {
+        entries.append(.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_saved(saved.id), data: .init(name: saved.title, color: theme.colors.text, type: .switchable(saved.alertsEnabled), viewType: bestGeneralViewType(Array(0 ..< total), for: offset), description: saved.alertsEnabled ? strings.jobSearch_alertsOn : strings.jobSearch_alertsOff, descTextColor: theme.colors.grayText, action: {
             arguments.loadSaved(saved)
         }, switchAction: {
             arguments.toggleAlerts(saved)
@@ -700,6 +734,46 @@ public func NovagramJobSearchController(context: any AccountContextProtocol, sav
         NovagramJobStore.remove(id: saved.id, account: account)
         reloadStore()
     })
+    arguments.removeHashtag = { tag in
+        updateFilter { filter in
+            let mode = filter.mode
+            filter.setHashtags(filter.hashtags(for: mode).filter { $0 != tag }, for: mode)
+        }
+    }
+    arguments.resetHashtags = {
+        updateFilter { filter in
+            filter.setHashtags(nil, for: filter.mode)
+        }
+    }
+    arguments.addHashtag = {
+        let l10n = NovagramL10n.current
+        let alert = NSAlert()
+        alert.messageText = l10n.jobSearch_hashtagAddTitle
+        alert.informativeText = l10n.jobSearch_hashtagAddInfo
+        let field = NSTextField(frame: NSMakeRect(0, 0, 240, 24))
+        field.placeholderString = "#python"
+        alert.accessoryView = field
+        alert.addButton(withTitle: l10n.jobSearch_hashtagAdd)
+        alert.addButton(withTitle: strings().modalCancel)
+        alert.window.initialFirstResponder = field
+        alert.beginSheetModal(for: window, completionHandler: { response in
+            guard response == .alertFirstButtonReturn else {
+                return
+            }
+            guard let tag = NovagramJobFilter.normalizedHashtag(field.stringValue) else {
+                showModalText(for: window, text: l10n.jobSearch_hashtagInvalid)
+                return
+            }
+            updateFilter { filter in
+                let mode = filter.mode
+                let current = filter.hashtags(for: mode)
+                guard current.count < NovagramJobFilter.maxHashtags, !current.contains(where: { $0.lowercased() == tag.lowercased() }) else {
+                    return
+                }
+                filter.setHashtags(current + [tag], for: mode)
+            }
+        })
+    }
     arguments.selectRole = { role in
         updateFilter { $0.query = role }
     }

@@ -351,6 +351,26 @@ if let suite = UserDefaults(suiteName: suiteName) {
 
 
 let samples = [uzLatinVacancy, ruVacancy, uzCyrillicVacancy, enResume, uzResume, ruResume]
+var hashtagFilter = NovagramJobFilter()
+checkEqual(hashtagFilter.hashtags(for: .findJob), NovagramJobPresets.hashtags(for: .findJob), "job hashtags default to presets")
+checkEqual(hashtagFilter.hashtags(for: .findCandidates), NovagramJobPresets.hashtags(for: .findCandidates), "candidate hashtags default to presets")
+check(!hashtagFilter.hasCustomHashtags(for: .findJob), "presets are not custom")
+let hashtagLegacyJSON = "{\"mode\":\"findJob\",\"query\":\"ios\"}".data(using: .utf8) ?? Data()
+let hashtagLegacy = try? JSONDecoder().decode(NovagramJobFilter.self, from: hashtagLegacyJSON)
+check(hashtagLegacy != nil && hashtagLegacy?.jobHashtags == nil && hashtagLegacy?.candidateHashtags == nil, "decoding without hashtag keys gives nil")
+hashtagFilter.setHashtags(["#python", " swift ", "PYTHON", "bad-tag", String(repeating: "a", count: 33)], for: .findJob)
+checkEqual(hashtagFilter.hashtags(for: .findJob), ["python", "swift"], "custom job hashtags are cleaned and deduplicated")
+checkEqual(hashtagFilter.hashtags(for: .findCandidates), NovagramJobPresets.hashtags(for: .findCandidates), "custom job hashtags leave candidate presets")
+check(hashtagFilter.hasCustomHashtags(for: .findJob), "changed list is custom")
+hashtagFilter.setHashtags((0..<20).map { "tag\($0)" }, for: .findCandidates)
+checkEqual(hashtagFilter.hashtags(for: .findCandidates).count, NovagramJobFilter.maxHashtags, "hashtag list is capped at 12")
+hashtagFilter.setHashtags([], for: .findJob)
+check(hashtagFilter.hashtags(for: .findJob).isEmpty, "empty custom list stays empty")
+let encodedHashtags = (try? JSONEncoder().encode(hashtagFilter)).flatMap { try? JSONDecoder().decode(NovagramJobFilter.self, from: $0) }
+checkEqual(encodedHashtags, hashtagFilter, "custom hashtags survive encoding")
+hashtagFilter.setHashtags(nil, for: .findJob)
+checkEqual(hashtagFilter.hashtags(for: .findJob), NovagramJobPresets.hashtags(for: .findJob), "nil resets to presets")
+
 let speedQuery = NovagramJobQuery.parse("python | менеджер -junior")
 let start = Date()
 for index in 0..<600 {
@@ -361,5 +381,11 @@ for index in 0..<600 {
 let elapsed = Date().timeIntervalSince(start) * 1000
 print(String(format: "Parsed 600 posts in %.0f ms", elapsed))
 
+check(NovagramJobSpamGuard.isSpamText("#школьники #vacancy #предзаказ #канада"), "hashtag-only post is spam")
+check(NovagramJobSpamGuard.isSpamText("#ishbor #karnataka #замечательный"), "three hashtags without text is spam")
+check(NovagramJobSpamGuard.isSpamSource(title: "💵 latest | $500-$6676......", username: nil), "price range title is spam")
+check(NovagramJobSpamGuard.isSpamText("SwagBucks BUCKS $0.006152"), "token price post is spam")
+check(!NovagramJobSpamGuard.isSpamText("iOS developer kerak, maosh $1500-$2500, tel +998901234567"), "salary range is not a token price")
+check(!NovagramJobSpamGuard.isSpamText("Sotuvchi kerak. Tel: +998901234567 #ish #vakansiya #toshkent #sotuvchi"), "short vacancy with hashtags is not spam")
 print("NovagramJobSearch checks: \(passedCount) passed, \(failures.count) failed")
 exit(failures.isEmpty ? 0 : 1)

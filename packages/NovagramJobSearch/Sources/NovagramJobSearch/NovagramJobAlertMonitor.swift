@@ -185,9 +185,10 @@ public final class NovagramJobAlertMonitor {
 
     private static func requestKeys(for search: NovagramJobSavedSearch, query: NovagramJobQuery, watched: [Int64]) -> [(key: String, source: NovagramJobSource, text: String, preset: Bool)] {
         var keys: [(key: String, source: NovagramJobSource, text: String, preset: Bool)] = []
-        let presets = NovagramJobSearchEngine.cleanHashtags(NovagramJobSearchEngine.presetHashtags(for: search.filter.mode))
+        let presetTags = Set(NovagramJobSearchEngine.cleanHashtags(NovagramJobPresets.hashtags(for: search.filter.mode)).map { $0.lowercased() })
+        let presets = NovagramJobSearchEngine.cleanHashtags(NovagramJobSearchEngine.runHashtags(search.filter))
         for tag in presets {
-            keys.append(("h:" + tag.lowercased(), .hashtags, tag, true))
+            keys.append(("h:" + tag.lowercased(), .hashtags, tag, presetTags.contains(tag.lowercased())))
         }
         for tag in NovagramJobSearchEngine.cleanHashtags(query.hashtagTerms) where !presets.contains(where: { $0.lowercased() == tag.lowercased() }) {
             keys.append(("h:" + tag.lowercased(), .hashtags, tag, false))

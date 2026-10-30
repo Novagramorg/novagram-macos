@@ -16,6 +16,7 @@ PURE_FILES=(
     NovagramJobContactParser.swift
     NovagramSearchLanguage.swift
     NovagramSearchConversion.swift
+    NovagramJobSpamGuard.swift
 )
 
 WORK="$(mktemp -d)"

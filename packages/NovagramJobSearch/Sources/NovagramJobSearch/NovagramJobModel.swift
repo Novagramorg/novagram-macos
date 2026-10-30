@@ -129,8 +129,13 @@ public struct NovagramJobFilter: Equatable, Codable {
     public var period: NovagramJobPeriod
     public var onlyWithSalary: Bool
     public var languages: Set<NovagramSearchLanguage>
+    public var jobHashtags: [String]?
+    public var candidateHashtags: [String]?
 
-    public init(mode: NovagramJobMode = .findJob, query: String = "", cityIds: Set<String> = [], formats: Set<NovagramJobWorkFormat> = [], period: NovagramJobPeriod = .week, onlyWithSalary: Bool = false, languages: Set<NovagramSearchLanguage> = NovagramSearchLanguage.all) {
+    public static let maxHashtags = 12
+    public static let maxHashtagLength = 32
+
+    public init(mode: NovagramJobMode = .findJob, query: String = "", cityIds: Set<String> = [], formats: Set<NovagramJobWorkFormat> = [], period: NovagramJobPeriod = .week, onlyWithSalary: Bool = false, languages: Set<NovagramSearchLanguage> = NovagramSearchLanguage.all, jobHashtags: [String]? = nil, candidateHashtags: [String]? = nil) {
         self.mode = mode
         self.query = query
         self.cityIds = cityIds
@@ -138,6 +143,8 @@ public struct NovagramJobFilter: Equatable, Codable {
         self.period = period
         self.onlyWithSalary = onlyWithSalary
         self.languages = languages
+        self.jobHashtags = jobHashtags.map(NovagramJobFilter.normalizedHashtags)
+        self.candidateHashtags = candidateHashtags.map(NovagramJobFilter.normalizedHashtags)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -148,6 +155,8 @@ public struct NovagramJobFilter: Equatable, Codable {
         case period
         case onlyWithSalary
         case languages
+        case jobHashtags
+        case candidateHashtags
     }
 
     public init(from decoder: Decoder) throws {
@@ -159,6 +168,47 @@ public struct NovagramJobFilter: Equatable, Codable {
         self.period = try container.decodeIfPresent(NovagramJobPeriod.self, forKey: .period) ?? .week
         self.onlyWithSalary = try container.decodeIfPresent(Bool.self, forKey: .onlyWithSalary) ?? false
         self.languages = try container.decodeIfPresent(Set<NovagramSearchLanguage>.self, forKey: .languages) ?? NovagramSearchLanguage.all
+        self.jobHashtags = try container.decodeIfPresent([String].self, forKey: .jobHashtags).map(NovagramJobFilter.normalizedHashtags)
+        self.candidateHashtags = try container.decodeIfPresent([String].self, forKey: .candidateHashtags).map(NovagramJobFilter.normalizedHashtags)
+    }
+
+    public func hashtags(for mode: NovagramJobMode) -> [String] {
+        let custom = mode == .findJob ? jobHashtags : candidateHashtags
+        return custom ?? NovagramJobPresets.hashtags(for: mode)
+    }
+
+    public func hasCustomHashtags(for mode: NovagramJobMode) -> Bool {
+        return hashtags(for: mode) != NovagramJobPresets.hashtags(for: mode)
+    }
+
+    public mutating func setHashtags(_ tags: [String]?, for mode: NovagramJobMode) {
+        let value = tags.map(NovagramJobFilter.normalizedHashtags)
+        switch mode {
+        case .findJob:
+            jobHashtags = value
+        case .findCandidates:
+            candidateHashtags = value
+        }
+    }
+
+    public static func normalizedHashtag(_ raw: String) -> String? {
+        let stripped = raw.filter { $0 != "#" && !$0.isWhitespace }
+        guard !stripped.isEmpty, stripped.count <= maxHashtagLength, stripped.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) else {
+            return nil
+        }
+        return stripped
+    }
+
+    public static func normalizedHashtags(_ tags: [String]) -> [String] {
+        var seen = Set<String>()
+        var result: [String] = []
+        for tag in tags {
+            guard result.count < maxHashtags, let clean = normalizedHashtag(tag), seen.insert(clean.lowercased()).inserted else {
+                continue
+            }
+            result.append(clean)
+        }
+        return result
     }
 
     public func accepts(text: String, info: NovagramJobPostInfo, date: Int32, now: Int32, query: NovagramJobQuery) -> Bool {

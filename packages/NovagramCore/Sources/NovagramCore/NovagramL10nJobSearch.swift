@@ -7,7 +7,7 @@ public extension NovagramL10n {
     var jobSearch_modeFindCandidates: String { pick(en: "Find candidates", uz: "Xodim topish", ru: "Найти сотрудников") }
     var jobSearch_queryHeader: String { pick(en: "Role or skills", uz: "Lavozim yoki ko'nikmalar", ru: "Должность или навыки") }
     var jobSearch_queryPlaceholder: String { pick(en: "iOS developer", uz: "iOS dasturchi", ru: "iOS-разработчик") }
-    var jobSearch_queryHint: String { pick(en: "iOS | swift: any of the words. -junior: without the word. \"to'liq stavka\": exact phrase.", uz: "iOS | swift: so'zlardan biri. -junior: bu so'zsiz. \"to'liq stavka\": aynan shu ibora.", ru: "iOS | swift: любое из слов. -junior: без слова. \"to'liq stavka\": точная фраза.") }
+    var jobSearch_queryHint: String { pick(en: "iOS | swift: any of the words. -junior: without the word. \"to'liq stavka\": exact phrase. #python: posts with this hashtag.", uz: "iOS | swift: so'zlardan biri. -junior: bu so'zsiz. \"to'liq stavka\": aynan shu ibora. #python: shu heshtegli postlar.", ru: "iOS | swift: любое из слов. -junior: без слова. \"to'liq stavka\": точная фраза. #python: посты с этим хештегом.") }
     var jobSearch_filtersHeader: String { pick(en: "Filters", uz: "Filtrlar", ru: "Фильтры") }
     var jobSearch_city: String { pick(en: "City", uz: "Shahar", ru: "Город") }
     var jobSearch_any: String { pick(en: "Any", uz: "Istalgan", ru: "Любой") }
@@ -26,6 +26,11 @@ public extension NovagramL10n {
     var jobSearch_languagesNote: String { pick(en: "Translations go through Telegram's translation service; Uzbek Latin and Cyrillic are converted on this Mac. None: the query is searched as typed.", uz: "Tarjima Telegram tarjima xizmati orqali bajariladi; o'zbek lotin va kirill yozuvi shu Mac'da almashtiriladi. Hech biri: so'rov yozilganidek qidiriladi.", ru: "Перевод выполняет сервис перевода Telegram; узбекская латиница и кириллица меняются на этом Mac. Нет: запрос ищется как введён.") }
     var jobSearch_sourcesHeader: String { pick(en: "Sources", uz: "Manbalar", ru: "Источники") }
     var jobSearch_sourceHashtags: String { pick(en: "Public hashtag posts", uz: "Ochiq heshteg postlari", ru: "Публичные посты по хештегам") }
+    var jobSearch_hashtagAddTitle: String { pick(en: "Add a hashtag", uz: "Heshteg qo'shish", ru: "Добавить хештег") }
+    var jobSearch_hashtagAddInfo: String { pick(en: "Letters, digits and _ only, up to 32 characters.", uz: "Faqat harf, raqam va _, ko'pi bilan 32 belgi.", ru: "Только буквы, цифры и _, не больше 32 символов.") }
+    var jobSearch_hashtagAdd: String { pick(en: "Add", uz: "Qo'shish", ru: "Добавить") }
+    var jobSearch_hashtagInvalid: String { pick(en: "Use letters, digits and _ only, up to 32 characters", uz: "Faqat harf, raqam va _ ishlating, ko'pi bilan 32 belgi", ru: "Используйте только буквы, цифры и _, не больше 32 символов") }
+    var jobSearch_hashtagsReset: String { pick(en: "Reset", uz: "Tiklash", ru: "Сбросить") }
     var jobSearch_sourceMyChats: String { pick(en: "My chats", uz: "Mening chatlarim", ru: "Мои чаты") }
     var jobSearch_sourceWatched: String { pick(en: "Watched channels", uz: "Kuzatilayotgan kanallar", ru: "Отслеживаемые каналы") }
     var jobSearch_sourceGlobal: String { pick(en: "All public posts", uz: "Barcha ochiq postlar", ru: "Все публичные посты") }

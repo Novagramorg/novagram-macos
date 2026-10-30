@@ -624,3 +624,30 @@ No Telegram file changed in this round.
 - Translations (`NovagramJobTranslations.swift`): each language gets at most 8 s (after that the search runs without it), and only non-empty translations are cached, so a failure is retried next time.
 
 No Telegram file changed.
+
+
+## Search features switch (2026-10-30)
+
+iOS parity (iOS commit `3517592085`). Settings → Novagram → a new SEARCH section right after Interface: "Search features" (`pro_messager/novagram_search_features`, Bool, a missing key counts as on, deep-link slug `search-features`), then "Search the translated query too", moved here from Interface (same key `novagram_search_translate`, same slug `search-translate`, shown only while Search features is on). The single reader of the key is `NovagramCore/NovagramSearchFeatures.swift` (`isEnabled`, `key`, `signal()` that follows `UserDefaults.didChangeNotification`); `NovagramJobSearchAvailability` now forwards to it.
+
+While the switch is off:
+- Global search (`ChatListUI/NovagramSearchFilters.swift`): the Messages "From:" menu has no dates / Unread only / Mentions only items, and a filter that is still set is ignored (`hasDates`, `filtersMessages`, `unreadActive`, `mentionsActive` read the switch, so the dates, the page fill, the read-state lookup, the kept messages and the header title all fall back to plain Telegram).
+- Inside a chat (`NovagramCore/NovagramChatSearchFilter.swift`): `"..."` and `re:` are plain text.
+- Saved searches (`NovagramCore/NovagramSavedSearches.swift`): `signal` gives an empty list (no section) and `record` saves nothing; the stored JSON stays.
+- Translated query (`NovagramCore/NovagramQueryTranslator.swift`, `ChatListUI/NovagramTranslatedSearch.swift`): no translate request and no "Translated:" section; the translated signal follows `NovagramSearchFeatures.signal()`, so toggling also refreshes the open search results list.
+- Jobs tab and job alerts: already gated by `NovagramJobSearchAvailability` (same key).
+- Never gated: the hidden / locked chat privacy filter (`NovagramSearchPrivacy`, `novagramSearchHides`).
+
+About (`Telegram-Mac/novagram/NovagramAboutController.swift`): the "Disable" texts of the exact phrase and regex entries point at the new switch (en/uz/ru; zh unchanged).
+
+No Telegram file changed.
+
+## Job search, custom hashtags and row colors (branch `feature/search-switch-and-job-hashtags`, 2026-10-30)
+
+- Query hint: adds "#python: posts with this hashtag" (en/uz/ru, `jobSearch_queryHint`).
+- Hashtag chips: while "Public hashtag posts" is on, a chip row under it shows the hashtags that source searches for the current mode (`#vakansiya ×`, …, `+`, and "Reset" when the list differs from the presets). × removes a tag; `+` opens an alert with a text field (`#` and spaces stripped, letters / digits / `_` only, at most 32 characters, invalid input shows a toast); at most 12 tags per list, an empty list is allowed (then only the query's `#tags` are searched). The chips reuse `NovagramJobRoleChipsRowItem`.
+- Model: `NovagramJobFilter.jobHashtags` / `candidateHashtags: [String]?` (nil = presets, defaulted init parameters at the end, decoding without the keys gives nil, values are cleaned and capped on init / decode / `setHashtags`), `hashtags(for:)` (custom ?? `NovagramJobPresets.hashtags(for:)`), `hasCustomHashtags(for:)`, `setHashtags(_:for:)`, `normalizedHashtag(_:)`, `maxHashtags = 12`, `maxHashtagLength = 32`. Same change in `novagram-search-kit-sdk` (`Jobs/NovagramJobModel.swift`, test `testCustomHashtags`, commit `b80a9ef`, pushed); Mac checks in `packages/NovagramJobSearch/Checks/main.swift`.
+- Engine and alerts: `NovagramJobSearchEngine.runHashtags(filter)` = the first 8 of `filter.hashtags(for: mode)` (was the first 4 presets), plus the query's `#tags`, all through the shared limiter. In alerts an empty page counts as a failed request only for preset tags; an empty custom tag is just empty.
+- "Search all public posts" row: the title uses the normal text color (half-transparent when disabled) and the subtitle the secondary gray; the saved-search rows' "Alerts on/off" subtitle is gray too. Cause: `InputDataGeneralData.descTextColor` nil falls back to `theme.colors.text` in `InputDataControllerEntries.swift`, so the rows now pass `theme.colors.grayText`.
+
+No Telegram file changed.
