@@ -799,4 +799,3 @@ Ours:
 
 Manual repro for regressions (test account only): developer flag and Call recording on, call a test contact, press Record: the contact's chat gets "🔴 I'm recording this call (Novagram)" once; Stop and Record again: no second message; hang up and call again, Record: a new message. Video call with the mouse outside the window: the controls fade, REC mm:ss stays.
 
-- 2026-10-30: consent alert key bumped to `novagram_call_recording_warned_v2` so everyone sees the new text ("the other person gets a message in this chat") once, even if they accepted the old one.

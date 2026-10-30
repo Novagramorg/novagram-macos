@@ -8,7 +8,7 @@ public enum NovagramCallRecordingSettings {
     public static let folderKey = "novagram_call_recording_folder"
     public static let autoKey = "novagram_call_recording_auto"
     public static let dataSavingKey = "novagram_call_data_saving"
-    static let warnedKey = "novagram_call_recording_warned_v2"
+    static let warnedKey = "novagram_call_recording_warned"
     static let captureRequestedKey = "novagram_call_recording_capture_requested"
 
     private static var defaults: UserDefaults? {
