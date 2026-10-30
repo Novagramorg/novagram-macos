@@ -31,7 +31,7 @@ public enum NovagramQueryTranslator {
 
     public static func translatedQuery(engine: TelegramEngine, query: String) -> Signal<String?, NoError> {
         let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard isEnabled, query.count >= minQueryLength else {
+        guard NovagramSearchFeatures.isEnabled, isEnabled, query.count >= minQueryLength else {
             return .single(nil)
         }
         let lang = targetLanguage

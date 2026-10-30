@@ -34,7 +34,7 @@ public enum NovagramChatSearchFilter {
     private static var recent: [Progress] = []
 
     public static func wrap(query: String, state: SearchMessagesState?, search: @escaping Search) -> Signal<(SearchMessagesResult, SearchMessagesState), NoError> {
-        guard let mode = mode(for: query) else {
+        guard NovagramSearchFeatures.isEnabled, let mode = mode(for: query) else {
             return search(query, state)
         }
         let matches: (Message) -> Bool

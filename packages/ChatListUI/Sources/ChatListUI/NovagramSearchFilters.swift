@@ -17,11 +17,19 @@ struct NovagramSearchFilterState: Equatable {
     var mentionsOnly = false
 
     var hasDates: Bool {
-        return minDate != nil || maxDate != nil
+        return NovagramSearchFeatures.isEnabled && (minDate != nil || maxDate != nil)
     }
 
     var filtersMessages: Bool {
-        return unreadOnly || mentionsOnly
+        return NovagramSearchFeatures.isEnabled && (unreadOnly || mentionsOnly)
+    }
+
+    var unreadActive: Bool {
+        return NovagramSearchFeatures.isEnabled && unreadOnly
+    }
+
+    var mentionsActive: Bool {
+        return NovagramSearchFeatures.isEnabled && mentionsOnly
     }
 
     var isActive: Bool {
@@ -60,10 +68,10 @@ func novagramSearchKeptMessages(_ messages: [Message], readStates: [PeerId: Comb
         if privacy.hidesMessage(message) {
             return false
         }
-        if filter.unreadOnly && !novagramIsUnread(message, readStates: readStates) {
+        if filter.unreadActive && !novagramIsUnread(message, readStates: readStates) {
             return false
         }
-        if filter.mentionsOnly && !novagramMentionsMe(message) {
+        if filter.mentionsActive && !novagramMentionsMe(message) {
             return false
         }
         return true
@@ -176,7 +184,7 @@ func novagramWithReadStates(
     postbox: Postbox,
     filter: NovagramSearchFilterState
 ) -> Signal<NovagramSearchPage, NoError> {
-    guard filter.unreadOnly else {
+    guard filter.unreadActive else {
         return signal
     }
     return signal |> mapToSignal { value -> Signal<NovagramSearchPage, NoError> in
@@ -261,16 +269,19 @@ func novagramSearchFilterTitle(_ base: String, _ filter: NovagramSearchFilterSta
     if filter.hasDates {
         parts.append((filter.minDate.map(novagramShortDate) ?? "…") + "–" + (filter.maxDate.map(novagramShortDate) ?? "…"))
     }
-    if filter.unreadOnly {
+    if filter.unreadActive {
         parts.append(l10n.search_unreadOnly)
     }
-    if filter.mentionsOnly {
+    if filter.mentionsActive {
         parts.append(l10n.search_mentionsOnly)
     }
     return parts.joined(separator: " · ")
 }
 
 func novagramSearchFilterActions(_ filter: NovagramSearchFilterState, window: Window, update: @escaping (NovagramSearchFilterState) -> Void) -> [SeparatorBlockState.DropdownAction] {
+    guard NovagramSearchFeatures.isEnabled else {
+        return []
+    }
     let l10n = NovagramL10n.current
     var actions: [SeparatorBlockState.DropdownAction] = []
     actions.append(.init(title: filter.minDate.map { l10n.search_fromDateValue(novagramShortDate($0)) } ?? l10n.search_fromDate, selected: filter.minDate != nil, action: {

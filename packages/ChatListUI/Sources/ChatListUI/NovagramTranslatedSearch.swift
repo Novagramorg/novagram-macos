@@ -39,7 +39,23 @@ func novagramTranslatedSearch(
     source: Signal<SearchControllerMessaagesSourceValue, NoError>,
     filter: Signal<NovagramSearchFilterState, NoError>
 ) -> Signal<NovagramTranslatedMessages?, NoError> {
-    guard scope.applies, NovagramQueryTranslator.isEnabled else {
+    return NovagramSearchFeatures.signal()
+        |> mapToSignal { enabled -> Signal<NovagramTranslatedMessages?, NoError> in
+            guard enabled else {
+                return .single(nil)
+            }
+            return novagramTranslatedMessages(context, scope: scope, location: location, source: source, filter: filter)
+        }
+}
+
+private func novagramTranslatedMessages(
+    _ context: any AccountContextProtocol,
+    scope: NovagramTranslatedScope,
+    location: SearchMessagesLocation,
+    source: Signal<SearchControllerMessaagesSourceValue, NoError>,
+    filter: Signal<NovagramSearchFilterState, NoError>
+) -> Signal<NovagramTranslatedMessages?, NoError> {
+    guard scope.applies, NovagramSearchFeatures.isEnabled, NovagramQueryTranslator.isEnabled else {
         return .single(nil)
     }
     let engine = context.engine

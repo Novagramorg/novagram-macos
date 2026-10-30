@@ -83,6 +83,9 @@ public extension NovagramL10n {
     var search_savedPin: String { pick(en: "Pin", uz: "Qadash", ru: "Закрепить") }
     var search_savedUnpin: String { pick(en: "Unpin", uz: "Qadashni olish", ru: "Открепить") }
     var search_savedRemove: String { pick(en: "Remove", uz: "O'chirish", ru: "Удалить") }
+    var settings_section_search: String { pick(en: "SEARCH", uz: "QIDIRUV", ru: "ПОИСК") }
+    var settings_searchFeatures_title: String { pick(en: "Search features", uz: "Qidiruv imkoniyatlari", ru: "Возможности поиска") }
+    var settings_searchFeatures_subtitle: String { pick(en: "Dates, Unread only and Mentions only in global search, \"exact phrase\" and re: inside a chat, and saved searches. Hidden chats stay out of search either way.", uz: "Global qidiruvda sanalar, \"Faqat o'qilmaganlar\" va \"Faqat mention'lar\", chat ichida \"aniq ibora\" va re:, hamda saqlangan qidiruvlar. Yashirin chatlar har holda qidiruvda chiqmaydi.", ru: "Даты, «Только непрочитанные» и «Только упоминания» в глобальном поиске, \"точная фраза\" и re: в чате и сохранённые запросы. Скрытые чаты в поиск не попадают в любом случае.") }
     var settings_searchTranslate_title: String { pick(en: "Search the translated query too", uz: "Tarjima qilingan so'rov bo'yicha ham qidirish", ru: "Искать и по переводу запроса") }
     var settings_searchTranslate_subtitle: String { pick(en: "Messages search also looks for the query translated into your translation language. The query is sent to Telegram's translation service.", uz: "Xabarlar qidiruvi so'rovni tarjima tilingizga tarjima qilib ham qidiradi. So'rov Telegram'ning tarjima xizmatiga yuboriladi.", ru: "Поиск по сообщениям также ищет запрос, переведённый на ваш язык перевода. Запрос отправляется в сервис перевода Telegram.") }
     var editedHistory_file: String { pick(en: "File", uz: "Fayl", ru: "Файл") }

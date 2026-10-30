@@ -29,11 +29,11 @@ public enum NovagramSavedSearches {
     }
 
     public static func signal(accountPeerId: PeerId) -> Signal<[NovagramSavedSearch], NoError> {
-        return changes.get() |> map { _ in list(accountPeerId: accountPeerId) } |> distinctUntilChanged
+        return combineLatest(changes.get(), NovagramSearchFeatures.signal()) |> map { _, enabled in enabled ? list(accountPeerId: accountPeerId) : [] } |> distinctUntilChanged
     }
 
     public static func record(_ query: String?, accountPeerId: PeerId, accountRecordId: AccountRecordId) {
-        guard let text = normalized(query) else {
+        guard NovagramSearchFeatures.isEnabled, let text = normalized(query) else {
             return
         }
         update(accountPeerId, accountRecordId) { stored in
