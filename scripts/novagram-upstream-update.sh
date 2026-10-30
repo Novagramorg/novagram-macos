@@ -218,10 +218,17 @@ $dirty"
     local subject
     subject="merged upstream telegram-macos through $(git rev-parse --short "$up") ($(git rev-list --count "$base..$up") commits)"
     echo "merging upstream/master into $branch..."
+    local merge_status=0
     if [ -n "${NOVAGRAM_TRAILER:-}" ]; then
-        git -c submodule.recurse=false merge --no-ff --no-edit -m "$subject" -m "$NOVAGRAM_TRAILER" upstream/master >> "$LOG" 2>&1
+        git -c submodule.recurse=false merge --no-ff --no-edit -m "$subject" -m "$NOVAGRAM_TRAILER" upstream/master >> "$LOG" 2>&1 || merge_status=$?
     else
-        git -c submodule.recurse=false merge --no-ff --no-edit -m "$subject" upstream/master >> "$LOG" 2>&1
+        git -c submodule.recurse=false merge --no-ff --no-edit -m "$subject" upstream/master >> "$LOG" 2>&1 || merge_status=$?
+    fi
+    if [ "$merge_status" -ne 0 ] && [ ! -e .git/MERGE_HEAD ]; then
+        die "git merge failed before merging anything (exit $merge_status), see $LOG"
+    fi
+    if ! git merge-base --is-ancestor upstream/master HEAD && [ ! -e .git/MERGE_HEAD ]; then
+        die "upstream/master is not in HEAD after the merge, see $LOG"
     fi
     if [ -e .git/MERGE_HEAD ]; then
         RESTORE_ON_EXIT=0
