@@ -549,7 +549,6 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
             if value {
                 let _ = logoutFromAccount(id: accountId, accountManager: context.sharedContext.accountManager, alreadyLoggedOutRemotely: false).start()
                 FastSettings.clear_uuid(context.account.id.int64)
-                NovagramSavedSearches.clear(accountRecordId: accountId) // Novagram
                 novagramJobSearchClear(accountRecordId: accountId) // Novagram
                 BrowserStateContext.cleanup(context.account.id)
                 closePipVideo(accountId: accountId)

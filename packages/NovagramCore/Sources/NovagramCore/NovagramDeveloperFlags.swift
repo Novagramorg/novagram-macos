@@ -22,7 +22,7 @@ public enum NovagramDeveloperFlags {
     private static let stickerPackSaveKey = "novagram_sticker_pack_save"
     // Read by TelegramCore too (fork-patches/telegramcore/NovagramAdEvents.swift): keep the name in sync.
     private static let adEventsOffKey = "novagram_ads_events_off"
-    private static let searchFeaturesKey = "novagram_dev_search_features"
+    public static let jobSearchKey = "novagram_dev_job_search"
     private static let callRecordingKey = "novagram_dev_call_recording"
     private static let callDataSavingKey = "novagram_dev_call_data_saving"
 
@@ -35,9 +35,9 @@ public enum NovagramDeveloperFlags {
         return self.signal { self.isCallDataSavingEnabled }
     }
 
-    public static var isSearchFeaturesEnabled: Bool {
-        get { return self.value(forKey: self.searchFeaturesKey) }
-        set { self.setValue(newValue, forKey: self.searchFeaturesKey) }
+    public static var isJobSearchEnabled: Bool {
+        get { return self.value(forKey: self.jobSearchKey) }
+        set { self.setValue(newValue, forKey: self.jobSearchKey) }
     }
 
     public static var isCallRecordingEnabled: Bool {
@@ -45,8 +45,8 @@ public enum NovagramDeveloperFlags {
         set { self.setValue(newValue, forKey: self.callRecordingKey) }
     }
 
-    public static var searchFeaturesSignal: Signal<Bool, NoError> {
-        return self.signal { self.isSearchFeaturesEnabled }
+    public static var jobSearchSignal: Signal<Bool, NoError> {
+        return self.signal { self.isJobSearchEnabled }
     }
 
     public static var callRecordingSignal: Signal<Bool, NoError> {
@@ -132,7 +132,7 @@ public enum NovagramDeveloperRole: String {
         case currencyRatesView
         case adsPanel
         case stickerPackSave
-        case searchFeatures
+        case jobSearch
         case callRecording
         case callDataSaving
     }
@@ -149,7 +149,7 @@ public enum NovagramDeveloperRole: String {
             switch item {
             case .adEventsOff, .adsPanel:
                 return true
-            case .removeAllAds, .currencyRatesView, .stickerPackSave, .searchFeatures, .callRecording, .callDataSaving:
+            case .removeAllAds, .currencyRatesView, .stickerPackSave, .jobSearch, .callRecording, .callDataSaving:
                 return false
             }
         }
@@ -191,8 +191,8 @@ public enum NovagramDeveloperRole: String {
         if !role.canUse(.stickerPackSave) && NovagramDeveloperFlags.isStickerPackSaveEnabled {
             NovagramDeveloperFlags.isStickerPackSaveEnabled = false
         }
-        if !role.canUse(.searchFeatures) && NovagramDeveloperFlags.isSearchFeaturesEnabled {
-            NovagramDeveloperFlags.isSearchFeaturesEnabled = false
+        if !role.canUse(.jobSearch) && NovagramDeveloperFlags.isJobSearchEnabled {
+            NovagramDeveloperFlags.isJobSearchEnabled = false
         }
         if !role.canUse(.callRecording) && NovagramDeveloperFlags.isCallRecordingEnabled {
             NovagramDeveloperFlags.isCallRecordingEnabled = false

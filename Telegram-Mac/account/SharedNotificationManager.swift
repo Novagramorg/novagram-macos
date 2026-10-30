@@ -8,7 +8,6 @@ import ObjcUtils
 import InAppSettings
 import PasscodeCore
 import WalletContext
-import NovagramCore // Novagram
 
 func getNotificationMessageId(userInfo:[AnyHashable: Any], for prefix: String) -> MessageId? {
     if let msgId = userInfo["\(prefix).message.id"] as? Int32, let msgNamespace = userInfo["\(prefix).message.namespace"] as? Int32, let namespace = userInfo["\(prefix).peer.namespace"] as? Int32, let id = userInfo["\(prefix).peer.id"] as? Int64 {
@@ -323,7 +322,6 @@ final class SharedNotificationManager : NSObject, NSUserNotificationCenterDelega
         let accountManager = self.accountManager
         let signal = combineLatest(self.activeAccounts.accounts.map { logoutFromAccount(id: $0.0, accountManager: self.accountManager, alreadyLoggedOutRemotely: false) }) |> deliverOnMainQueue
         appEncryption.remove()
-        self.activeAccounts.accounts.forEach { NovagramSavedSearches.clear(accountRecordId: $0.0) } // Novagram
         self.activeAccounts.accounts.forEach { novagramJobSearchClear(accountRecordId: $0.0) } // Novagram
         if #available(macOS 10.15, *) {
             _ = try? resetWalletLocalSecrets()

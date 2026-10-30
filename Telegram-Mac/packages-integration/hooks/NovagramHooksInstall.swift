@@ -20,7 +20,6 @@ func installNovagramHooks() {
     }
     hooks.accountWillLogOut = { accountId in
         NovagramAnalyticsManager.shared.accountWillLogOut(accountId: accountId)
-        NovagramSavedSearches.clear(accountRecordId: accountId)
         novagramJobSearchClear(accountRecordId: accountId)
     }
     hooks.openRecentActions = { context, peer in

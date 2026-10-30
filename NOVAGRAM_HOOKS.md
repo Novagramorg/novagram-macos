@@ -489,6 +489,8 @@ Ours:
 Manual repro for regressions: (1) turn on Call recording and Record every call automatically, call someone: REC starts with the ringback; answer an incoming call: REC starts on accept. (2) right-click the gear on the call screen: pick another microphone / speaker, the other side hears / you hear through it at once, Settings → Voice & Video shows the same choice. (3) Network Link Conditioner "Very Bad Network" during a video call: after ~5 s the banner shows, "Turn off my video" stops our camera. (4) Use less data for calls on, start a new call: the call log shows data saving `always`.
 ## Search plus, batch A (branch `feature/search-plus`, 2026-10-29)
 
+> Dates / Unread only / Mentions only removed 2026-10-30 (manager scope), last on main at 9d9b178d4; logic in NovagramSearchKit. The hidden / locked chat privacy part of this section stays.
+
 Plan: hidden chats were not filtered in global search (only `ChatListController.swift:1037` used the hidden-chats filter). Now they are, and they stay out even while hidden chats are revealed (owner's rule 2026-10-29: searching hidden chats defeats hiding them; `novagramSearchHides` and `NovagramSearchPrivacyPass` read `isPeerHiddenInStorage`). Search stays on the current account: an "Other accounts" section was built and removed the same day at the owner's request, and the Messages section gets a date range and "Unread only" / "Mentions only".
 
 | File | Change |
@@ -499,6 +501,8 @@ Ours: `packages/ChatListUI/.../NovagramSearchFilters.swift` (privacy checks; loc
 
 ## Search plus, batch B: translated query (branch `feature/search-plus`, 2026-10-29)
 
+> Removed 2026-10-30 (manager scope), last on main at 9d9b178d4; logic in NovagramSearchKit.
+
 With Settings → Novagram → Interface → "Search the translated query too" on (`pro_messager/novagram_search_translate`, default off), global search translates the query into the `auto_translate_lang` language (else `en`) and shows a "Translated: …" section of messages found by the translation. The switch text says the query is sent to Telegram's translation service.
 
 | File | Change |
@@ -508,6 +512,8 @@ With Settings → Novagram → Interface → "Search the translated query too" o
 Ours: `packages/NovagramCore/.../NovagramQueryTranslator.swift` (`engine.messages.translate(text:toLang:)`, only for 3+ characters, 600 ms debounce through a delayed start, in-memory cache keyed by language and query (200 entries, then cleared), no section when the translation equals the query ignoring case and spaces; while the switch is off the translate signal is never built or subscribed); `packages/ChatListUI/.../NovagramTranslatedSearch.swift` (common chat list search with messages, no tags, no `#`/`$`; its own `searchMessages(state: nil, limit: 20)` with the same "From" source and dates as the Messages section, no paging; messages go through `novagramSearchKeptMessages`, so hidden and locked chats and the unread / mentions filters apply as in batch A). The section sits at 19000, before Messages (not 25000 as planned): Messages pages more on scroll to the bottom, so a section after it would stay out of reach. Settings row in `Telegram-Mac/novagram/NovagramSettingsController.swift`, strings in `NovagramL10nParity.swift`.
 
 ## Search plus, review fixes (branch `feature/search-plus`, 2026-10-29)
+
+> Unread / filter paging and the translated section removed 2026-10-30 (manager scope), last on main at 9d9b178d4; logic in NovagramSearchKit. The privacy lines of this section stay.
 
 Hidden chats no longer show in the Apps and Channels tabs, the community search or "Show as messages"; locked chats' messages stay out of "Show as messages" too. "Unread only" keeps earlier pages, the filtered list keeps loading while it is short, the translated section no longer holds up the search.
 
@@ -520,6 +526,8 @@ Ours: `packages/NovagramCore/.../NovagramSearchPrivacy.swift` (`NovagramSearchPr
 
 ## Search plus, batch C: exact phrase and regex in a chat (branch `feature/search-batch-c`, 2026-10-29)
 
+> Removed 2026-10-30 (manager scope), last on main at 9d9b178d4; logic in NovagramSearchKit.
+
 Inside a chat's search, a query in double quotes (`"two words"`, curly quotes too) sends the words without quotes and keeps only messages containing the exact phrase (case- and diacritic-insensitive); `re:pattern` (lowercase `re:` only, so `Re: invoice` stays a plain search) scans the chat history (empty query, 100 per page, at most 2000 messages) with a case-insensitive `NSRegularExpression` (each message gets at most 50 ms, stopped through `enumerateMatches` with `.reportProgress`; each page at most 1 s, after that the search counts as finished), an invalid pattern falls back to a plain search for the text after `re:`. Normal queries make the same single request as before.
 
 | File | Change |
@@ -529,6 +537,8 @@ Inside a chat's search, a query in double quotes (`"two words"`, curly quotes to
 Ours: `packages/NovagramCore/.../NovagramChatSearchFilter.swift` (query parsing; filtering on `Queue.concurrentDefaultQueue()`; while a request adds fewer than 10 matches and the server has more, it fetches the next page, at most 5 extra pages per request; the result's `totalCount` is the number of matches loaded so far, so the header count shows them; messages already checked are not matched again on the next page; the last 8 paging states remember their match count, the checked message ids and whether they are finished (server done or 2000 messages scanned), so loading more after the cap returns the same result without a request; disposing the signal, when the query changes or search closes, cancels the paging). Hint sentence `about_searchHint` (en/uz/ru) in `NovagramL10nParity.swift`, appended to the About Novagram intro text in `Telegram-Mac/novagram/NovagramAboutController.swift`. The chat's in-message highlight still uses the typed query, so quoted and `re:` results are not highlighted inside bubbles.
 
 ## Search plus, batch C: saved searches (branch `feature/search-batch-c`, 2026-10-29)
+
+> Removed 2026-10-30 (manager scope), last on main at 9d9b178d4; logic in NovagramSearchKit.
 
 Global search remembers the query a result was opened from (trimmed, empty ignored, de-duplicated case-insensitively, last 20 plus unlimited pinned ones, per account). On the empty search screen a "Saved searches" section sits between the top peers strip and Recent: pinned first (marked "Pinned"), then recent. Clicking one puts the text back into the search field, which runs the search again; the right-click menu has Pin / Unpin and Remove. Text only: no tab, date or filter restore.
 
@@ -628,6 +638,8 @@ No Telegram file changed.
 
 ## Search features switch (2026-10-30)
 
+> Removed 2026-10-30 (manager scope), last on main at 9d9b178d4; logic in NovagramSearchKit. The Jobs tab now follows `novagram_dev_job_search`.
+
 iOS parity (iOS commit `3517592085`). Settings → Novagram → a new SEARCH section right after Interface: "Search features" (`pro_messager/novagram_search_features`, Bool, a missing key counts as on, deep-link slug `search-features`), then "Search the translated query too", moved here from Interface (same key `novagram_search_translate`, same slug `search-translate`, shown only while Search features is on). The single reader of the key is `NovagramCore/NovagramSearchFeatures.swift` (`isEnabled`, `key`, `signal()` that follows `UserDefaults.didChangeNotification`); `NovagramJobSearchAvailability` now forwards to it.
 
 While the switch is off:
@@ -654,6 +666,8 @@ No Telegram file changed.
 
 ## NovagramSearchKit SDK (2026-10-30)
 
+> NovagramCore and ChatListUI adapters removed 2026-10-30 (manager scope), last on main at 9d9b178d4; only NovagramJobSearch uses the SDK now.
+
 The pure search logic now comes from the shared SDK `Novagramorg/novagram-search-kit-sdk` (module `NovagramSearchKit`, Foundation only, also used by iOS); the Mac keeps no copy of it, only thin adapters for Signals, Postbox and UI.
 
 - Submodule: `packages/NovagramSearchKit` → https://github.com/Novagramorg/novagram-search-kit-sdk, pinned to `3751cf3`. Update: `git -C packages/NovagramSearchKit fetch && git -C packages/NovagramSearchKit checkout <sha>`, then `git add packages/NovagramSearchKit`. Never a bare `git submodule update` (it resets `submodules/telegram-ios` and wipes the TelegramCore fork patches); touch only this path. `scripts/novagram-local.sh hide` sets `ignore = dirty` on it like on every submodule in `.gitmodules`; `scripts/novagram-upstream-update.sh` (`update_moved_submodules`) only updates submodules whose checkout differs from the index, which upstream never moves for this one. Neither script needed a change.
@@ -675,6 +689,8 @@ The pure search logic now comes from the shared SDK `Novagramorg/novagram-search
 
 ## Search translate languages (2026-10-30)
 
+> Removed 2026-10-30 (manager scope), last on main at 9d9b178d4; logic in NovagramSearchKit.
+
 iOS parity. The rules come from SDK `NovagramSearchSettings`: `translateTargets`, `setTranslateTargets`, `serverTranslationCodes(for:)`, `maxServerTranslations = 3`.
 
 - Key `pro_messager/novagram_search_translate_langs` (`[String]` of `uz-Latn`, `uz-Cyrl`, `ru`, `en`, in tap order; empty = None). A missing key means today's single target from `auto_translate_lang` (`uz` → `uz-Latn`, other codes as they are); nothing is written until the row is used, and the first write keeps only the 4 allowed codes.
@@ -690,6 +706,8 @@ iOS parity. The rules come from SDK `NovagramSearchSettings`: `translateTargets`
 
 ## Developer flags for search and call recording (2026-10-30)
 
+> The search flag `novagram_dev_search_features` removed 2026-10-30 (manager scope), last on main at 9d9b178d4; job search has its own flag `novagram_dev_job_search`. The call recording and call data saving flags stay.
+
 Owner's rule: search features and call recording are hidden Developer features until the manager accepts them (same spec on iOS).
 
 - `NovagramCore/NovagramDeveloperFlags.swift`: `novagram_dev_search_features` (`isSearchFeaturesEnabled`, `searchFeaturesSignal`) and `novagram_dev_call_recording` (`isCallRecordingEnabled`, `callRecordingSignal`), pro_messager, Bool, missing = off, posting `novagramDeveloperFlagsChanged`. `NovagramDeveloperRole.Switch` gained `searchFeatures` and `callRecording`: the director cannot see them and a director login turns them off.
@@ -700,3 +718,30 @@ Owner's rule: search features and call recording are hidden Developer features u
 - Third flag, "Use less data for calls" (owner, not approved by the manager either): `novagram_dev_call_data_saving` (`isCallDataSavingEnabled`, `callDataSavingSignal`, pro_messager, Bool, missing = off), "Use less data for calls (beta)" / "Qo'ng'iroqlarda kam trafik (beta)" / "Экономия трафика в звонках (бета)" (`developer_callDataSaving*`), developer role only (`NovagramDeveloperRole.Switch.callDataSaving`; a director login turns it off). Off: the "Use less data for calls" row in Novagram Settings → Calls is hidden and the slug `call-data-saving` does nothing; calls use upstream's `.never` (`TelegramCallsCore/NovagramCallDataSaving.swift` returns `.always` only while both the flag and `novagram_call_data_saving` are on; the hook line `PCallSession.swift:537` is unchanged, and upstream hard-codes `.never` there, so Telegram's own Data and Storage setting and `VoiceCallSettings` are not touched). The stored row value is kept for when the flag comes back.
 - The Calls section (header included) shows only while call recording is available (flag on, macOS 14+) or the data saving flag is on. Its header is uppercase like the other sections: "CALLS" / "QO'NG'IROQLAR" / "ЗВОНКИ" (`callRecording_section`).
 No Telegram file changed.
+
+## Manager scope: rejected search UI removed (2026-10-30)
+
+The manager approved search over all accounts and search in edit history / deleted messages, and rejected dates, Unread / Mentions only, the translated query (with translate languages), saved searches and "phrase" / `re:` inside a chat. The owner removed the rejected UI; all logic stays in NovagramSearchKit (SDK untouched). Branch `feature/search-manager-scope`, from main 9d9b178d4. Hidden / locked chat privacy in every search path is kept.
+
+Telegram files (old line numbers at 9d9b178d4):
+
+| File | Change |
+| --- | --- |
+| `packages/ChatListUI/.../SearchController.swift` | deleted: stable id `case novagramSavedSearch(String)` (`:94`) and its hash line (`:137`); entry `case novagramSavedSearch(...)` (`:162`) and its `stableId`, `index`, `==`, row item lines (`:198`, `:231`, `:344`, `:646`); `novagramSearchFilter` and `novagramAutoLoad` properties (`:861–862`); `public var novagramSetQuery` (`:881`); their local captures (`:934–935`); `novagramFillFilteredPage` (`:1266`) and `novagramWithReadStates` (`:1271`) lines; the translated sections line (`:1394`); the saved searches section line (`:1763`); `novagramAutoLoad.takeRequest()` (`:1891`); `novagramSavedSearchSelect` in `selectionDidChange` (`:2203`); `NovagramSavedSearches.record` before `open` (`:2396`). Restored to upstream: `remoteSearch` combine (`:1254`), the Messages `searchMessages` location (`:1263`), the Messages header `if !remoteMessages.0.isEmpty {` (`:1395`), the dropdown title (`:1400`) and its actions `})])` (`:1411`), the empty-screen `combineLatest` (`:1754`). Changed, still hooks: the Messages loop now uses `novagramSearchPrivateMessages(result.0.messages)` (`:1278`, privacy only); the final `combineLatest` keeps only the ads argument and the map only `promoted` (`:1332–1333`) |
+| `packages/ChatUI/.../ChatController.swift` | `searchRequest` line restored to upstream (`:542`); `import NovagramCore` stays (other hooks) |
+| `packages/ChatListUI/.../PeersListController.swift` | `searchController.novagramSetQuery` line deleted (`:3247`) |
+| `Telegram-Mac/app/ApplicationContext.swift` | `NovagramSavedSearches.clear` in the `loggedOut` observer deleted (`:552`); the job search clear stays |
+| `Telegram-Mac/account/SharedNotificationManager.swift` | `import NovagramCore` (`:11`) and the saved searches clear in `logout()` (`:326`) deleted; the job search clear stays |
+| `packages/ChatListUI/Package.swift` | the two `NovagramSearchKit` lines deleted (`:57`, `:72`) |
+
+Our files:
+- Deleted: `ChatListUI/NovagramTranslatedSearch.swift`, `ChatListUI/NovagramTranslateChipsRowItem.swift`, `ChatListUI/NovagramSavedSearchRows.swift`, `NovagramCore/NovagramChatSearchFilter.swift`, `NovagramCore/NovagramSavedSearches.swift`, `NovagramCore/NovagramQueryTranslator.swift`, `NovagramCore/NovagramSearchFeatures.swift`.
+- `ChatListUI/NovagramSearchFilters.swift`: only the privacy functions remain (`novagramSearchHides` ×2, `novagramSearchPrivateMessages`).
+- `packages/NovagramCore/Package.swift`: the NovagramSearchKit dependency removed (NovagramCore no longer uses it). `NovagramJobSearch` keeps it.
+- `Telegram-Mac/novagram/NovagramSettingsController.swift`: the SEARCH section (Search features, translate, Translate into), its state, defaults keys, menu, slugs `search-features`, `search-translate`, `search-translate-langs` and the Developer row "Search features (beta)" removed; new Developer row "Job search (beta)".
+- `Telegram-Mac/novagram/NovagramAboutController.swift`: the "Exact phrase search in a chat" and "Regex search in a chat" entries removed.
+- `Telegram-Mac/packages-integration/hooks/NovagramHooksInstall.swift` (`accountWillLogOut`) and `Telegram-Mac/novagram/NovagramAccountsController.swift`: the saved searches clear removed; `NovagramHooks.accountWillLogOut` and the job store clears stay. The stored `novagram_saved_searches_*` JSON is left on disk.
+- Strings removed: `search_*` date / unread / mentions / translated / saved strings and `settings_section_search`, `settings_searchFeatures_*`, `settings_searchTranslate*` (`NovagramL10nParity.swift`), `developer_searchFeatures*` (`NovagramL10n.swift`).
+- Job search flag: `NovagramDeveloperFlags.jobSearchKey` = `novagram_dev_job_search` (pro_messager, Bool, missing = off), `isJobSearchEnabled`, `jobSearchSignal`; `NovagramDeveloperRole.Switch.jobSearch` (developer only, a director login turns it off); strings `developer_jobSearchTitle` "Job search (beta)" / "Ish qidirish (beta)" / "Поиск работы (бета)" and `developer_jobSearchTip`. `NovagramJobSearchAvailability` reads only this flag, so it gates the Jobs tab, the page, `tg://novagram/jobs` and job alerts.
+
+`// Novagram` lines in `packages` + `Telegram-Mac`: 496 before, 463 after (32 Telegram-file hook lines, plus one comment line in the trimmed `NovagramSearchFilters.swift`).

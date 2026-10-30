@@ -54,7 +54,6 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "NovagramCore", path: "../NovagramCore"), // Novagram
-        .package(name: "NovagramSearchKit", path: "../NovagramSearchKit"), // Novagram
         .package(name: "SSignalKit", path: "../../submodules/telegram-ios/submodules/SSignalKit"),
         .package(name: "TelegramCore", path: "../../submodules/telegram-ios/submodules/TelegramCore"),
         .package(name: "Postbox", path: "../../submodules/telegram-ios/submodules/Postbox"),
@@ -69,7 +68,6 @@ let package = Package(
             name: "ChatListUI",
             dependencies: [
                 .product(name: "NovagramCore", package: "NovagramCore", condition: nil), // Novagram
-                .product(name: "NovagramSearchKit", package: "NovagramSearchKit", condition: nil), // Novagram
                 .product(name: "SwiftSignalKit", package: "SSignalKit", condition: nil),
                 .product(name: "TelegramCore", package: "TelegramCore", condition: nil),
                 .product(name: "Postbox", package: "Postbox", condition: nil),
