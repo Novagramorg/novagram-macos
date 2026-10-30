@@ -87,8 +87,9 @@ public final class NovagramEditedHistoryManager {
 
     /// Process a batch of messages to observe and record edits: a changed text or changed media
     /// (iOS records both). The saved version keeps its own time, as on iOS.
-    public func processMessages(_ messages: [Message]) {
+    public func processMessages(_ messages: [Message], account: Account? = nil) {
         lock.lock(); defer { lock.unlock() }
+        var archived: [NovagramArchiveEdit] = []
         for message in messages {
             let msgId = message.id
             let edited = message.attributes.compactMap({ $0 as? EditedMessageAttribute }).first
@@ -105,10 +106,14 @@ public final class NovagramEditedHistoryManager {
                             existing = Array(existing.suffix(50))
                         }
                         saveLocked(existing, peerId: msgId.peerId, messageId: msgId.id)
+                        archived.append(NovagramArchiveEdit(message: message, previousText: previous.text, editDate: current.timestamp))
                     }
                 }
             }
             lastSeen[msgId] = current
+        }
+        if let account, !archived.isEmpty {
+            NovagramMessageArchive.shared.recordEdited(archived, account: account)
         }
     }
 

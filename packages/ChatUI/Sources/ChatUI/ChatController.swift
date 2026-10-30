@@ -3031,7 +3031,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
     public override func viewDidLoad() {
         super.viewDidLoad()
         deletedMessagesDisposable.set((context.account.stateManager.deletedMessages |> deliverOnMainQueue).start(next: { [weak self] ids in // Novagram
-            guard let self, NovagramDeletedMessages.shared.recordDeleted(ids, peerId: self.chatInteraction.peerId), NovagramDeletedMessages.shared.isEnabled, let location = self.locationValue else { return } // Novagram
+            guard let self, NovagramDeletedMessages.shared.recordDeleted(ids, peerId: self.chatInteraction.peerId, account: self.context.account), NovagramDeletedMessages.shared.isEnabled, let location = self.locationValue else { return } // Novagram
             self.setLocation(location.content) // Novagram
         })) // Novagram
         
@@ -4138,7 +4138,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                     proccesedView = ChatHistoryView(originalView: view, filteredEntries: [], theme: chatTheme)
                 } else {
                     let msgEntries = NovagramDeletedMessages.shared.process(view.entries, peerId: chatInteraction.peerId, hasEarlier: view.earlierId != nil, hasLater: view.laterId != nil) // Novagram
-                    NovagramEditedHistoryManager.shared.processMessages(view.entries.map { $0.message }) // Novagram
+                    NovagramEditedHistoryManager.shared.processMessages(view.entries.map { $0.message }, account: context.account) // Novagram
                     
                     let topMessages: [Message]?
                     switch chatLocation {

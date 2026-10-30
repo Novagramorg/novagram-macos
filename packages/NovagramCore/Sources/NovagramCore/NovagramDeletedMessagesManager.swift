@@ -66,9 +66,10 @@ public final class NovagramDeletedMessages {
     /// Records deletions from `stateManager.deletedMessages`. Returns true if a tombstone
     /// was newly created for `peerId` (so the caller can nudge that chat to refresh).
     @discardableResult
-    public func recordDeleted(_ ids: [DeletedMessageId], peerId: PeerId) -> Bool {
+    public func recordDeleted(_ ids: [DeletedMessageId], peerId: PeerId, account: Account? = nil) -> Bool {
         lock.lock(); defer { lock.unlock() }
         var createdForPeer = false
+        var archived: [Message] = []
         for did in ids {
             // TelegramCore maps CloudUser (1-on-1) & CloudGroup deletions to `.global(id.id)` —
             // peer stripped, shared id space. Channels/secret chats keep `.messageId`. Resolve
@@ -89,11 +90,15 @@ public final class NovagramDeletedMessages {
                     continue
                 }
                 tombstones[mid.peerId, default: [:]][mid] = markDeleted(entry)
+                archived.append(entry.message)
                 enforceTombstoneCap(mid.peerId)
                 if mid.peerId == peerId {
                     createdForPeer = true
                 }
             }
+        }
+        if let account, !archived.isEmpty {
+            NovagramMessageArchive.shared.recordDeleted(archived, account: account)
         }
         return createdForPeer
     }

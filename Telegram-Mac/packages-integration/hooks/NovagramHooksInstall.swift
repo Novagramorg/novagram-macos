@@ -8,6 +8,7 @@ import CallsUI
 import InAppSettings
 import SwiftSignalKit
 import NovagramJobSearch
+import ApiCredentials
 
 func installNovagramHooks() {
     var hooks = NovagramHooks()
@@ -17,6 +18,12 @@ func installNovagramHooks() {
         }
         let controller = NovagramEditedHistoryController(context: context, peerId: peerId, messageId: messageId, currentText: currentText)
         context.bindings.rootNavigation().push(controller)
+    }
+    hooks.openChat = { context, peerId in
+        guard let context = context as? AccountContext else {
+            return
+        }
+        navigateToChat(navigation: context.bindings.rootNavigation(), context: context, chatLocation: .peer(peerId))
     }
     hooks.accountWillLogOut = { accountId in
         NovagramAnalyticsManager.shared.accountWillLogOut(accountId: accountId)
@@ -41,6 +48,9 @@ func installNovagramHooks() {
         return NovagramJobAlertMonitor.shared.handleNotificationClick(userInfo)
     }
     NovagramHooks.install(hooks)
+    if let directory = ApiEnvironment.containerURL?.appendingPathComponent("novagram-archive", isDirectory: true) {
+        NovagramMessageArchive.shared.configure(directory: directory)
+    }
     installNovagramJobSearchHooks()
     installNovagramSettingsHooks()
     installNovagramAdsHooks()
@@ -105,12 +115,17 @@ func novagramJobSearchDidStart(context: AccountContext) {
     NovagramJobAlertMonitor.shared.start(context: context)
 }
 
+func novagramMessageArchiveDidStart(context: AccountContext) {
+    NovagramMessageArchive.shared.migrateLegacyIfNeeded(sharedContext: context.sharedContext, currentAccount: context.account)
+}
+
 func novagramJobSearchDidStop(context: AccountContext) {
     NovagramJobAlertMonitor.shared.stop(context: context)
 }
 
 func novagramJobSearchClear(accountRecordId: AccountRecordId) {
     NovagramJobSearchData.clear(accountRecordId: accountRecordId.int64)
+    NovagramMessageArchive.shared.clear(accountRecordId: accountRecordId.int64)
     NovagramJobAlertMonitor.shared.clearUnseen(accountRecordId: accountRecordId.int64)
 }
 
