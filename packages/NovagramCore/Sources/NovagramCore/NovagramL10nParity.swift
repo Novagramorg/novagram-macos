@@ -80,7 +80,7 @@ public extension NovagramL10n {
     var search_archiveOpenChat: String { pick(en: "Open chat", uz: "Chatni ochish", ru: "Открыть чат") }
     var search_archiveClose: String { pick(en: "Close", uz: "Yopish", ru: "Закрыть") }
     var settings_unlimitedPins_title: String { pick(en: "Unlimited Pins", uz: "Cheksiz pin", ru: "Безлимитные закрепы") }
-    var settings_unlimitedPins_subtitle: String { pick(en: "Pin up to 1000 chats. Only the first few sync to Telegram, the rest live on this Mac only. Turning this off unpins them.", uz: "1000 tagacha chat pin qiling. Faqat dastlabki bir nechtasi Telegram bilan sinxronlanadi, qolganlari faqat shu Mac'da. O'chirsangiz ular pindan olinadi.", ru: "Закрепляйте до 1000 чатов. С Telegram синхронизируются только первые несколько, остальные только на этом Mac. При отключении они открепляются.") }
+    var settings_unlimitedPins_subtitle: String { pick(en: "Pin up to 1000 chats. Only the first few sync to Telegram, the rest stay on this device only. Turning this off unpins them.", uz: "1000 tagacha chat pin qiling. Faqat dastlabki bir nechtasi Telegram bilan sinxronlanadi, qolganlari faqat shu qurilmada. O'chirsangiz ular pindan olinadi.", ru: "Закрепляйте до 1000 чатов. С Telegram синхронизируются только первые несколько, остальные только на этом устройстве. При отключении они открепляются.") }
     var settings_folderStyle_title: String { pick(en: "Folder display style", uz: "Papka ko'rinishi", ru: "Стиль папок") }
     func settings_folderStyle_label(_ style: String) -> String {
         switch style {
