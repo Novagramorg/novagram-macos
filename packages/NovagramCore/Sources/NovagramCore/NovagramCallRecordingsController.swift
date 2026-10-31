@@ -67,7 +67,7 @@ final class NovagramCallRecordingsController: GenericViewController<NovagramCall
     }
 
     override var defaultBarTitle: String {
-        return NovagramL10n.current.callRecording_list
+        return strings.title
     }
 
     override func getRightBarViewOnce() -> BarView {

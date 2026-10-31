@@ -72,7 +72,12 @@ func openNovagramSettings(context: AccountContext, feature: String?) {
         navigation.push(NovagramAutoTranslateController(context))
     case "translate-language", "translation-language", "language":
         navigation.push(NovagramTranslationLanguageController(context))
+    case "call-recording-auto":
+        navigation.push(NovagramCallRecordingSettingsController(focus: .auto))
+    case "call-recording-folder":
+        navigation.push(NovagramCallRecordingSettingsController(focus: .folder))
     case novagramCallRecordingsSlug:
+        navigation.push(NovagramCallRecordingSettingsController())
         if let recordings = makeNovagramCallRecordingsController() {
             navigation.push(recordings)
         }

@@ -93,12 +93,9 @@ public extension NovagramL10n {
     var settings_channelHistory_subtitle: String { pick(en: "Adds “Recent Actions” to the chat list menu of channels and groups you admin", uz: "Siz admin bo'lgan kanal va guruhlar menyusiga «So'nggi amallar» bandini qo'shadi", ru: "Добавляет «Недавние действия» в меню каналов и групп, где вы администратор") }
     var settings_voiceTranslate_subtitle: String { pick(en: "When dictation ends, the text is translated into the auto-translate language. Works when “Ask to translate on send” is off", uz: "Diktovka tugagach matn avto-tarjima tiliga tarjima qilinadi. «Yuborishda tarjima so'rovi» o'chiq bo'lsa ishlaydi", ru: "После диктовки текст переводится на язык автоперевода. Работает, когда «Запрос перевода при отправке» выключен") }
 
-    var callRecording_title: String { pick(en: "Call recording", uz: "Qo'ng'iroqni yozib olish", ru: "Запись звонков") }
-    var callRecording_subtitle: String { pick(en: "Adds a Record button to voice and video calls", uz: "Ovozli va video qo'ng'iroqlarga «Yozish» tugmasini qo'shadi", ru: "Добавляет кнопку «Запись» в аудио- и видеозвонки") }
-    var callRecording_list: String { pick(en: "Recordings", uz: "Yozuvlar", ru: "Записи") }
     var callRecording_saveTo: String { pick(en: "Save to", uz: "Saqlash joyi", ru: "Сохранять в") }
     var callRecording_askEveryTime: String { pick(en: "Ask every time", uz: "Har safar so'rash", ru: "Спрашивать каждый раз") }
-    var callRecording_footer: String { pick(en: "Recordings are made and kept only on this device. When a recording starts, Novagram sends “🔴 I'm recording this call” to the chat, so the other person knows. The REC mark stays visible while recording.", uz: "Yozuvlar faqat shu qurilmada yaratiladi va saqlanadi. Yozish boshlanganda Novagram chatga “🔴 Men bu qo'ng'iroqni yozib olyapman” xabarini yuboradi, shunda suhbatdoshingiz biladi. Yozish davomida REC belgisi ko'rinib turadi.", ru: "Записи создаются и хранятся только на этом устройстве. Когда начинается запись, Novagram отправляет в чат «🔴 Я записываю этот звонок», чтобы собеседник знал. Значок REC виден всё время записи.") }
+    var callRecording_saveToFooter: String { pick(en: "New recordings go straight into this folder. With “Ask every time”, Novagram asks where to save each recording when the call ends.", uz: "Yangi yozuvlar to'g'ridan-to'g'ri shu papkaga tushadi. «Har safar so'rash» tanlansa, Novagram har bir yozuvni qayerga saqlashni qo'ng'iroq tugaganda so'raydi.", ru: "Новые записи сохраняются прямо в эту папку. Если выбрано «Спрашивать каждый раз», Novagram спросит, куда сохранить запись, когда звонок закончится.") }
     var callRecording_chooseMessage: String { pick(en: "Choose a folder for call recordings", uz: "Qo'ng'iroq yozuvlari uchun papkani tanlang", ru: "Выберите папку для записей звонков") }
     var callRecording_choose: String { pick(en: "Choose", uz: "Tanlash", ru: "Выбрать") }
     var callRecording_chooseFolder: String { pick(en: "Choose Folder…", uz: "Papka tanlash…", ru: "Выбрать папку…") }
@@ -113,8 +110,6 @@ public extension NovagramL10n {
     var callRecording_showInFinder: String { pick(en: "Show in Finder", uz: "Finder'da ko'rsatish", ru: "Показать в Finder") }
     var callRecording_failed: String { pick(en: "Call recording failed", uz: "Qo'ng'iroqni yozib bo'lmadi", ru: "Не удалось записать звонок") }
     var callRecording_saveFailed: String { pick(en: "Couldn't save the call recording", uz: "Qo'ng'iroq yozuvini saqlab bo'lmadi", ru: "Не удалось сохранить запись звонка") }
-    var callRecording_auto_title: String { pick(en: "Record every call automatically", uz: "Har bir qo'ng'iroqni avtomatik yozib olish", ru: "Записывать каждый звонок автоматически") }
-    var callRecording_auto_subtitle: String { pick(en: "Recording starts as soon as the call screen opens", uz: "Qo'ng'iroq oynasi ochilishi bilan yozish boshlanadi", ru: "Запись начинается сразу при открытии окна звонка") }
     var callDataSaving_title: String { pick(en: "Use less data for calls", uz: "Qo'ng'iroqlarda kamroq trafik", ru: "Экономия трафика в звонках") }
     var callDataSaving_subtitle: String { pick(en: "Lower audio and video quality; applies to new calls", uz: "Ovoz va video sifati pasayadi; yangi qo'ng'iroqlarga ta'sir qiladi", ru: "Ниже качество звука и видео; действует для новых звонков") }
     var callDevices_microphone: String { pick(en: "Microphone", uz: "Mikrofon", ru: "Микрофон") }

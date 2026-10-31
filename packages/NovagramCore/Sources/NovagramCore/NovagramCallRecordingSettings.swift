@@ -95,6 +95,28 @@ public enum NovagramCallRecordingSettings {
         }
     }
 
+    static var recordingCountSignal: Signal<Int, NoError> {
+        return Signal { subscriber in
+            subscriber.putNext(recordingCount())
+            subscriber.putCompletion()
+            return EmptyDisposable
+        }
+        |> runOn(Queue.concurrentDefaultQueue())
+    }
+
+    private static func recordingCount() -> Int {
+        guard let folder = resolveFolder() else {
+            return CallRecordingStorage.default.list().count
+        }
+        let accessing = folder.startAccessingSecurityScopedResource()
+        defer {
+            if accessing {
+                folder.stopAccessingSecurityScopedResource()
+            }
+        }
+        return CallRecordingStorage(directory: folder).list().count
+    }
+
     public static func clearFolder() {
         defaults?.removeObject(forKey: folderKey)
     }
