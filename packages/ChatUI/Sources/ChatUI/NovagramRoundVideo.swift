@@ -71,4 +71,5 @@ private func novagramSendRoundVideo(path: String, context: any AccountContextPro
     let file = TelegramMediaFile(fileId: MediaId(namespace: Namespaces.Media.LocalFile, id: randomId), partialReference: nil, resource: resource, previewRepresentations: representations, videoThumbnails: [], videoCover: nil, immediateThumbnailData: nil, mimeType: "video/mp4", size: nil, attributes: attributes, alternativeRepresentations: [])
 
     _ = Sender.enqueue(media: file, context: context, peerId: peerId, replyId: nil, threadId: threadId).start()
+    NovagramReviewPrompt.record(.roundVideoFromGallery)
 }

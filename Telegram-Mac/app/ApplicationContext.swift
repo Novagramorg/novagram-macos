@@ -172,6 +172,7 @@ final class UnauthorizedApplicationContext {
     
     
     init(window:Window, sharedContext: SharedAccountContext, account: UnauthorizedAccount, otherAccountPhoneNumbers: ((String, AccountRecordId, Bool)?, [(String, AccountRecordId, Bool)])) {
+        NovagramReviewPrompt.loginScreenDidShow() // Novagram
 
         
         window.maxSize = NSMakeSize(.greatestFiniteMagnitude, .greatestFiniteMagnitude)
@@ -519,6 +520,7 @@ final class AuthorizedApplicationContext: NSObject, SplitViewDelegate {
         NovagramAutoApproveManager.shared.start(context: context) // Novagram
         novagramSpotlightAndSiriDidStart(context: context) // Novagram
         novagramMessageArchiveDidStart(context: context) // Novagram
+        novagramReviewPromptDidStart(context: context) // Novagram
 
         if #available(macOS 10.15, *), let walletContext = context.walletContext {
             tonConnectPresentationDisposable.set((walletContext.tonConnectState

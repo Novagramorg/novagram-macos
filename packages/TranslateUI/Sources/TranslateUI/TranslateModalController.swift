@@ -1291,6 +1291,7 @@ public func TranslateModalController(context: any AccountContextProtocol, from: 
             signal = translateBlocks(context: context, from: stateValue.with { $0.from }, to: stateValue.with { $0.to }, blocks: blocks, configState: configState, tone: stateValue.with { $0.tone })
         }
         disposable.set((signal).start(next: { result in
+            if !isInputMode, messageId != nil, !result.result.isEmpty { NovagramTranslateHooks.didTranslateMessage() } // Novagram
             updateState { current in
                 var current = current
                 if result.result.isEmpty {

@@ -7,6 +7,20 @@ import LocalAnimations
 import ChatHistoryModel
 import NovagramCore
 
+// The message put into the input by our last "Forward without Quotes" item. Telegram's own hide-sender toggle uses the
+// same send path, so only this one counts for the rating prompt.
+private var novagramForwardWithoutNamesIds = Set<MessageId>()
+
+func novagramForwardDidSend(_ messageIds: [MessageId], hideNames: Bool) {
+    DispatchQueue.main.async {
+        let startedByUs = !novagramForwardWithoutNamesIds.isDisjoint(with: messageIds)
+        novagramForwardWithoutNamesIds.subtract(messageIds)
+        if startedByUs, hideNames {
+            NovagramReviewPrompt.record(.forwardWithoutNames)
+        }
+    }
+}
+
 // Message context menu items added by Novagram: forward without the sender name, edit before forwarding,
 // and the edit history screen (old fork: ChatMessageMenuItems.swift).
 func novagramForwardMenuItems(message: Message, chatInteraction: ChatInteraction) -> [ContextMenuItem] {
@@ -14,6 +28,7 @@ func novagramForwardMenuItems(message: Message, chatInteraction: ChatInteraction
     var items: [ContextMenuItem] = []
     if NovagramSettingsKey.bool("forward_hide_names") {
         items.append(ContextMenuItem(l10n.forward_withoutQuotes, handler: { [weak chatInteraction] in
+            novagramForwardWithoutNamesIds = [message.id]
             chatInteraction?.update(animated: true, {
                 $0.updatedInterfaceState {
                     $0.withUpdatedForwardMessageIds([message.id])

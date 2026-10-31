@@ -33,6 +33,9 @@ public enum NovagramGhostMode {
         set {
             guard newValue != isActive else { return }
             defaults?.set(newValue, forKey: activeKey)
+            if newValue {
+                NovagramReviewPrompt.record(.ghostMode)
+            }
             NotificationCenter.default.post(name: didChangeNotification, object: nil)
             // Settings paneli ham eshitadi (toggle/tugma holati yangilanadi).
             NotificationCenter.default.post(name: Notification.Name("NovagramSettingsChanged"), object: nil)

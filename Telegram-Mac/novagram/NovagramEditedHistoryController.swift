@@ -298,6 +298,7 @@ final class NovagramEditedHistoryController: TableViewController {
                 return entry.entry.item(initialSize: initialSize.modify { $0 }, context: context, peerId: peerId)
             }
             self?.genericView.merge(with: TableUpdateTransition(deleted: removed, inserted: inserted, updated: updated, animated: false))
+            NovagramReviewPrompt.record(.editedHistory)
             self?.readyOnce()
         }))
     }

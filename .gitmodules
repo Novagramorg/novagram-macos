@@ -37,3 +37,6 @@
 [submodule "packages/NovagramCallRecordingKit"]
 	path = packages/NovagramCallRecordingKit
 	url = https://github.com/Novagramorg/novagram-call-recording-kit-sdk
+[submodule "packages/NovagramReviewPromptKit"]
+	path = packages/NovagramReviewPromptKit
+	url = https://github.com/Novagramorg/novagram-review-prompt-kit-sdk

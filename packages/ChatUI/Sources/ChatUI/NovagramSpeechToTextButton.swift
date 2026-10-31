@@ -106,6 +106,9 @@ final class NovagramSpeechToTextButton {
                     self.lastDictatedText = nil
                     self.updateAppearance()
                     if let dictated {
+                        if !dictated.isEmpty {
+                            NovagramReviewPrompt.record(.speechToText)
+                        }
                         self.translateDictated(dictated)
                     }
                 }
@@ -155,6 +158,7 @@ final class NovagramSpeechToTextButton {
             chatInteraction.update({
                 $0.withUpdatedEffectiveInputState(ChatTextInputState(inputText: translated))
             })
+            NovagramReviewPrompt.record(.voiceTranslate)
         })
     }
 

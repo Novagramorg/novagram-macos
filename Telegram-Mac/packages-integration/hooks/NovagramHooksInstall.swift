@@ -8,6 +8,7 @@ import CallsUI
 import InAppSettings
 import SwiftSignalKit
 import NovagramJobSearch
+import TranslateUI
 import ApiCredentials
 
 func installNovagramHooks() {
@@ -56,6 +57,9 @@ func installNovagramHooks() {
     installNovagramAdsHooks()
     installNovagramCallRecordHooks()
     installNovagramCallExtrasHooks()
+    NovagramTranslateHooks.didTranslateMessage = {
+        NovagramReviewPrompt.record(.translateMessage)
+    }
 }
 
 private func installNovagramCallRecordHooks() {
@@ -118,6 +122,40 @@ func novagramJobSearchDidStart(context: AccountContext) {
 func novagramMessageArchiveDidStart(context: AccountContext) {
     NovagramMessageArchive.shared.removeOrphans(sharedContext: context.sharedContext)
     NovagramMessageArchive.shared.migrateLegacyIfNeeded(sharedContext: context.sharedContext, currentAccount: context.account)
+}
+
+private let novagramReviewPromptDisposable = MetaDisposable()
+
+// The rating prompt's natural break: the chat list shows with no chat open (the empty right pane in the dual
+// layout, the chat list after closing a chat in the single layout).
+func novagramReviewPromptDidStart(context: AccountContext) {
+    guard !context.isSupport else {
+        return
+    }
+    NovagramReviewPrompt.accountDidStart(accountId: context.account.id.int64)
+    var noChatOpen = false
+    novagramReviewPromptDisposable.set((context.globalPeerHandler.get() |> deliverOnMainQueue).start(next: { [weak context] location in
+        noChatOpen = location == nil
+        guard noChatOpen, let context else {
+            return
+        }
+        NovagramReviewPrompt.chatListDidAppear(window: context.window, isBusy: { [weak context] in
+            guard let context else {
+                return true
+            }
+            return !noChatOpen || novagramReviewPromptIsBusy(context)
+        })
+    }))
+}
+
+// A call, a recording, the passcode lock, the open secret vault or any sheet (the chat lock PIN sheet too).
+private func novagramReviewPromptIsBusy(_ context: AccountContext) -> Bool {
+    let isLocked = appDelegate?.sharedApplicationContextValue?.notificationManager.isLocked ?? true
+    return isLocked
+        || context.sharedContext.hasActiveCall
+        || NovagramCallRecording.shared.isRecording
+        || NovagramHiddenChatsManager.shared.isRevealed
+        || hasModals(context.window)
 }
 
 func novagramJobSearchDidStop(context: AccountContext) {

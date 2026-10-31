@@ -3003,7 +3003,7 @@ public final class StoryModalController<Context: AccountContextProtocol> : Modal
                     if let resource = resource {
                         menu.addItem(ContextMenuItem(strings().storyMyInputSaveMedia, handler: {
                             if context.isPremium || NovagramPremiumUnlock.storiesSaveAndHD { // Novagram
-                                saveAs(resource, account: context.account)
+                                novagramSaveStory(resource, account: context.account) // Novagram
                             } else {
                                 saveGalleryPremium()
                             }

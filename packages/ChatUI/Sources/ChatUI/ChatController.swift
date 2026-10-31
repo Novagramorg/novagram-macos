@@ -4908,6 +4908,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                                                 return .complete()
                                             }
 
+                                            novagramForwardDidSend(messages.map { $0.id }, hideNames: hideNames) // Novagram
                                             return Sender.forwardMessages(messageIds: messages.map { $0.id }, context: context, peerId: destinationPeerId, replyId: destinationReply, threadId: destinationThreadId, hideNames: hideNames, hideCaptions: hideCaptions, silent: silent, atDate: atDate, sendAsPeerId: currentSendAsPeerId) |> afterNext { ids in
                                             } |> ignoreValues
                                         }))
@@ -10106,7 +10107,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                         self?.chatInteraction.openInfo(peerId, false, nil, nil)
                     }, itemImage: MenuAnimation.menu_show_info.value))
                 }
-                if NovagramSettingsKey.bool("show_view_first_message") { items.append(ContextMenuItem(NovagramL10n.current.settings_chat_firstMessage_title, handler: { [weak self] in self?.chatInteraction.scrollToTheFirst() }, itemImage: MenuAnimation.menu_sort_up.value)) } // Novagram
+                if NovagramSettingsKey.bool("show_view_first_message") { items.append(ContextMenuItem(NovagramL10n.current.settings_chat_firstMessage_title, handler: { [weak self] in self?.chatInteraction.scrollToTheFirst(); NovagramReviewPrompt.record(.viewFirstMessage) }, itemImage: MenuAnimation.menu_sort_up.value)) } // Novagram
 
 
                 if let notificationSettings = peerView.notificationSettings as? TelegramPeerNotificationSettings, !self.isAdChat {

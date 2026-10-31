@@ -869,3 +869,37 @@ Owner (via the iOS session, iOS main e74695a3e0): the Developer section has one 
 - Removed strings: `callRecording_title`, `_subtitle`, `_list`, `_footer`, `_auto_title`, `_auto_subtitle` (the SDK texts replace them). The list's title is the SDK's `CallRecordingStrings.title`.
 
 Manual repro: reveal Developer (20 s hold), Novagram Settings → Developer → Call recording (shows Off) → the page; turn the switch on: folder picker, auto + Save to blocks appear, the Developer row shows On after Back; turn it off: auto + Save to hide, Call recordings stays and opens the list.
+
+## App Store rating prompt (2026-10-31)
+
+Owner request via the iOS session: the shared SDK `Novagramorg/novagram-review-prompt-kit-sdk` (public, GPL-2.0-or-later, owned by the iOS session), git submodule at `packages/NovagramReviewPromptKit`, pinned at ee588de (no tags; update by moving the pin, never edit it here). NovagramCore depends on it as a local path package (product `NovagramReviewPromptCore`). On a fresh clone: `git submodule update --init -- packages/NovagramReviewPromptKit`.
+
+Owner decisions (fixed): every user, no Developer gate; Apple's system prompt only (no custom alert, no "Enjoying?" question, no age logic, no reward); the SDK defaults for the 11 counted features and the rules (5 successes of one feature, 3 days after start, 14 days apart, once per app version, 5 new successes after every request). State: `pro_messager`, key `novagram_review_prompt_state`.
+
+- `NovagramCore/NovagramReviewPrompt.swift` (new): the one `ReviewPromptCenter` of the app. `record(_:)` (any thread), `loginScreenDidShow()` + `accountDidStart(accountId:)` (a login = an account start after the login screen, with another account than before → `noteFreshStart()`; launches, account switches and a cancelled "Add Account" do not count), `chatListDidAppear(window:isBusy:)`, `rateTitle` / `rateFooter` (SDK `ReviewPromptStrings`), `openWriteReview()` (`macappstore://…?action=write-review`). Logs every success and every request result to the unified log (subsystem `uz.fenixuz.app`, category `NovagramReviewPrompt`).
+- Natural break (`NovagramHooksInstall.swift`, `novagramReviewPromptDidStart`, skipped for the support account window): `context.globalPeerHandler` becomes nil, which happens only when the empty right pane appears (dual layout), the chat list appears after closing a chat (single layout) and at account start. `isBusy`: a chat opened during the SDK's 2 s delay, passcode/screen lock (`notificationManager.isLocked`), `sharedContext.hasActiveCall`, `NovagramCallRecording.shared.isRecording`, the secret vault revealed, any modal (`hasModals(window)`, covers the chat lock PIN sheet).
+- Settings: Novagram Settings top section, "Rate Novagram" row under About (`.topRate`, star icon) + the SDK footer. No "Send feedback" row (same as iOS).
+
+Success points (11, verified 2026-10-31):
+
+| Feature | Where | Counts when |
+|---|---|---|
+| editedHistory | `Telegram-Mac/novagram/NovagramEditedHistoryController.swift` | the history screen has loaded |
+| translateMessage | `TranslateUI/.../TranslateModalController.swift` → `NovagramTranslateHooks.didTranslateMessage` (new `NovagramTranslateHooks.swift`, set in `installNovagramHooks`) | a chat message (`messageId` set; not the input AI modes, bio, link or gallery text) with a non-empty result |
+| speechToText | `ChatUI/NovagramSpeechToTextButton.swift` | dictation stopped with text |
+| voiceTranslate | same file, `translateDictated` | the translated text replaced the input |
+| storySave | `StoriesUI/.../StoryModalController.swift` (others' stories, the Premium/Novagram save item) → `StoriesUI/NovagramStorySave.swift` (new: `saveAs(_:account:)` + the save panel completion) | the file exists at the saved path. Saving your own story is Telegram's and is not counted |
+| roundVideoFromGallery | `ChatUI/NovagramRoundVideo.swift` | the round video was enqueued |
+| forwardWithoutNames | `ChatUI/NovagramMessageMenuItems.swift` marks the ids, `ChatController.swift` send path → `novagramForwardDidSend` | the message put into the input by our last "Forward without Quotes" item is sent with hide names on. Telegram's own hide-sender toggle is not counted |
+| ghostMode | `NovagramCore/NovagramGhostMode.swift` (`isActive` setter, every path) | turned on |
+| chatLockUnlock | `NovagramCore/NovagramChatLockGate.swift` (`proceed`, also after master recovery) | correct PIN |
+| secretVaultUnlock | `NovagramCore/NovagramHiddenChatsManager.swift` (`unlockDirectly`) | vault revealed |
+| viewFirstMessage | `ChatController.swift` (existing Novagram menu line) | the item was chosen |
+
+`autoTranslate` and `callRecordingSaved` are not reported (not counted by the SDK default anyway).
+
+Telegram files (`// Novagram` lines 479 → 484): `Telegram-Mac/app/ApplicationContext.swift` (2: login screen, account start), `ChatUI/ChatController.swift` (1 new: forward send; the View First Message line changed), `StoriesUI/StoryModalController.swift` (1: `saveAs` → `novagramSaveStory`), `TranslateUI/TranslateModalController.swift` (1).
+
+Testing: a Debug build shows the system sheet on every request, builds outside the App Store may show nothing, so check the log: `log stream --level default --predicate 'subsystem == "uz.fenixuz.app" AND category == "NovagramReviewPrompt"'`. To start over: `defaults delete <pro_messager suite> novagram_review_prompt_state` (app quit) or the SDK's `removeObject(forKey: ReviewPromptCenter.stateKey)`.
+
+Manual repro: fresh state → use one feature 5 times (e.g. View First Message from the chat header menu) → the log shows `success viewFirstMessage, new 5`; close the chat → `request <version>: skipped(tooSoonAfterStart(until: …))` until 3 days after the start; with the start date moved back, closing a chat logs `requested` and the Debug build shows the sheet; during a call or with a sheet open it logs `busy`.

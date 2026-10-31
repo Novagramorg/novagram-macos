@@ -14,6 +14,7 @@ public extension NovagramChatPincode {
         }
         let proceed: () -> Void = {
             sessionUnlocked.insert(peerId)
+            NovagramReviewPrompt.record(.chatLockUnlock)
             reopen()
         }
         let onForgot: (() -> Void)? = manager.isMasterEnabled() ? {

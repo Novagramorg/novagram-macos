@@ -218,7 +218,7 @@ private enum NovagramEntryId: Hashable {
     case section(Int)
     case header(Int)
     case topTips
-    case topAbout
+    case topAbout, topRate, topRateFooter
     case interfaceHideFolders, interfaceStories, interfaceMutual, interfaceUnlimitedPins, interfaceFooter
     case chatDeleted, chatEditedHistory, chatFirstMessage, chatGhostActive, chatGhost, chatRoundVideo, chatForwardHideNames, chatFooter
     case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingTranslateConfirm, messagingAskVoice, messagingAskSticker, messagingAutoSticker, messagingHeartEffect, messagingFooter
@@ -236,6 +236,7 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     switch id {
     case .topAbout:                 map = ("info.circle.fill", .blue)
     case .topTips:                  map = ("sparkles", .gold)
+    case .topRate:                  map = ("star.fill", .yellow)
     case .interfaceHideFolders:     map = ("folder.badge.minus", .lightBlue)
     case .interfaceStories:         map = ("circle.dashed", .violet)
     case .interfaceMutual:          map = ("person.2.fill", .blue)
@@ -506,7 +507,11 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     // ─── FENIX PRO (top) ───
     entries.append(.section(sectionId)); sectionId += 1
     // Novagram Bots lives in the main Settings list (as on iOS), not here.
-    entries.append(.disclosurePlaceholder(next(), .topAbout, l10n.about_rowTitle, "", .singleItem, "about"))
+    entries.append(.disclosurePlaceholder(next(), .topAbout, l10n.about_rowTitle, "", .firstItem, "about"))
+    entries.append(.action(next(), .topRate, NovagramReviewPrompt.rateTitle, nil, .lastItem, {
+        NovagramReviewPrompt.openWriteReview()
+    }))
+    entries.append(.footer(next(), .topRateFooter, NovagramReviewPrompt.rateFooter))
 
     // ─── INTERFACE ───
     entries.append(.section(sectionId)); sectionId += 1

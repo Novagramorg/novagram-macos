@@ -92,6 +92,7 @@ public final class NovagramHiddenChatsManager {
 
     public func unlockDirectly() {
         isRevealed = true
+        NovagramReviewPrompt.record(.secretVaultUnlock)
         NotificationCenter.default.post(name: NSNotification.Name("NovagramSettingsChanged"), object: nil)
     }
 
