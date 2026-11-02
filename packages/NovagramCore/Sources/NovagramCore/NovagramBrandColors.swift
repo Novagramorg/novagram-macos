@@ -28,8 +28,29 @@ public enum NovagramBrandColors {
     public static let brand700 = NSColor(rgb: 0x086FC6)   // Primary deep
     public static let brand900 = NSColor(rgb: 0x07406F)
 
-    // Accent of the light themes when "Brand accent in light theme" is on.
-    public static let lightThemeAccent = brand500
+    // MARK: - Default accent of each built-in theme
+    // Keys are TelegramBuiltinTheme raw values. One line per theme: change a value to recolor that theme.
+    public static let themeAccents: [String: NSColor] = [
+        "day": brand500,
+        "dayClassic": brand500,
+        "dark": brand500,
+        "nightAccent": brand500,
+        "system": brand500
+    ]
+
+    // When true, the Day accent also paints the Day outgoing bubbles; when false Day keeps its own bubbles.
+    public static let dayOutgoingBubblesBranded = false
+
+    private static let dayBubbleBottomBrightness: CGFloat = 0.9
+
+    // The accent of a built-in theme plus its outgoing bubble colors (nil = the theme keeps its own bubbles).
+    public static func themeAccent(for theme: String) -> (accent: NSColor, messages: [NSColor]?)? {
+        guard let accent = themeAccents[theme] else { return nil }
+        if theme == "day" && dayOutgoingBubblesBranded {
+            return (accent, [accent, accent.withMultipliedBrightnessBy(dayBubbleBottomBrightness)])
+        }
+        return (accent, nil)
+    }
 
     // MARK: - Ink (dark text / dark backgrounds)
     public static let inkBase = NSColor(rgb: 0x0F1115)    // Dark bg (dark mode)

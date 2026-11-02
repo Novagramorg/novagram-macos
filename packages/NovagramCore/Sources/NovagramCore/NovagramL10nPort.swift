@@ -67,7 +67,7 @@ public extension NovagramL10n {
 
 public extension NovagramL10n {
     var stt_buttonTip: String { pick(en: "Speech to Text", uz: "Ovozni matnga", ru: "Голос в текст") }
-    var stt_recordingTip: String { pick(en: "Listening… click to stop", uz: "Tinglanmoqda… to'xtatish uchun bosing", ru: "Слушаю… нажмите, чтобы остановить") }
+    var stt_recordingTip: String { pick(en: "Listening… use the button again to stop", uz: "Tinglanmoqda… to'xtatish uchun tugmani yana ishlating", ru: "Слушаю… чтобы остановить, используйте кнопку ещё раз") }
 }
 
 public extension NovagramL10n {

@@ -355,7 +355,7 @@ No Telegram file changed. Ours: `NovagramUnreadReminderManager` reads the iOS ke
 | --- | --- |
 | `Telegram-Mac/app/ApplicationContext.swift` | `NovagramAutoDownload.applyIfNeeded(context:)` after the folders prompt (keeps a newly started account's auto-download off) |
 
-Ours: `NovagramSettingsController.swift` `NovagramAutoDownload` (`auto_download_disabled` sets `AutomaticMediaDownloadSettings.automaticDownload` for every logged-in account; Mac has one switch for all networks) and `NovagramWhiteThemeAccent` (`white_theme_accent_enabled`: `LocalAccentColor` #0A9BF5 for `.day` and `.dayClassic`, re-applied with `installDefaultAccent()` when a light builtin theme is active; off removes only our accent). `NovagramBrandColors` now uses the iOS blue palette (was the old green, unused).
+Ours: `NovagramSettingsController.swift` `NovagramAutoDownload` (`auto_download_disabled` sets `AutomaticMediaDownloadSettings.automaticDownload` for every logged-in account; Mac has one switch for all networks) and `NovagramWhiteThemeAccent` (`white_theme_accent_enabled`: `LocalAccentColor` #0A9BF5 for `.day` and `.dayClassic`, re-applied with `installDefaultAccent()` when a light builtin theme is active; off removes only our accent; since 2026-11-02 off changes nothing, see "Novagram brand accent"). `NovagramBrandColors` now uses the iOS blue palette (was the old green, unused).
 
 ### Phase 5: chat list and folders
 
@@ -905,3 +905,17 @@ App Privacy: no change. The SDK keeps only counts and dates on the device (`pro_
 Testing: a Debug build shows the system sheet on every request, builds outside the App Store may show nothing, so check the log: `log stream --level default --predicate 'subsystem == "uz.fenixuz.app" AND category == "NovagramReviewPrompt"'`. To start over: `defaults delete <pro_messager suite> novagram_review_prompt_state` (app quit) or the SDK's `removeObject(forKey: ReviewPromptCenter.stateKey)`.
 
 Manual repro: fresh state → use one feature 5 times (e.g. View First Message from the chat header menu) → the log shows `success viewFirstMessage, new 5`; close the chat → `request <version>: skipped(tooSoonAfterStart(until: …))` until 3 days after the start; with the start date moved back, closing a chat logs `requested` and the Debug build shows the sheet; during a call or with a sheet open it logs `busy`.
+
+## Novagram brand accent (2026-11-02)
+
+The Novagram brand blue replaces Telegram's blue as the default accent of every built-in theme (Day, Day Classic, Dark, Night, System) through Telegram's own per-theme saved accent (`ThemePaletteSettings.accents`, applied by `installDefaultAccent()` on every theme switch). `ColorPalette.swift` is not touched.
+
+- `NovagramCore/NovagramBrandColors.swift`: `themeAccents` (one line per theme, keyed by the `TelegramBuiltinTheme` raw values, all `brand500` for now), `dayOutgoingBubblesBranded` (default false; true gives the Day accent `messages` [accent, accent × 0.9 brightness] so Day outgoing bubbles turn brand blue) and `themeAccent(for:)`. `lightThemeAccent` is gone (the table replaces it).
+- `Telegram-Mac/novagram/NovagramSettingsController.swift` `NovagramWhiteThemeAccent.migrateIfNeeded(accountManager:)`: once per install (`pro_messager` / `novagram_brand_accent_v1`, set after the update ran) every built-in theme without a saved local accent (`cloud == nil`) gets ours; an accent the user saved is never overwritten, except the old red build's accents (`0xb40000`, `0xff3b30`), which are dropped first. If no cloud theme is active and the current palette is a built-in one (an imported custom palette keeps its colors), `installDefaultAccent()` recolors the current theme right away; the light switch uses the same guard. Fresh installs take the same path. `white_theme_accent_enabled` is left alone (iOS default: off). The switch now matches iOS: On writes our accent (from the table) on Day / Day Classic, overwriting another accent; Off changes nothing, so the saved brand accent stays and Telegram blue never comes back (on iOS, Off is invisible too because brand blue is the default).
+- `SettingsUI/NovagramAccentList.swift` (new): `novagramAccentList(_:palette:cloudTheme:)` puts our accent first in the Appearance accent picker of a built-in theme with a non-empty list and removes Telegram's default blue (the theme's first built-in accent), so two near-identical blues never sit side by side. Cloud themes and `.system` (no picker) are left as they are.
+
+Telegram files (`// Novagram` lines 484 → 486):
+- `Telegram-Mac/app/AppDelegate.swift` (1): `NovagramWhiteThemeAccent.migrateIfNeeded(accountManager: accountManager) // Novagram`, after `NovagramAutoProxyManager.shared.start`.
+- `SettingsUI/AppAppearanceViewController.swift` (1): `accentList = novagramAccentList(accentList, palette: appearance.presentation.colors, cloudTheme: appearance.presentation.cloudTheme) // Novagram`, after `var accentList = …`.
+
+Manual repro: `defaults delete <pro_messager suite> novagram_brand_accent_v1`, launch → the current built-in theme turns brand blue, turn "Brand accent in light theme" On and Off → Day stays brand blue; switch Day → Dark → Night → System: brand blue everywhere; Appearance picker shows the brand color first; pick another accent, relaunch → it stays.

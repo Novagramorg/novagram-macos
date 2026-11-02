@@ -1053,33 +1053,74 @@ enum NovagramUnlimitedPins {
     }
 }
 
-// iOS "Brand accent in light theme" (`white_theme_accent_enabled`): Novagram blue becomes the saved accent
-// of the Day and Day Classic themes. Turning it off removes only our accent, a user-picked one stays.
+// iOS "Brand accent in light theme" (`white_theme_accent_enabled`): the brand accent from
+// `NovagramBrandColors.themeAccents` becomes the saved accent of the Day and Day Classic themes.
+// On overwrites another accent there; Off changes nothing.
 enum NovagramWhiteThemeAccent {
     private static let lightThemes: [TelegramBuiltinTheme] = [.day, .dayClassic]
+    private static let builtinThemes: [TelegramBuiltinTheme] = [.day, .dayClassic, .dark, .nightAccent, .system]
+    private static let brandAccentMigrationKey = "novagram_brand_accent_v1"
+    // The old Novagram build had red built-in palettes, so a red accent saved there is not a real choice.
+    private static let oldBuildRedAccents: Set<UInt32> = [0xb40000, 0xff3b30]
 
+    // Off keeps the saved brand accent: the brand blue is the default accent now (same as iOS, where
+    // Off shows no visible change), so Telegram blue never comes back.
     static func apply(enabled: Bool, accountManager: AccountManager<TelegramAccountManagerTypes>) {
-        let ours = PaletteAccentColor(NovagramBrandColors.lightThemeAccent)
+        guard enabled else { return }
         _ = updateThemeInteractivetly(accountManager: accountManager, f: { settings in
             var accents = settings.accents
             for name in lightThemes {
-                let index = accents.firstIndex(where: { $0.name == name && $0.cloud == nil })
-                if enabled {
-                    let accent = LocalAccentColor(name: name, color: ours, cloud: nil)
-                    if let index {
-                        accents[index] = accent
-                    } else {
-                        accents.append(accent)
-                    }
-                } else if let index, accents[index].color == ours {
-                    accents.remove(at: index)
+                guard let ours = brandAccent(for: name) else { continue }
+                let accent = LocalAccentColor(name: name, color: ours, cloud: nil)
+                if let index = accents.firstIndex(where: { $0.name == name && $0.cloud == nil }) {
+                    accents[index] = accent
+                } else {
+                    accents.append(accent)
                 }
             }
-            var updated = ThemePaletteSettings(palette: settings.palette, bubbled: settings.bubbled, fontSize: settings.fontSize, wallpaper: settings.wallpaper, defaultDark: settings.defaultDark, defaultDay: settings.defaultDay, defaultIsDark: settings.defaultIsDark, wallpapers: settings.wallpapers, accents: accents, cloudTheme: settings.cloudTheme, associated: settings.associated, legacyMenu: settings.legacyMenu)
-            if settings.cloudTheme == nil, lightThemes.contains(settings.palette.parent) {
+            var updated = settings.withNovagramAccents(accents)
+            if settings.cloudTheme == nil, isBuiltinPalette(settings.palette), lightThemes.contains(settings.palette.parent) {
                 updated = updated.installDefaultAccent()
             }
             return updated
         }).start()
+    }
+
+    // One time per install: every built-in theme without an accent the user saved gets the brand accent,
+    // and the current built-in theme is recolored right away. Fresh installs take the same path.
+    static func migrateIfNeeded(accountManager: AccountManager<TelegramAccountManagerTypes>) {
+        guard let defaults = novagramDefaults, !defaults.bool(forKey: brandAccentMigrationKey) else { return }
+        _ = (updateThemeInteractivetly(accountManager: accountManager, f: { settings in
+            var accents = settings.accents
+            accents.removeAll(where: { $0.cloud == nil && oldBuildRedAccents.contains($0.color.accent.argb & 0x00FFFFFF) })
+            for name in builtinThemes where !accents.contains(where: { $0.name == name && $0.cloud == nil }) {
+                if let ours = brandAccent(for: name) {
+                    accents.append(LocalAccentColor(name: name, color: ours, cloud: nil))
+                }
+            }
+            var updated = settings.withNovagramAccents(accents)
+            if settings.cloudTheme == nil, isBuiltinPalette(settings.palette) {
+                updated = updated.installDefaultAccent()
+            }
+            return updated
+        }) |> deliverOnMainQueue).start(completed: {
+            defaults.set(true, forKey: brandAccentMigrationKey)
+        })
+    }
+
+    // An imported custom palette keeps its own colors: only the built-in palettes are recolored.
+    private static func isBuiltinPalette(_ palette: ColorPalette) -> Bool {
+        return builtinThemes.contains(where: { $0.palette.name == palette.name })
+    }
+
+    private static func brandAccent(for theme: TelegramBuiltinTheme) -> PaletteAccentColor? {
+        guard let value = NovagramBrandColors.themeAccent(for: theme.rawValue) else { return nil }
+        return PaletteAccentColor(value.accent, value.messages)
+    }
+}
+
+private extension ThemePaletteSettings {
+    func withNovagramAccents(_ accents: [LocalAccentColor]) -> ThemePaletteSettings {
+        return ThemePaletteSettings(palette: palette, bubbled: bubbled, fontSize: fontSize, wallpaper: wallpaper, defaultDark: defaultDark, defaultDay: defaultDay, defaultIsDark: defaultIsDark, wallpapers: wallpapers, accents: accents, cloudTheme: cloudTheme, associated: associated, legacyMenu: legacyMenu)
     }
 }

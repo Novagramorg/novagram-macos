@@ -300,9 +300,9 @@ public struct NovagramL10n {
 
     public var sub_comingSoon_message: String {
         pick(
-            en: "This screen is available in the iOS Novagram app. The macOS port is in progress.",
-            uz: "Bu ekran iOS Novagram ilovasida mavjud. macOS porti ustida ishlanmoqda.",
-            ru: "Этот экран есть в iOS-приложении Novagram. macOS-порт в разработке."
+            en: "This screen is not available yet.",
+            uz: "Bu ekran hozircha mavjud emas.",
+            ru: "Этот экран пока недоступен."
         )
     }
 
@@ -356,9 +356,9 @@ public struct NovagramL10n {
 
     public func demo_dialog_fetching_elapsed(_ seconds: Int) -> String {
         pick(
-            en: "Fetching verification code… \(seconds)s elapsed\n\nFor App Store reviewers only.\nTap 'Cancel auto-fill' for manual entry.",
-            uz: "Kod olinmoqda… \(seconds)s\n\nFaqat App Store reviewer uchun.\nQo'lda kiritish uchun 'Bekor qilish' tugmasini bosing.",
-            ru: "Получение кода… прошло \(seconds)с\n\nТолько для рецензентов App Store.\nДля ручного ввода нажмите «Отменить»."
+            en: "Fetching verification code… \(seconds)s elapsed\n\nFor App Store reviewers only.\nChoose 'Cancel auto-fill' for manual entry.",
+            uz: "Kod olinmoqda… \(seconds)s\n\nFaqat App Store reviewer uchun.\nQo'lda kiritish uchun 'Bekor qilish' tugmasini tanlang.",
+            ru: "Получение кода… прошло \(seconds)с\n\nТолько для рецензентов App Store.\nДля ручного ввода выберите «Отменить»."
         )
     }
 
@@ -368,9 +368,9 @@ public struct NovagramL10n {
 
     public var demo_dialog_timeout: String {
         pick(
-            en: "Auto-fetch unavailable (timeout). Tap 'Cancel auto-fill' to enter the code manually.",
-            uz: "Avto-fetch ishlamadi (timeout). Kodni qo'lda kiritish uchun 'Bekor qilish'ni bosing.",
-            ru: "Авто-ввод недоступен (timeout). Нажмите «Отменить» и введите код вручную."
+            en: "Auto-fetch unavailable (timeout). Choose 'Cancel auto-fill' to enter the code manually.",
+            uz: "Avto-fetch ishlamadi (timeout). Kodni qo'lda kiritish uchun 'Bekor qilish'ni tanlang.",
+            ru: "Авто-ввод недоступен (timeout). Выберите «Отменить» и введите код вручную."
         )
     }
 
@@ -774,9 +774,9 @@ public struct NovagramL10n {
 
     public var tasks_listFooter: String {
         pick(
-            en: "Tap a task to edit. Drag to reorder.",
-            uz: "Tahrirlash uchun vazifani bosing.",
-            ru: "Нажмите на задачу для редактирования."
+            en: "Select a task to edit. Drag to reorder.",
+            uz: "Tahrirlash uchun vazifani tanlang.",
+            ru: "Выберите задачу для редактирования."
         )
     }
 
@@ -822,8 +822,8 @@ public struct NovagramL10n {
     public var tips_ghost_body: String {
         pick(
             en: "Read messages without sending read receipts. Toggle the ghost icon at the top of your chat list — no one will know you were there.",
-            uz: "Xabarlarni o'qildi belgisi yubormasdan o'qing. Chatlar ro'yxati tepasidagi ghost ikonkasini bosing — hech kim bilmaydi.",
-            ru: "Читайте сообщения без отправки уведомлений о прочтении. Нажмите иконку призрака вверху списка чатов — никто не узнает."
+            uz: "Xabarlarni o'qildi belgisi yubormasdan o'qing. Chatlar ro'yxati tepasidagi ghost ikonkasidan foydalaning — hech kim bilmaydi.",
+            ru: "Читайте сообщения без отправки уведомлений о прочтении. Используйте иконку призрака вверху списка чатов — никто не узнает."
         )
     }
 
@@ -832,9 +832,9 @@ public struct NovagramL10n {
     }
     public var tips_stt_body: String {
         pick(
-            en: "Tap the microphone button next to the text field to convert voice to text instantly. Enable it in Novagram → Voice → Text settings.",
-            uz: "Matn maydonidagi mikrofon tugmasini bosib, ovozingizni darhol matnga aylantiring. Novagram → Ovoz → Matn sozlamalarida yoqing.",
-            ru: "Нажмите кнопку микрофона рядом с полем ввода, чтобы мгновенно преобразовать голос в текст. Включите в настройках Novagram → Голос → Текст."
+            en: "Use the microphone button next to the text field to convert voice to text instantly. Enable it in Novagram → Voice → Text settings.",
+            uz: "Matn maydonidagi mikrofon tugmasidan foydalanib, ovozingizni darhol matnga aylantiring. Novagram → Ovoz → Matn sozlamalarida yoqing.",
+            ru: "Используйте кнопку микрофона рядом с полем ввода, чтобы мгновенно преобразовать голос в текст. Включите в настройках Novagram → Голос → Текст."
         )
     }
 
@@ -854,9 +854,9 @@ public struct NovagramL10n {
     }
     public var tips_editedHistory_body: String {
         pick(
-            en: "See every previous version of an edited message. Right-click any edited message and choose \"Editing history\" to view all changes.",
-            uz: "Tahrirlangan xabarning barcha oldingi versiyalarini ko'ring. Tahrirlangan xabarga o'ng tugma bosib, \"Tahrir tarixi\"ni tanlang.",
-            ru: "Смотрите все предыдущие версии отредактированных сообщений. Нажмите правой кнопкой на отредактированное сообщение и выберите «История правок»."
+            en: "See every previous version of an edited message. Open the menu of any edited message and choose \"Editing history\" to view all changes.",
+            uz: "Tahrirlangan xabarning barcha oldingi versiyalarini ko'ring. Tahrirlangan xabar menyusini ochib, \"Tahrir tarixi\"ni tanlang.",
+            ru: "Смотрите все предыдущие версии отредактированных сообщений. Откройте меню отредактированного сообщения и выберите «История правок»."
         )
     }
 
@@ -887,9 +887,9 @@ public struct NovagramL10n {
     }
     public var tips_translate_body: String {
         pick(
-            en: "Translate any message with one tap. Right-click a message and choose \"Translate\". Enable the button in Novagram → Messages settings.",
-            uz: "Har qanday xabarni bir teginishda tarjima qiling. Xabarga o'ng tugma bosib, \"Tarjima\" ni tanlang. Novagram → Xabarlar sozlamalarida yoqiladi.",
-            ru: "Переводите любое сообщение одним нажатием. Нажмите правой кнопкой на сообщение и выберите «Перевести». Включается в настройках Novagram → Сообщения."
+            en: "Translate any message with one action. Open the message menu and choose \"Translate\". Enable the button in Novagram → Messages settings.",
+            uz: "Har qanday xabarni bir amalda tarjima qiling. Xabar menyusini ochib, \"Tarjima\" ni tanlang. Novagram → Xabarlar sozlamalarida yoqiladi.",
+            ru: "Переводите любое сообщение одним действием. Откройте меню сообщения и выберите «Перевести». Включается в настройках Novagram → Сообщения."
         )
     }
 
@@ -898,9 +898,9 @@ public struct NovagramL10n {
     }
     public var tips_novagramHub_body: String {
         pick(
-            en: "All Novagram features in one place. Open your Novagram Settings and tap the gold \"Novagram\" row to access Ghost mode, STT, auto-text, translate, chat lock, and more.",
-            uz: "Barcha Novagram imkoniyatlari bir joyda. Novagram Sozlamalariga kirib, oltin rang \"Novagram\" qatoriga bosing — Ghost rejimi, STT, avto-matn, tarjima, chat qulfi va boshqalar.",
-            ru: "Все функции Novagram в одном месте. Откройте Настройки Novagram и нажмите золотую строку «Novagram» — Ghost-режим, STT, авто-текст, перевод, блокировка чатов и многое другое."
+            en: "All Novagram features in one place. Open your Novagram Settings and choose the gold \"Novagram\" row to access Ghost mode, STT, auto-text, translate, chat lock, and more.",
+            uz: "Barcha Novagram imkoniyatlari bir joyda. Novagram Sozlamalariga kirib, oltin rang \"Novagram\" qatorini tanlang — Ghost rejimi, STT, avto-matn, tarjima, chat qulfi va boshqalar.",
+            ru: "Все функции Novagram в одном месте. Откройте Настройки Novagram и выберите золотую строку «Novagram» — Ghost-режим, STT, авто-текст, перевод, блокировка чатов и многое другое."
         )
     }
 
@@ -950,9 +950,9 @@ public struct NovagramL10n {
     }
     public var about_multiAccount_body: String {
         pick(
-            en: "Add several Novagram accounts and switch between them in one click — each can open in its own window.",
-            uz: "Bir nechta Novagram account qo'shing va bir bosishda almashing — har biri o'z oynasida ochilishi mumkin.",
-            ru: "Добавляйте несколько аккаунтов Novagram и переключайтесь между ними одним кликом — каждый можно открыть в своём окне."
+            en: "Add several Novagram accounts and switch between them in one step — each can open in its own window.",
+            uz: "Bir nechta Novagram account qo'shing va bir qadamda almashing — har biri o'z oynasida ochilishi mumkin.",
+            ru: "Добавляйте несколько аккаунтов Novagram и переключайтесь между ними в один шаг — каждый можно открыть в своём окне."
         )
     }
     public var about_qrLogin_title: String {
@@ -970,9 +970,9 @@ public struct NovagramL10n {
     }
     public var about_editedHistory_body: String {
         pick(
-            en: "See every previous version of an edited message. Right-click an edited message and choose \"Editing history\".",
-            uz: "Tahrirlangan xabarning barcha oldingi versiyalarini ko'ring. Tahrirlangan xabarga o'ng tugma bosib, \"Tahrir tarixi\"ni tanlang.",
-            ru: "Смотрите все предыдущие версии отредактированного сообщения. Нажмите правой кнопкой и выберите «История правок»."
+            en: "See every previous version of an edited message. Open the menu of an edited message and choose \"Editing history\".",
+            uz: "Tahrirlangan xabarning barcha oldingi versiyalarini ko'ring. Tahrirlangan xabar menyusini ochib, \"Tahrir tarixi\"ni tanlang.",
+            ru: "Смотрите все предыдущие версии отредактированного сообщения. Откройте меню сообщения и выберите «История правок»."
         )
     }
     public var about_stt_title: String {
@@ -1000,9 +1000,9 @@ public struct NovagramL10n {
     }
     public var about_messaging_body: String {
         pick(
-            en: "Add a custom signature to every outgoing message automatically, and translate any incoming message with one click.",
-            uz: "Har bir chiquvchi xabar oxiriga avtomatik imzo qo'shing va istalgan kelgan xabarni bir bosishda tarjima qiling.",
-            ru: "Автоматически добавляйте подпись в конец каждого исходящего сообщения и переводите любое входящее сообщение одним кликом."
+            en: "Add a custom signature to every outgoing message automatically, and translate any incoming message with one action.",
+            uz: "Har bir chiquvchi xabar oxiriga avtomatik imzo qo'shing va istalgan kelgan xabarni bir amalda tarjima qiling.",
+            ru: "Автоматически добавляйте подпись в конец каждого исходящего сообщения и переводите любое входящее сообщение одним действием."
         )
     }
     public var about_footer: String {
@@ -1037,7 +1037,7 @@ public struct NovagramL10n {
     // MARK: - Liquid Glass settings (macOS 26)
 
     public var glass_settingsTitle: String { pick(en: "Liquid Glass", uz: "Liquid Glass", ru: "Liquid Glass") }
-    public var glass_settingsSubtitle: String { pick(en: "Translucent glass material for sidebars, bars and panels (macOS 26)", uz: "Yon panel, panel va oynalar uchun shaffof shisha materiali (macOS 26)", ru: "Полупрозрачный стеклянный материал для панелей (macOS 26)") }
+    public var glass_settingsSubtitle: String { pick(en: "Translucent glass material for sidebars, bars and panels (requires the latest system)", uz: "Yon panel, panel va oynalar uchun shaffof shisha materiali (eng so'nggi tizim talab qilinadi)", ru: "Полупрозрачный стеклянный материал для панелей (требуется новейшая система)") }
 
     // MARK: - Chat export
 

@@ -79,10 +79,10 @@ private func allFeatureSpecs() -> [FeatureSpec] {
             symbol: "eye.slash.fill", color: .gray,
             title: L3(en: "Ghost Mode", uz: "Ghost rejimi", ru: "Режим «Призрак»", zh: "幽灵模式"),
             enable: L3(
-                en: "Settings → Novagram → Chat → turn on “Ghost mode button”. A ghost icon appears above your chat list — tap it any time to toggle ghost mode instantly.",
-                uz: "Sozlamalar → Novagram → Chat → \"Ghost rejimi tugmasi\"ni yoqing. Chatlar ro'yxati tepasida ghost ikonkasi paydo bo'ladi — istalgan vaqt bosib yoqing yoki o'chiring.",
-                ru: "Настройки → Novagram → Чат → включите «Кнопка режима Призрак». Над списком чатов появится значок призрака — нажимайте его в любой момент.",
-                zh: "设置 → Novagram → 聊天 → 开启“幽灵模式按钮”。聊天列表上方会出现幽灵图标，随时点按即可立即开关幽灵模式。"
+                en: "Settings → Novagram → Chat → turn on “Ghost mode button”. A ghost icon appears above your chat list — use it any time to toggle ghost mode instantly.",
+                uz: "Sozlamalar → Novagram → Chat → \"Ghost rejimi tugmasi\"ni yoqing. Chatlar ro'yxati tepasida ghost ikonkasi paydo bo'ladi — istalgan vaqt shu ikonka orqali yoqing yoki o'chiring.",
+                ru: "Настройки → Novagram → Чат → включите «Кнопка режима Призрак». Над списком чатов появится значок призрака — используйте его в любой момент.",
+                zh: "设置 → Novagram → 聊天 → 开启“幽灵模式按钮”。聊天列表上方会出现幽灵图标，随时使用它即可立即开关幽灵模式。"
             ),
             works: L3(
                 en: "While active, you can read messages, view stories and ads, and stay online without ever sending a “seen”, “typing” or “online” signal to the other side.",
@@ -91,10 +91,10 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "开启期间，你可以阅读消息、观看动态和广告并保持在线，而不会向对方发送任何“已读”、“正在输入”或“在线”信号。"
             ),
             disable: L3(
-                en: "Tap the ghost icon again, or turn the same switch off in Settings → Novagram → Chat. Read receipts resume normally.",
-                uz: "Ghost ikonkasini yana bosing yoki Sozlamalar → Novagram → Chat bo'limida shu switchni o'chiring. \"Ko'rildi\" signali odatdagidek qaytadi.",
-                ru: "Нажмите значок призрака ещё раз или выключите тот же переключатель в Настройки → Novagram → Чат. Уведомления о прочтении возобновятся.",
-                zh: "再次点按幽灵图标，或在设置 → Novagram → 聊天中关闭同一开关。已读回执将恢复正常。"
+                en: "Use the ghost icon again, or turn the same switch off in Settings → Novagram → Chat. Read receipts resume normally.",
+                uz: "Ghost ikonkasidan yana foydalaning yoki Sozlamalar → Novagram → Chat bo'limida shu switchni o'chiring. \"Ko'rildi\" signali odatdagidek qaytadi.",
+                ru: "Используйте значок призрака ещё раз или выключите тот же переключатель в Настройки → Novagram → Чат. Уведомления о прочтении возобновятся.",
+                zh: "再次使用幽灵图标，或在设置 → Novagram → 聊天中关闭同一开关。已读回执将恢复正常。"
             )
         ),
         // 2. Multi-Account (No Sleep)
@@ -102,10 +102,10 @@ private func allFeatureSpecs() -> [FeatureSpec] {
             symbol: "person.2.fill", color: .blue,
             title: L3(en: "Multi-Account (No Sleep)", uz: "Ko'p account (Uyqusiz)", ru: "Мультиаккаунт (без сна)", zh: "多账号（不休眠）"),
             enable: L3(
-                en: "Add accounts the normal Telegram way (Settings → Add Account). Long-press any account row in the account switcher and choose “Activate (No Sleep)” to keep up to 5 accounts live at once.",
-                uz: "Akkauntlarni odatdagidek qo'shing (Sozlamalar → Add Account). Akkaunt almashtirgichida istalgan akkauntga uzoq bosib \"Faollashtirish (Uyqusiz)\"ni tanlang — bir vaqtda 5 tagacha akkaunt jonli turadi.",
-                ru: "Добавляйте аккаунты обычным способом Telegram (Настройки → Add Account). Зажмите любой аккаунт в переключателе и выберите «Активировать (Без сна)» — до 5 аккаунтов будут активны одновременно.",
-                zh: "按 Telegram 的常规方式添加账号（设置 → 添加账号）。在账号切换器中长按任一账号，选择“激活（不休眠）”，最多可让 5 个账号同时保持活跃。"
+                en: "Add accounts the normal Telegram way (Settings → Add Account). Open the menu of any account in the account switcher and choose “Activate (No Sleep)” to keep up to 5 accounts live at once.",
+                uz: "Akkauntlarni odatdagidek qo'shing (Sozlamalar → Add Account). Akkaunt almashtirgichida istalgan akkaunt menyusini ochib \"Faollashtirish (Uyqusiz)\"ni tanlang — bir vaqtda 5 tagacha akkaunt jonli turadi.",
+                ru: "Добавляйте аккаунты обычным способом Telegram (Настройки → Add Account). Откройте меню любого аккаунта в переключателе и выберите «Активировать (Без сна)» — до 5 аккаунтов будут активны одновременно.",
+                zh: "按 Telegram 的常规方式添加账号（设置 → 添加账号）。在账号切换器中打开任一账号的菜单，选择“激活（不休眠）”，最多可让 5 个账号同时保持活跃。"
             ),
             works: L3(
                 en: "Only active (non-sleeping) accounts keep an open connection; the rest sleep to save battery but still receive push notifications and wake up in 1–2 seconds when you switch to them. This lets you run 100+ accounts without slowing your phone down.",
@@ -114,10 +114,10 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "只有已激活（不休眠）的账号会保持连接；其余账号会休眠以节省电量，但仍能收到推送通知，切换过去时 1–2 秒即可唤醒。因此即使登录 100 多个账号，手机也不会变慢。"
             ),
             disable: L3(
-                en: "Long-press an activated account and choose “Put to Sleep” to release its live slot. Sleeping is the default state for every account beyond the current one.",
-                uz: "Faollashtirilgan akkauntga uzoq bosib \"Uyquga qo'yish\"ni tanlang — jonli o'rin bo'shaydi. Joriy akkaunt tashqarisidagi har qanday akkaunt uchun uyqu — standart holat.",
-                ru: "Зажмите активированный аккаунт и выберите «Перевести в сон» — активный слот освободится. Сон — состояние по умолчанию для всех аккаунтов, кроме текущего.",
-                zh: "长按已激活的账号，选择“设为休眠”即可释放其活跃名额。除当前账号外，其他账号默认都处于休眠状态。"
+                en: "Open the menu of an activated account and choose “Put to Sleep” to release its live slot. Sleeping is the default state for every account beyond the current one.",
+                uz: "Faollashtirilgan akkaunt menyusini ochib \"Uyquga qo'yish\"ni tanlang — jonli o'rin bo'shaydi. Joriy akkaunt tashqarisidagi har qanday akkaunt uchun uyqu — standart holat.",
+                ru: "Откройте меню активированного аккаунта и выберите «Перевести в сон» — активный слот освободится. Сон — состояние по умолчанию для всех аккаунтов, кроме текущего.",
+                zh: "打开已激活账号的菜单，选择“设为休眠”即可释放其活跃名额。除当前账号外，其他账号默认都处于休眠状态。"
             )
         ),
         // 3. QR Code Login
@@ -125,10 +125,10 @@ private func allFeatureSpecs() -> [FeatureSpec] {
             symbol: "qrcode", color: .violet,
             title: L3(en: "QR Code Login", uz: "QR kod orqali kirish", ru: "Вход по QR-коду", zh: "二维码登录"),
             enable: L3(
-                en: "On the phone-number login screen, tap the QR icon in the top-right corner of the navigation bar.",
-                uz: "Telefon raqami kiritish ekranida, yuqori o'ng burchakdagi QR ikonkasini bosing.",
-                ru: "На экране входа по номеру телефона нажмите значок QR в правом верхнем углу навигационной панели.",
-                zh: "在手机号登录界面，点按导航栏右上角的二维码图标。"
+                en: "On the phone-number login screen, choose QR code login.",
+                uz: "Telefon raqami kiritish ekranida, QR kod orqali kirishni tanlang.",
+                ru: "На экране входа по номеру телефона выберите вход по QR-коду.",
+                zh: "在手机号登录界面，选择二维码登录。"
             ),
             works: L3(
                 en: "A QR code appears — scan it from an already-logged-in Telegram/Novagram app (Settings → Devices → Link Desktop Device) to sign in instantly, without typing an SMS code.",
@@ -137,10 +137,10 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "界面上会出现一个二维码，用已登录的 Telegram/Novagram 应用扫描它（设置 → 设备 → 关联桌面设备），无需输入短信验证码即可立即登录。"
             ),
             disable: L3(
-                en: "Tap the back arrow inside the QR overlay, or Cancel, to return to normal phone-number entry. There is no persistent toggle — it's a one-time action per login attempt.",
-                uz: "QR oynasi ichidagi orqaga strelkasini yoki Bekor qilish tugmasini bosib, oddiy telefon raqami kiritishga qaytishingiz mumkin. Doimiy switch yo'q — bu har safar login uchun bir martalik amal.",
-                ru: "Нажмите стрелку назад внутри окна QR-кода или «Отмена», чтобы вернуться к вводу номера телефона. Постоянного переключателя нет — это разовое действие при каждой попытке входа.",
-                zh: "点按二维码界面中的返回箭头或“取消”，即可回到常规的手机号输入界面。此功能没有常驻开关，只是每次登录时的一次性操作。"
+                en: "Use the back arrow inside the QR overlay, or Cancel, to return to normal phone-number entry. There is no persistent toggle — it's a one-time action per login attempt.",
+                uz: "QR oynasi ichidagi orqaga strelkasidan yoki Bekor qilish tugmasidan foydalanib, oddiy telefon raqami kiritishga qaytishingiz mumkin. Doimiy switch yo'q — bu har safar login uchun bir martalik amal.",
+                ru: "Используйте стрелку назад внутри окна QR-кода или «Отмена», чтобы вернуться к вводу номера телефона. Постоянного переключателя нет — это разовое действие при каждой попытке входа.",
+                zh: "使用二维码界面中的返回箭头或“取消”，即可回到常规的手机号输入界面。此功能没有常驻开关，只是每次登录时的一次性操作。"
             )
         ),
         // 4. Edited Message History
@@ -154,10 +154,10 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "设置 → Novagram → 聊天 → 开启“消息编辑记录”。"
             ),
             works: L3(
-                en: "Every time you or the other person edits a message, the previous version is saved on your device. Long-press any edited message (marked “edited”) and choose “Editing history” to see every past version in order.",
-                uz: "Siz yoki suhbatdosh xabarni tahrirlaganida, oldingi versiyasi qurilmangizda saqlanadi. Tahrirlangan (\"edited\" belgili) xabarga uzoq bosib \"Tahrir tarixi\"ni tanlang — barcha versiyalarni tartib bilan ko'rasiz.",
-                ru: "Каждый раз, когда вы или собеседник редактируете сообщение, предыдущая версия сохраняется на вашем устройстве. Зажмите отредактированное сообщение (с меткой «edited») и выберите «История правок» — увидите все версии по порядку.",
-                zh: "每当你或对方编辑消息时，之前的版本都会保存在你的设备上。长按任意已编辑的消息（带有“已编辑”标记），选择“编辑记录”，即可按顺序查看所有历史版本。"
+                en: "Every time you or the other person edits a message, the previous version is saved on your device. Open the menu of any edited message (marked “edited”) and choose “Editing history” to see every past version in order.",
+                uz: "Siz yoki suhbatdosh xabarni tahrirlaganida, oldingi versiyasi qurilmangizda saqlanadi. Tahrirlangan (\"edited\" belgili) xabar menyusini ochib \"Tahrir tarixi\"ni tanlang — barcha versiyalarni tartib bilan ko'rasiz.",
+                ru: "Каждый раз, когда вы или собеседник редактируете сообщение, предыдущая версия сохраняется на вашем устройстве. Откройте меню отредактированного сообщения (с меткой «edited») и выберите «История правок» — увидите все версии по порядку.",
+                zh: "每当你或对方编辑消息时，之前的版本都会保存在你的设备上。打开任意已编辑消息（带有“已编辑”标记）的菜单，选择“编辑记录”，即可按顺序查看所有历史版本。"
             ),
             disable: L3(
                 en: "Turn the same switch off. History already collected stays on your device, but the “Editing history” menu item stops appearing for new edits.",
@@ -177,10 +177,10 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "设置 → Novagram → 语音 → 文字 → 开启“语音转文字”。还可以在下方选择“识别语言”。"
             ),
             works: L3(
-                en: "A small STT shortcut appears next to the microphone button in every chat. Tap it while recording, or after sending a voice message, to transcribe the speech to text directly on your device.",
-                uz: "Har bir chatda mikrofon tugmasi yonida kichik STT tugmasi paydo bo'ladi. Ovozli xabar yozayotganda yoki yuborgandan keyin uni bosing — nutq qurilmangizda matnga aylanadi.",
-                ru: "Рядом с кнопкой микрофона в каждом чате появляется маленькая кнопка STT. Нажмите её во время записи или после отправки голосового — речь распознается в текст прямо на устройстве.",
-                zh: "每个聊天中的麦克风按钮旁会出现一个小小的 STT 快捷按钮。在录音时或发送语音消息后点按它，即可直接在设备上将语音转为文字。"
+                en: "A small STT shortcut appears next to the microphone button in every chat. Use it while recording, or after sending a voice message, to transcribe the speech to text directly on your device.",
+                uz: "Har bir chatda mikrofon tugmasi yonida kichik STT tugmasi paydo bo'ladi. Ovozli xabar yozayotganda yoki yuborgandan keyin undan foydalaning — nutq qurilmangizda matnga aylanadi.",
+                ru: "Рядом с кнопкой микрофона в каждом чате появляется маленькая кнопка STT. Используйте её во время записи или после отправки голосового — речь распознается в текст прямо на устройстве.",
+                zh: "每个聊天中的麦克风按钮旁会出现一个小小的 STT 快捷按钮。在录音时或发送语音消息后使用它，即可直接在设备上将语音转为文字。"
             ),
             disable: L3(
                 en: "Turn the same switch off. The STT shortcut disappears from the chat input area.",
@@ -194,22 +194,22 @@ private func allFeatureSpecs() -> [FeatureSpec] {
             symbol: "lock.shield.fill", color: .green,
             title: L3(en: "Chat Lock (PIN)", uz: "Chat qulfi (PIN)", ru: "Блокировка чатов (PIN)", zh: "聊天锁（PIN 码）"),
             enable: L3(
-                en: "Long-press any chat → “Set Lock” from the context menu, then set a 4-digit PIN or a password of any length. (Settings → Novagram → Protection also has a “Chat Lock” master toggle that must be on the first time.)",
-                uz: "Istalgan chatni uzoq bosing → context menyudan \"Qulf o'rnatish\"ni tanlang, so'ng 4 xonali PIN yoki istalgan uzunlikdagi parol kiriting. (Sozlamalar → Novagram → Himoya bo'limida ham \"Chat qulfi\" asosiy switchi birinchi marta yoqilgan bo'lishi kerak.)",
-                ru: "Зажмите любой чат → выберите «Установить замок» в контекстном меню, затем задайте 4-значный PIN или пароль любой длины. (В Настройки → Novagram → Защита также есть главный переключатель «Блокировка чата», который должен быть включён в первый раз.)",
-                zh: "长按任意聊天 → 在弹出菜单中选择“设置密码”，然后设置 4 位 PIN 码或任意长度的密码。（设置 → Novagram → 安全防护中还有一个“聊天锁”总开关，首次使用时需要先将其开启。）"
+                en: "Open the menu of any chat → “Set Lock”, then set a 4-digit PIN or a password of any length. (Settings → Novagram → Protection also has a “Chat Lock” master toggle that must be on the first time.)",
+                uz: "Istalgan chat menyusini oching → \"Qulf o'rnatish\"ni tanlang, so'ng 4 xonali PIN yoki istalgan uzunlikdagi parol kiriting. (Sozlamalar → Novagram → Himoya bo'limida ham \"Chat qulfi\" asosiy switchi birinchi marta yoqilgan bo'lishi kerak.)",
+                ru: "Откройте меню любого чата → «Установить замок», затем задайте 4-значный PIN или пароль любой длины. (В Настройки → Novagram → Защита также есть главный переключатель «Блокировка чата», который должен быть включён в первый раз.)",
+                zh: "打开任意聊天的菜单 → “设置密码”，然后设置 4 位 PIN 码或任意长度的密码。（设置 → Novagram → 安全防护中还有一个“聊天锁”总开关，首次使用时需要先将其开启。）"
             ),
             works: L3(
-                en: "The locked chat requires your PIN/password (or Face ID / Touch ID, if your device supports it and you enabled biometric unlock) to open. Credentials are stored securely in the iOS Keychain, never on any server.",
-                uz: "Qulflangan chatni ochish uchun PIN/parol (yoki qurilmangiz qo'llab-quvvatlasa va yoqsangiz Face ID/Touch ID) so'raladi. Ma'lumotlar xavfsiz iOS Keychain'da saqlanadi, hech qanday serverga yuborilmaydi.",
-                ru: "Для открытия заблокированного чата требуется PIN/пароль (или Face ID/Touch ID, если устройство поддерживает и вы включили биометрию). Данные хранятся в защищённом iOS Keychain и никогда не отправляются на сервер.",
-                zh: "打开已上锁的聊天需要输入 PIN 码/密码（如果设备支持并且你已开启生物识别解锁，也可以使用 Face ID / Touch ID）。凭据安全地存储在 iOS 钥匙串中，绝不会上传到任何服务器。"
+                en: "The locked chat requires your PIN/password (or Face ID / Touch ID, if your device supports it and you enabled biometric unlock) to open. Credentials are stored securely in the system keychain, never on any server.",
+                uz: "Qulflangan chatni ochish uchun PIN/parol (yoki qurilmangiz qo'llab-quvvatlasa va yoqsangiz Face ID/Touch ID) so'raladi. Ma'lumotlar xavfsiz tizim keychain'ida saqlanadi, hech qanday serverga yuborilmaydi.",
+                ru: "Для открытия заблокированного чата требуется PIN/пароль (или Face ID/Touch ID, если устройство поддерживает и вы включили биометрию). Данные хранятся в защищённой системной связке ключей и никогда не отправляются на сервер.",
+                zh: "打开已上锁的聊天需要输入 PIN 码/密码（如果设备支持并且你已开启生物识别解锁，也可以使用 Face ID / Touch ID）。凭据安全地存储在 系统钥匙串中，绝不会上传到任何服务器。"
             ),
             disable: L3(
-                en: "Long-press the locked chat → “Remove Lock”, and confirm with your PIN/password. Locking is per-chat, so removing it from one chat doesn't affect the others.",
-                uz: "Qulflangan chatni uzoq bosing → \"Qulfni olib tashlash\", va PIN/parol bilan tasdiqlang. Qulf har bir chat uchun alohida, shuning uchun bittasidan olib tashlash boshqalariga ta'sir qilmaydi.",
-                ru: "Зажмите заблокированный чат → «Снять замок» и подтвердите PIN/паролем. Блокировка отдельная для каждого чата, поэтому снятие с одного не влияет на остальные.",
-                zh: "长按已上锁的聊天 → “移除密码”，然后输入 PIN 码/密码确认。锁定按聊天单独设置，因此解除一个聊天的锁定不会影响其他聊天。"
+                en: "Open the menu of the locked chat → “Remove Lock”, and confirm with your PIN/password. Locking is per-chat, so removing it from one chat doesn't affect the others.",
+                uz: "Qulflangan chat menyusini oching → \"Qulfni olib tashlash\", va PIN/parol bilan tasdiqlang. Qulf har bir chat uchun alohida, shuning uchun bittasidan olib tashlash boshqalariga ta'sir qilmaydi.",
+                ru: "Откройте меню заблокированного чата → «Снять замок» и подтвердите PIN/паролем. Блокировка отдельная для каждого чата, поэтому снятие с одного не влияет на остальные.",
+                zh: "打开已上锁聊天的菜单 → “移除密码”，然后输入 PIN 码/密码确认。锁定按聊天单独设置，因此解除一个聊天的锁定不会影响其他聊天。"
             )
         ),
         // 7. Secret Vault
@@ -217,16 +217,16 @@ private func allFeatureSpecs() -> [FeatureSpec] {
             symbol: "eye.slash.fill", color: .purple,
             title: L3(en: "Hidden Chats", uz: "Yashirin chatlar", ru: "Скрытые чаты", zh: "隐藏聊天"),
             enable: L3(
-                en: "Long-press any chat and choose “Hide” — the first time, you'll be asked to set a separate passcode. Or turn the toggle on directly in Settings → Novagram → Protection → “Hidden Chats”.",
-                uz: "Istalgan chatni uzoq bosib \"Berkitish\"ni tanlang — birinchi marta alohida kod-parol o'rnatishingiz so'raladi. Yoki to'g'ridan-to'g'ri Sozlamalar → Novagram → Himoya → \"Yashirin chatlar\" switchini yoqing.",
-                ru: "Зажмите любой чат и выберите «Скрыть» — в первый раз попросят задать отдельный код-пароль. Либо включите переключатель напрямую в Настройки → Novagram → Защита → «Скрытые чаты».",
-                zh: "长按任意聊天并选择“隐藏”，首次使用时会要求你设置一个单独的密码。也可以直接在设置 → Novagram → 安全防护 → “隐藏聊天”中开启该开关。"
+                en: "Open the menu of any chat and choose “Hide” — the first time, you'll be asked to set a separate passcode. Or turn the toggle on directly in Settings → Novagram → Protection → “Hidden Chats”.",
+                uz: "Istalgan chat menyusini ochib \"Berkitish\"ni tanlang — birinchi marta alohida kod-parol o'rnatishingiz so'raladi. Yoki to'g'ridan-to'g'ri Sozlamalar → Novagram → Himoya → \"Yashirin chatlar\" switchini yoqing.",
+                ru: "Откройте меню любого чата и выберите «Скрыть» — в первый раз попросят задать отдельный код-пароль. Либо включите переключатель напрямую в Настройки → Novagram → Защита → «Скрытые чаты».",
+                zh: "打开任意聊天的菜单并选择“隐藏”，首次使用时会要求你设置一个单独的密码。也可以直接在设置 → Novagram → 安全防护 → “隐藏聊天”中开启该开关。"
             ),
             works: L3(
-                en: "Hidden chats vanish from your main chat list and are muted automatically. To open them, long-press the “Chats” title and enter your passcode — a separate passcode from Chat Lock.",
-                uz: "Berkitilgan chatlar asosiy chat ro'yxatidan yo'qoladi va avtomatik ovozsiz qilinadi. Ularni ochish uchun \"Chats\" sarlavhasini uzoq bosing va kod-parolni kiriting — bu Chat qulfidan alohida kod-parol.",
-                ru: "Скрытые чаты исчезают из основного списка и автоматически отключаются от звука. Чтобы открыть их, зажмите заголовок «Chats» и введите код-пароль — он отдельный от блокировки чата.",
-                zh: "隐藏的聊天会从主聊天列表中消失，并自动设为静音。要打开它们，请长按“聊天”标题并输入密码（此密码与聊天锁的密码相互独立）。"
+                en: "Hidden chats vanish from your main chat list and are muted automatically. To open them, use the “Chats” title and enter your passcode — a separate passcode from Chat Lock.",
+                uz: "Berkitilgan chatlar asosiy chat ro'yxatidan yo'qoladi va avtomatik ovozsiz qilinadi. Ularni ochish uchun \"Chats\" sarlavhasidan foydalaning va kod-parolni kiriting — bu Chat qulfidan alohida kod-parol.",
+                ru: "Скрытые чаты исчезают из основного списка и автоматически отключаются от звука. Чтобы открыть их, используйте заголовок «Chats» и введите код-пароль — он отдельный от блокировки чата.",
+                zh: "隐藏的聊天会从主聊天列表中消失，并自动设为静音。要打开它们，请使用“聊天”标题并输入密码（此密码与聊天锁的密码相互独立）。"
             ),
             disable: L3(
                 en: "Turn the “Hidden Chats” switch off in Settings → Novagram → Protection. This requires your Chat Lock master PIN and shows a confirmation — turning it off returns every hidden chat to the main list, unmutes them, and deletes the passcode.",
@@ -269,10 +269,10 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "设置 → Novagram → 消息 → 开启“翻译按钮”（在消息菜单中添加“翻译”），和/或为“自动翻译”设置目标语言。"
             ),
             works: L3(
-                en: "Long-press any incoming message and tap “Translate” to see it in your chosen language instantly, without leaving the chat. With auto-translate configured, this happens with one tap and no extra menu.",
-                uz: "Istalgan kelgan xabarga uzoq bosib \"Translate\"ni bosing — u chatdan chiqmasdan tanlangan tilingizda darhol ko'rinadi. Avto-tarjima sozlangan bo'lsa, bu bir teginishda, qo'shimcha menyusiz sodir bo'ladi.",
-                ru: "Зажмите любое входящее сообщение и нажмите «Перевести» — увидите его на выбранном языке мгновенно, не покидая чат. При настроенном авто-переводе это происходит одним нажатием, без лишнего меню.",
-                zh: "长按任意收到的消息并点按“翻译”，无需离开聊天即可立即看到所选语言的译文。设置自动翻译后，只需轻点一下即可完成，无需额外菜单。"
+                en: "Open the menu of any incoming message and choose “Translate” to see it in your chosen language instantly, without leaving the chat. With auto-translate configured, this happens in one step with no extra menu.",
+                uz: "Istalgan kelgan xabar menyusini ochib \"Translate\"ni tanlang — u chatdan chiqmasdan tanlangan tilingizda darhol ko'rinadi. Avto-tarjima sozlangan bo'lsa, bu bir qadamda, qo'shimcha menyusiz sodir bo'ladi.",
+                ru: "Откройте меню любого входящего сообщения и выберите «Перевести» — увидите его на выбранном языке мгновенно, не покидая чат. При настроенном авто-переводе это происходит в один шаг, без лишнего меню.",
+                zh: "打开任意收到消息的菜单并选择“翻译”，无需离开聊天即可立即看到所选语言的译文。设置自动翻译后，一步即可完成，无需额外菜单。"
             ),
             disable: L3(
                 en: "Turn “Translate button” off in the same screen to remove the context-menu entry, or clear the auto-translate language to stop automatic translation.",
@@ -309,16 +309,16 @@ private func allFeatureSpecs() -> [FeatureSpec] {
             symbol: "folder.badge.plus", color: .blue,
             title: L3(en: "Recommended Folders", uz: "Tavsiya etilgan papkalar", ru: "Рекомендуемые папки", zh: "推荐分组"),
             enable: L3(
-                en: "Settings → Novagram → Features → tap “Recommended folders” (or accept the one-time prompt shown on first launch).",
-                uz: "Sozlamalar → Novagram → Imkoniyatlar → \"Tavsiya etilgan papkalar\"ni bosing (yoki birinchi ishga tushirishda chiqadigan bir martalik taklifni qabul qiling).",
-                ru: "Настройки → Novagram → Функции → нажмите «Рекомендуемые папки» (или примите разовое предложение при первом запуске).",
-                zh: "设置 → Novagram → 功能 → 点按“推荐分组”（或在首次启动时接受一次性提示）。"
+                en: "Settings → Novagram → Features → choose “Recommended folders” (or accept the one-time prompt shown on first launch).",
+                uz: "Sozlamalar → Novagram → Imkoniyatlar → \"Tavsiya etilgan papkalar\"ni tanlang (yoki birinchi ishga tushirishda chiqadigan bir martalik taklifni qabul qiling).",
+                ru: "Настройки → Novagram → Функции → выберите «Рекомендуемые папки» (или примите разовое предложение при первом запуске).",
+                zh: "设置 → Novagram → 功能 → 选择“推荐分组”（或在首次启动时接受一次性提示）。"
             ),
             works: L3(
-                en: "One tap instantly creates four ready-made chat folders — Personal, Unread, Channels and Bots — so you don't have to build folders from scratch.",
-                uz: "Bir bosishda darhol 4 ta tayyor chat jild yaratiladi — Shaxsiy, O'qilmagan, Kanallar va Botlar — jildlarni noldan yasashingiz shart emas.",
-                ru: "Одним нажатием сразу создаются 4 готовые папки чатов — Личные, Непрочитанные, Каналы и Боты — не нужно создавать папки с нуля.",
-                zh: "轻点一下即可立即创建四个现成的聊天分组：个人、未读、频道和机器人，无需从零开始创建分组。"
+                en: "One action instantly creates four ready-made chat folders — Personal, Unread, Channels and Bots — so you don't have to build folders from scratch.",
+                uz: "Bir amalda darhol 4 ta tayyor chat jild yaratiladi — Shaxsiy, O'qilmagan, Kanallar va Botlar — jildlarni noldan yasashingiz shart emas.",
+                ru: "Одним действием сразу создаются 4 готовые папки чатов — Личные, Непрочитанные, Каналы и Боты — не нужно создавать папки с нуля.",
+                zh: "一步操作即可立即创建四个现成的聊天分组：个人、未读、频道和机器人，无需从零开始创建分组。"
             ),
             disable: L3(
                 en: "This is a one-time action, not a persistent toggle — there's nothing to turn off. Delete any folder you don't want the normal way (Chat Folders settings → swipe or edit).",
@@ -384,10 +384,10 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "设置 → Novagram → 功能 → 开启“自动通过入群申请”。"
             ),
             works: L3(
-                en: "For groups and channels where you're an admin, pending join requests are automatically accepted in the background — no need to open the requests list and tap Accept one by one.",
-                uz: "Siz admin bo'lgan guruh va kanallarda, kutilayotgan qo'shilish so'rovlari fonda avtomatik qabul qilinadi — so'rovlar ro'yxatini ochib, birma-bir Qabul qilish tugmasini bosish shart emas.",
-                ru: "В группах и каналах, где вы администратор, ожидающие запросы на вступление автоматически принимаются в фоне — не нужно открывать список запросов и нажимать «Принять» по одному.",
-                zh: "在你担任管理员的群组和频道中，待处理的加入申请会在后台自动通过，无需打开申请列表逐个点按“通过”。"
+                en: "For groups and channels where you're an admin, pending join requests are automatically accepted in the background — no need to open the requests list and accept them one by one.",
+                uz: "Siz admin bo'lgan guruh va kanallarda, kutilayotgan qo'shilish so'rovlari fonda avtomatik qabul qilinadi — so'rovlar ro'yxatini ochib, birma-bir Qabul qilish tugmasidan foydalanish shart emas.",
+                ru: "В группах и каналах, где вы администратор, ожидающие запросы на вступление автоматически принимаются в фоне — не нужно открывать список запросов и принимать их по одному.",
+                zh: "在你担任管理员的群组和频道中，待处理的加入申请会在后台自动通过，无需打开申请列表逐个选择“通过”。"
             ),
             disable: L3(
                 en: "Turn the same switch off. New join requests will wait for your manual approval again.",
@@ -424,16 +424,16 @@ private func allFeatureSpecs() -> [FeatureSpec] {
             symbol: "bolt.circle.fill", color: .teal,
             title: L3(en: "Novagram Bots", uz: "Novagram Botlar", ru: "Боты Novagram", zh: "Novagram 机器人"),
             enable: L3(
-                en: "No toggle needed — open Settings → Novagram and tap the “Novagram Bots” row near the top.",
-                uz: "Switch kerak emas — Sozlamalar → Novagram'ni oching va yuqoridagi \"Novagram Botlar\" qatorini bosing.",
-                ru: "Переключатель не нужен — откройте Настройки → Novagram и нажмите строку «Боты Novagram» в верхней части списка.",
-                zh: "无需开关：打开设置 → Novagram，点按顶部附近的“Novagram 机器人”一行。"
+                en: "No toggle needed — open Settings → Novagram and choose the “Novagram Bots” row near the top.",
+                uz: "Switch kerak emas — Sozlamalar → Novagram'ni oching va yuqoridagi \"Novagram Botlar\" qatorini tanlang.",
+                ru: "Переключатель не нужен — откройте Настройки → Novagram и выберите строку «Боты Novagram» в верхней части списка.",
+                zh: "无需开关：打开设置 → Novagram，选择顶部附近的“Novagram 机器人”一行。"
             ),
             works: L3(
-                en: "Shows a curated, categorized directory of useful Telegram bots (utilities, downloaders, tools, etc.) with a short description for each — tap any bot to open a chat with it directly.",
-                uz: "Foydali Telegram botlarining tartiblangan, toifalarga bo'lingan ro'yxatini har biri uchun qisqa tavsif bilan ko'rsatadi — istalgan botni bosib, u bilan chatni to'g'ridan-to'g'ri oching.",
-                ru: "Показывает подобранный, разделённый по категориям каталог полезных Telegram-ботов (утилиты, загрузчики, инструменты и т.д.) с кратким описанием каждого — нажмите на любого бота, чтобы открыть чат с ним напрямую.",
-                zh: "按类别展示精选的实用 Telegram 机器人目录（实用程序、下载器、工具等），每个都附有简短介绍，点按任意机器人即可直接与其聊天。"
+                en: "Shows a curated, categorized directory of useful Telegram bots (utilities, downloaders, tools, etc.) with a short description for each — choose any bot to open a chat with it directly.",
+                uz: "Foydali Telegram botlarining tartiblangan, toifalarga bo'lingan ro'yxatini har biri uchun qisqa tavsif bilan ko'rsatadi — istalgan botni tanlab, u bilan chatni to'g'ridan-to'g'ri oching.",
+                ru: "Показывает подобранный, разделённый по категориям каталог полезных Telegram-ботов (утилиты, загрузчики, инструменты и т.д.) с кратким описанием каждого — выберите любого бота, чтобы открыть чат с ним напрямую.",
+                zh: "按类别展示精选的实用 Telegram 机器人目录（实用程序、下载器、工具等），每个都附有简短介绍，选择任意机器人即可直接与其聊天。"
             ),
             disable: L3(
                 en: "This is a read-only directory screen, not a feature toggle — simply don't open it if you don't need it.",
@@ -706,9 +706,9 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "设置 → Novagram → 消息 → 开启“爱心特效”。"
             ),
             works: L3(
-                en: "Automatically attaches the animated ❤️ message effect to every text message you send — a small, playful touch with no extra taps.",
-                uz: "Yuboradigan har bir matnli xabaringizga animatsion ❤️ effektini avtomatik qo'shadi — qo'shimcha bosishlarsiz kichik, quvnoq teginish.",
-                ru: "Автоматически добавляет анимированный эффект ❤️ к каждому отправленному текстовому сообщению — небольшой игривый штрих без лишних нажатий.",
+                en: "Automatically attaches the animated ❤️ message effect to every text message you send — a small, playful touch with no extra steps.",
+                uz: "Yuboradigan har bir matnli xabaringizga animatsion ❤️ effektini avtomatik qo'shadi — qo'shimcha amallarsiz kichik, quvnoq teginish.",
+                ru: "Автоматически добавляет анимированный эффект ❤️ к каждому отправленному текстовому сообщению — небольшой игривый штрих без лишних действий.",
                 zh: "自动为你发送的每条文字消息添加 ❤️ 动画特效，无需额外操作，增添一点俏皮的小乐趣。"
             ),
             disable: L3(
@@ -752,9 +752,9 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "设置 → Novagram → 安全防护 → 开启“发送前确认”。"
             ),
             works: L3(
-                en: "Shows a small confirmation dialog before sending a voice message, sticker, or gift, helping you avoid accidental sends from a stray tap.",
-                uz: "Ovozli xabar, stiker yoki sovg'a yuborishdan oldin kichik tasdiqlash dialogini ko'rsatadi — tasodifiy bosishdan kelib chiqqan xato yuborishlarning oldini oladi.",
-                ru: "Показывает небольшой диалог подтверждения перед отправкой голосового сообщения, стикера или подарка — помогает избежать случайной отправки от неловкого нажатия.",
+                en: "Shows a small confirmation dialog before sending a voice message, sticker, or gift, helping you avoid accidental sends from an accidental action.",
+                uz: "Ovozli xabar, stiker yoki sovg'a yuborishdan oldin kichik tasdiqlash dialogini ko'rsatadi — tasodifiy harakatdan kelib chiqqan xato yuborishlarning oldini oladi.",
+                ru: "Показывает небольшой диалог подтверждения перед отправкой голосового сообщения, стикера или подарка — помогает избежать случайной отправки от случайного действия.",
                 zh: "在发送语音消息、贴纸或礼物前弹出确认对话框，避免因误触而意外发送。"
             ),
             disable: L3(
@@ -792,16 +792,16 @@ private func allFeatureSpecs() -> [FeatureSpec] {
             symbol: "link.circle.fill", color: .teal,
             title: L3(en: "Settings Links", uz: "Sozlamalar havolalari", ru: "Ссылки в настройках", zh: "设置页链接"),
             enable: L3(
-                en: "Nothing to turn on. Settings → Novagram → Features has a “Share Novagram Settings link” row, and every other row answers a long press.",
-                uz: "Hech narsani yoqish shart emas. Sozlamalar → Novagram → Imkoniyatlar bo'limida \"Novagram Settings havolasini ulashish\" qatori bor, qolgan har bir qatorni esa bosib turish kifoya.",
-                ru: "Ничего включать не нужно. В Настройки → Novagram → Функции есть строка «Поделиться ссылкой Novagram Settings», а любую другую строку достаточно нажать и удерживать.",
-                zh: "无需开启。设置 → Novagram → 功能中有“分享 Novagram 设置链接”一行，其他每一行也都支持长按。"
+                en: "Nothing to turn on. Settings → Novagram → Features has a “Share Novagram Settings link” row, and every other row has its own link in its menu.",
+                uz: "Hech narsani yoqish shart emas. Sozlamalar → Novagram → Imkoniyatlar bo'limida \"Novagram Settings havolasini ulashish\" qatori bor, qolgan har bir qatorning menyusida o'z havolasi bor.",
+                ru: "Ничего включать не нужно. В Настройки → Novagram → Функции есть строка «Поделиться ссылкой Novagram Settings», а у любой другой строки в меню есть своя ссылка.",
+                zh: "无需开启。设置 → Novagram → 功能中有“分享 Novagram 设置链接”一行，其他每一行的菜单中也都有各自的链接。"
             ),
             works: L3(
-                en: "The share row copies and shares tg://settings/novagrampro, which opens this settings screen. Press and hold any row instead and you get tg://settings/novagrampro/<feature> — that link opens the screen, scrolls straight to that row and traces an outline around it.",
-                uz: "Ulashish qatori tg://settings/novagrampro havolasini nusxalab ulashadi — u shu sozlamalar ekranini ochadi. Istalgan qatorni bosib tursangiz esa tg://settings/novagrampro/<feature> havolasini olasiz — u ekranni ochib, to'g'ridan-to'g'ri o'sha qatorga o'tadi va uning atrofida chiziq chizadi.",
-                ru: "Строка отправки копирует и отправляет tg://settings/novagrampro — она открывает этот экран настроек. А если нажать и удерживать любую строку, вы получите tg://settings/novagrampro/<feature> — такая ссылка открывает экран, прокручивает прямо к этой строке и обводит её контуром.",
-                zh: "分享行会复制并分享 tg://settings/novagrampro，该链接可打开此设置页面。若改为长按任意一行，则会得到 tg://settings/novagrampro/<feature>，该链接会打开此页面，直接滚动到那一行，并在其周围描出轮廓。"
+                en: "The share row copies and shares tg://settings/novagrampro, which opens this settings screen. Open the menu of any row instead and you get tg://settings/novagrampro/<feature> — that link opens the screen, scrolls straight to that row and traces an outline around it.",
+                uz: "Ulashish qatori tg://settings/novagrampro havolasini nusxalab ulashadi — u shu sozlamalar ekranini ochadi. Istalgan qator menyusini ochsangiz esa tg://settings/novagrampro/<feature> havolasini olasiz — u ekranni ochib, to'g'ridan-to'g'ri o'sha qatorga o'tadi va uning atrofida chiziq chizadi.",
+                ru: "Строка отправки копирует и отправляет tg://settings/novagrampro — она открывает этот экран настроек. А если открыть меню любой строки, вы получите tg://settings/novagrampro/<feature> — такая ссылка открывает экран, прокручивает прямо к этой строке и обводит её контуром.",
+                zh: "分享行会复制并分享 tg://settings/novagrampro，该链接可打开此设置页面。若改为打开任意一行的菜单，则会得到 tg://settings/novagrampro/<feature>，该链接会打开此页面，直接滚动到那一行，并在其周围描出轮廓。"
             ),
             disable: L3(
                 en: "Nothing to turn off — links are only created when you ask for one.",
@@ -822,16 +822,16 @@ private func allFeatureSpecs() -> [FeatureSpec] {
                 zh: "在Novagram中无需Telegram Premium自动生效。"
             ),
             works: L3(
-                en: "Allows you to download and save any story directly to your Mac and watch stories in full HD quality without premium restrictions.",
-                uz: "Istalgan hikoyani Mac xotirasiga to'g'ridan-to'g'ri yuklab olish va premium cheklovisiz to'liq HD sifatda tomosha qilish imkonini beradi.",
-                ru: "Позволяет сохранять любые истории на Mac и смотреть их в максимальном качестве HD без ограничений.",
-                zh: "允许直接将任何故事保存到Mac，并以全高清画质观看，不受会员限制。"
+                en: "Allows you to download and save any story directly to this device and watch stories in full HD quality without premium restrictions.",
+                uz: "Istalgan hikoyani qurilma xotirasiga to'g'ridan-to'g'ri yuklab olish va premium cheklovisiz to'liq HD sifatda tomosha qilish imkonini beradi.",
+                ru: "Позволяет сохранять любые истории на устройстве и смотреть их в максимальном качестве HD без ограничений.",
+                zh: "允许直接将任何故事保存到本设备，并以全高清画质观看，不受会员限制。"
             ),
             disable: L3(
-                en: "Core built-in feature in Novagram macOS.",
-                uz: "Novagram macOS ichiga o'rnatilgan asosiy imkoniyat.",
-                ru: "Встроенная базовая возможность Novagram macOS.",
-                zh: "Novagram macOS内置基础功能。"
+                en: "Core built-in feature in Novagram.",
+                uz: "Novagram ichiga o'rnatilgan asosiy imkoniyat.",
+                ru: "Встроенная базовая возможность Novagram.",
+                zh: "Novagram 内置基础功能。"
             )
         ),
         // 35. Peer Profile ID & Novagram Diagnostics (macOS)
@@ -839,15 +839,15 @@ private func allFeatureSpecs() -> [FeatureSpec] {
             symbol: "info.circle.fill", color: .blue,
             title: L3(en: "Peer Profile ID & Diagnostics", uz: "Profil ID va diagnostika", ru: "ID профиля и диагностика", zh: "用户ID与诊断详情"),
             enable: L3(
-                en: "Open any profile or click “...” menu → “Novagram Info”.",
+                en: "Open any profile or use the “...” menu → “Novagram Info”.",
                 uz: "Har qanday profilni oching yoki profil menyusi (“...”) dan “Novagram Info”ni tanlang.",
-                ru: "Откройте любой профиль или нажмите меню («...») → «Novagram Info».",
+                ru: "Откройте любой профиль или используйте меню («...») → «Novagram Info».",
                 zh: "打开任意个人资料或在菜单（“...”）中选择“Novagram Info”。"
             ),
             works: L3(
-                en: "Shows exact Telegram numeric Peer ID (click to copy instantly) and details about Data Center (DC), user type, scam/fake flags and premium status.",
-                uz: "Aniq Telegram raqamli Peer ID (bir marta bosish bilan nusxalanadi), Data Center (DC), foydalanuvchi turi va tekshiruv belgilarini ko'rsatadi.",
-                ru: "Показывает точный цифровой Peer ID (копируется в один клик), Data Center (DC), тип пользователя и статус верификации.",
+                en: "Shows exact Telegram numeric Peer ID (copy it instantly) and details about Data Center (DC), user type, scam/fake flags and premium status.",
+                uz: "Aniq Telegram raqamli Peer ID (bir zumda nusxalanadi), Data Center (DC), foydalanuvchi turi va tekshiruv belgilarini ko'rsatadi.",
+                ru: "Показывает точный цифровой Peer ID (копируется мгновенно), Data Center (DC), тип пользователя и статус верификации.",
                 zh: "显示精确的Telegram数字ID（一键复制）、数据中心(DC)、用户类型和验证状态。"
             ),
             disable: L3(

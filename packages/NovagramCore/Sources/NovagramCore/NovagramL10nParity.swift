@@ -3,7 +3,7 @@ import Foundation
 // Strings for the iOS features ported to the Mac in 2026-10 (texts follow the iOS Novagram module).
 public extension NovagramL10n {
     var settings_chat_editedHistory_title: String { pick(en: "Edited message history", uz: "Tahrirlangan xabar tarixi", ru: "История правок сообщений") }
-    var settings_chat_editedHistory_subtitle: String { pick(en: "Right-click an edited message to see all its previous versions", uz: "Tahrirlangan xabarni o'ng tugma bilan bosib, barcha oldingi versiyalarini ko'ring", ru: "Нажмите правой кнопкой на изменённое сообщение, чтобы увидеть все его прошлые версии") }
+    var settings_chat_editedHistory_subtitle: String { pick(en: "Open the menu of an edited message to see all its previous versions", uz: "Tahrirlangan xabar menyusini ochib, barcha oldingi versiyalarini ko'ring", ru: "Откройте меню изменённого сообщения, чтобы увидеть все его прошлые версии") }
     var settings_chat_roundVideo_title: String { pick(en: "Round video from file", uz: "Fayldan dumaloq video", ru: "Круглое видео из файла") }
     var settings_chat_roundVideo_subtitle: String { pick(en: "Adds “Send as Round Video” to the attach menu", uz: "Biriktirish menyusiga «Dumaloq video sifatida yuborish» bandini qo'shadi", ru: "Добавляет «Отправить как кружок» в меню вложений") }
     var settings_chat_forwardHideNames_title: String { pick(en: "Forward Without Name", uz: "Imzosiz forward", ru: "Пересылка без имени") }
@@ -67,7 +67,7 @@ public extension NovagramL10n {
     var settingsLink_copy: String { pick(en: "Copy link", uz: "Havolani nusxalash", ru: "Копировать ссылку") }
     var settingsLink_share: String { pick(en: "Share link", uz: "Havolani ulashish", ru: "Поделиться ссылкой") }
     var settingsLink_copied: String { pick(en: "Link copied", uz: "Havola nusxalandi", ru: "Ссылка скопирована") }
-    var settingsLink_hint: String { pick(en: "Right-click any row to get a link straight to that setting.", uz: "Istalgan qatorni o'ng tugma bilan bosing: o'sha sozlamaning havolasini olasiz.", ru: "Нажмите правой кнопкой на любую строку, чтобы получить ссылку именно на эту настройку.") }
+    var settingsLink_hint: String { pick(en: "Open the menu of any row to get a link straight to that setting.", uz: "Istalgan qator menyusini oching: o'sha sozlamaning havolasini olasiz.", ru: "Откройте меню любой строки, чтобы получить ссылку именно на эту настройку.") }
     var developer_adEventsOffTitle: String { pick(en: "Don't send ad events", uz: "Reklama hodisalarini yubormaslik", ru: "Не отправлять события рекламы") }
     var developer_adEventsOffTip: String { pick(en: "Views, clicks and actions of Novagram and Telegram ads are not sent, so an ad shown once per user keeps showing while you test. This device only.", uz: "Novagram va Telegram reklamalarining ko'rish, bosish va harakat hodisalari serverga yuborilmaydi, shuning uchun bir marta ko'rsatiladigan reklama test paytida qayta chiqaveradi. Faqat shu qurilmada.", ru: "Просмотры, клики и действия по рекламе Novagram и Telegram не отправляются, поэтому реклама с одним показом на пользователя продолжает показываться во время теста. Только на этом устройстве.") }
     var editedHistory_file: String { pick(en: "File", uz: "Fayl", ru: "Файл") }

@@ -361,6 +361,7 @@ private func appAppearanceEntries(appearance: Appearance, state: State, settings
     }))
 
     var accentList = appearance.presentation.cloudTheme == nil || appearance.presentation.cloudTheme?.settings != nil ? appearance.presentation.colors.accentList.map { AppearanceAccentColor(accent: $0, cloudTheme: nil) } : []
+    accentList = novagramAccentList(accentList, palette: appearance.presentation.colors, cloudTheme: appearance.presentation.cloudTheme) // Novagram
 
     var cloudThemes = cloudThemes
     if let cloud = appearance.presentation.cloudTheme {

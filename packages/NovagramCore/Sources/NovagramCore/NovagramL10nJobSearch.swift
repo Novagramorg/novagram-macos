@@ -23,7 +23,7 @@ public extension NovagramL10n {
     var jobSearch_onlySalary: String { pick(en: "Only with salary", uz: "Faqat maosh ko'rsatilganlar", ru: "Только с зарплатой") }
     var jobSearch_languages: String { pick(en: "Convert languages", uz: "Tillarga o'girish", ru: "Перевод на языки") }
     var jobSearch_languagesNone: String { pick(en: "None", uz: "Hech biri", ru: "Нет") }
-    var jobSearch_languagesNote: String { pick(en: "Translations go through Telegram's translation service; Uzbek Latin and Cyrillic are converted on this Mac. None: the query is searched as typed.", uz: "Tarjima Telegram tarjima xizmati orqali bajariladi; o'zbek lotin va kirill yozuvi shu Mac'da almashtiriladi. Hech biri: so'rov yozilganidek qidiriladi.", ru: "Перевод выполняет сервис перевода Telegram; узбекская латиница и кириллица меняются на этом Mac. Нет: запрос ищется как введён.") }
+    var jobSearch_languagesNote: String { pick(en: "Translations go through Telegram's translation service; Uzbek Latin and Cyrillic are converted on this device. None: the query is searched as typed.", uz: "Tarjima Telegram tarjima xizmati orqali bajariladi; o'zbek lotin va kirill yozuvi shu qurilmada almashtiriladi. Hech biri: so'rov yozilganidek qidiriladi.", ru: "Перевод выполняет сервис перевода Telegram; узбекская латиница и кириллица меняются на этом устройстве. Нет: запрос ищется как введён.") }
     var jobSearch_sourcesHeader: String { pick(en: "Sources", uz: "Manbalar", ru: "Источники") }
     var jobSearch_sourceHashtags: String { pick(en: "Public hashtag posts", uz: "Ochiq heshteg postlari", ru: "Публичные посты по хештегам") }
     var jobSearch_hashtagAddTitle: String { pick(en: "Add a hashtag", uz: "Heshteg qo'shish", ru: "Добавить хештег") }

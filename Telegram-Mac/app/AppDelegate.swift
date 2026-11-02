@@ -971,6 +971,7 @@ class AppDelegate: NSResponder, NSApplicationDelegate, NSUserNotificationCenterD
                 self.sharedApplicationContextValue = sharedApplicationContext
                 NovagramAnalyticsManager.shared.start(sharedContext: sharedContext) // Novagram
                 NovagramAutoProxyManager.shared.start(accountManager: accountManager) // Novagram
+                NovagramWhiteThemeAccent.migrateIfNeeded(accountManager: accountManager) // Novagram
                 
                 self.supportAccountContextValue = .init(applicationContext: sharedApplicationContext)
                 
