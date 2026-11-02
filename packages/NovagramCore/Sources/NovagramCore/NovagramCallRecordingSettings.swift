@@ -53,6 +53,14 @@ public enum NovagramCallRecordingSettings {
         shared.isAutoEnabled = value
     }
 
+    public static var videoQuality: CallRecordingVideoQuality {
+        return shared.videoQuality
+    }
+
+    public static func setVideoQuality(_ value: CallRecordingVideoQuality) {
+        shared.videoQuality = value
+    }
+
     public static var isDataSavingEnabled: Bool {
         return defaults?.bool(forKey: dataSavingKey) ?? false
     }

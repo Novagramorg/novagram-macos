@@ -880,3 +880,13 @@ The manager approved call recording for both apps (owner, via the iOS session). 
 - Unchanged: the keys and their default (off), the consent alert, the chat notice, the REC badge, the recordings list. "Use less data for calls" (`novagram_call_data_saving`) stays in the Developer section, still unapproved.
 
 Manual repro: with the Developer section hidden, Novagram Settings → Chat → last row "Call recording" (Off) → the page; turn it on → folder picker; `tg://settings/novagrampro/call-recording` highlights the row; a director login keeps it on.
+
+## Call recording video quality (2026-11-02)
+
+iOS parity with CallRecordingKit `e3637d7` (pin d4291aec8 -> e3637d7): the shared `pro_messager` key `novagram_call_recording_video_quality` = `audio` | `saver` | `high` (missing or unknown = `saver`). No Telegram file changed.
+
+- `NovagramCallRecordingSettings.videoQuality` / `setVideoQuality(_:)` read and write `CallRecordingSettings().videoQuality`.
+- `NovagramCallRecording.begin` reads the quality once per recording: audio only gives the capture `hasVideo: false` and `noteVideoUpgrade` never enables video, so the file ends up `.m4a`; `makeSession` starts the session with `CallRecordingConfiguration(videoSize: NovagramCallRecording.videoSize, framesPerSecond:, videoBitRate:)` taken from `CallRecordingConfiguration(quality:)` (battery saver 15 fps at 1.25 Mbit/s, high 30 fps at 2.5 Mbit/s, the Mac video size kept).
+- Settings page: a VIDEO QUALITY block after the auto switch, only while Call recording is on: `qualityHeader`, three checkmark rows `qualityTitle(_:)` for `CallRecordingVideoQuality.allCases`, `qualityFooter`; the choice applies from the next recording.
+
+Manual repro: Settings > Chat > Call recording on > pick Audio only > record a video call > the file is `.m4a`; pick High > `.mp4` at 30 fps; the choice survives a relaunch and matches iOS.

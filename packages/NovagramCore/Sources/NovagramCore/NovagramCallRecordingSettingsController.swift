@@ -22,12 +22,14 @@ extension NovagramCallRecordingSettings {
 private final class Arguments {
     let toggleRecord: (Bool) -> Void
     let toggleAuto: (Bool) -> Void
+    let setQuality: (CallRecordingVideoQuality) -> Void
     let changeFolder: () -> Void
     let openRecordings: () -> Void
 
-    init(toggleRecord: @escaping (Bool) -> Void, toggleAuto: @escaping (Bool) -> Void, changeFolder: @escaping () -> Void, openRecordings: @escaping () -> Void) {
+    init(toggleRecord: @escaping (Bool) -> Void, toggleAuto: @escaping (Bool) -> Void, setQuality: @escaping (CallRecordingVideoQuality) -> Void, changeFolder: @escaping () -> Void, openRecordings: @escaping () -> Void) {
         self.toggleRecord = toggleRecord
         self.toggleAuto = toggleAuto
+        self.setQuality = setQuality
         self.changeFolder = changeFolder
         self.openRecordings = openRecordings
     }
@@ -36,11 +38,12 @@ private final class Arguments {
 private struct State: Equatable {
     var isEnabled: Bool
     var isAutoEnabled: Bool
+    var videoQuality: CallRecordingVideoQuality
     var folder: String?
     var recordingCount: Int
 
     static func stored(recordingCount: Int) -> State {
-        return State(isEnabled: NovagramCallRecordingSettings.isStoredEnabled, isAutoEnabled: NovagramCallRecordingSettings.isAutoStored, folder: NovagramCallRecordingSettings.folderDisplayPath, recordingCount: recordingCount)
+        return State(isEnabled: NovagramCallRecordingSettings.isStoredEnabled, isAutoEnabled: NovagramCallRecordingSettings.isAutoStored, videoQuality: NovagramCallRecordingSettings.videoQuality, folder: NovagramCallRecordingSettings.folderDisplayPath, recordingCount: recordingCount)
     }
 }
 
@@ -48,6 +51,9 @@ private let _id_record = InputDataIdentifier("_id_call_recording_record")
 private let _id_auto = InputDataIdentifier("_id_call_recording_auto")
 private let _id_folder = InputDataIdentifier("_id_call_recording_folder")
 private let _id_recordings = InputDataIdentifier("_id_call_recording_recordings")
+private func _id_quality(_ quality: CallRecordingVideoQuality) -> InputDataIdentifier {
+    return InputDataIdentifier("_id_call_recording_quality_\(quality.rawValue)")
+}
 
 private func entries(_ state: State, strings: CallRecordingSettingsStrings, l10n: NovagramL10n, arguments: Arguments) -> [InputDataEntry] {
     var entries: [InputDataEntry] = []
@@ -76,6 +82,15 @@ private func entries(_ state: State, strings: CallRecordingSettingsStrings, l10n
         section()
         row(_id_auto, strings.autoTitle, .switchable(state.isAutoEnabled), { arguments.toggleAuto(!state.isAutoEnabled) })
         text(strings.autoFooter, .textBottomItem)
+
+        section()
+        text(strings.qualityHeader, .textTopItem)
+        let qualities = CallRecordingVideoQuality.allCases
+        for quality in qualities {
+            entries.append(.general(sectionId: sectionId, index: index, value: .none, error: nil, identifier: _id_quality(quality), data: .init(name: strings.qualityTitle(quality), color: theme.colors.text, type: .selectable(state.videoQuality == quality), viewType: bestGeneralViewType(qualities, for: quality), action: { arguments.setQuality(quality) })))
+            index += 1
+        }
+        text(strings.qualityFooter, .textBottomItem)
 
         section()
         row(_id_folder, l10n.callRecording_saveTo, .nextContext(state.folder ?? l10n.callRecording_askEveryTime), arguments.changeFolder)
@@ -138,6 +153,9 @@ public func NovagramCallRecordingSettingsController(focus: NovagramCallRecording
         }
     }, toggleAuto: { value in
         NovagramCallRecordingSettings.setAutoEnabled(value)
+        settingsChanged()
+    }, setQuality: { quality in
+        NovagramCallRecordingSettings.setVideoQuality(quality)
         settingsChanged()
     }, changeFolder: {
         guard let window = getController?()?.window else {

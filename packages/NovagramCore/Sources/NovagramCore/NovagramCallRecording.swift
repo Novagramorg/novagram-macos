@@ -31,6 +31,7 @@ public final class NovagramCallRecording {
     private var isStarting = false
     private var stopWhenStarted = false
     private var isMuted = false
+    private var videoQuality = CallRecordingVideoQuality.default
     private weak var window: Window?
     private weak var autoWindow: Window?
     private var permissionAlertShown = false
@@ -230,7 +231,8 @@ public final class NovagramCallRecording {
 
     @available(macOS 14.0, *)
     private func begin(window: Window, title: String, hasVideo: Bool, micDeviceId: String?, isAuto: Bool, callId: UUID, onStarted: @escaping () -> Void) {
-        let capture = NovagramCallCapture(window: window, micDeviceId: micDeviceId, hasVideo: hasVideo)
+        videoQuality = NovagramCallRecordingSettings.videoQuality
+        let capture = NovagramCallCapture(window: window, micDeviceId: micDeviceId, hasVideo: hasVideo && videoQuality.recordsVideo)
         capture.onStreamStop = { [weak self, weak capture] in
             guard let self, let capture, self.capture === capture, !self.isStarting else {
                 return
@@ -311,9 +313,11 @@ public final class NovagramCallRecording {
             self.centerDirectory = directory
         }
         let isMuted = self.isMuted
+        let encoding = CallRecordingConfiguration(quality: videoQuality)
+        let configuration = CallRecordingConfiguration(videoSize: NovagramCallRecording.videoSize, framesPerSecond: encoding.framesPerSecond, videoBitRate: encoding.videoBitRate)
         do {
             let session = try MainActor.assumeIsolated {
-                try center.start(callId: callId, peerName: peerName, onDetach: { [weak self] in
+                try center.start(callId: callId, peerName: peerName, configuration: configuration, onDetach: { [weak self] in
                     self?.sessionDidDetach(callId: callId)
                 })
             }
@@ -385,7 +389,7 @@ public final class NovagramCallRecording {
     }
 
     private func noteVideoUpgrade(hasVideo: Bool) {
-        guard #available(macOS 14.0, *), hasVideo, isRecording, let capture = capture as? NovagramCallCapture else {
+        guard #available(macOS 14.0, *), hasVideo, videoQuality.recordsVideo, isRecording, let capture = capture as? NovagramCallCapture else {
             return
         }
         capture.enableVideo()
