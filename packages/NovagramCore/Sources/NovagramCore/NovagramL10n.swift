@@ -1265,15 +1265,15 @@ public struct NovagramL10n {
         pick(en: "Show the Novagram ads panel", uz: "Novagram reklama panelini ko'rsatish", ru: "Показывать рекламную панель Novagram")
     }
 
-    public var developer_jobSearchTitle: String {
-        pick(en: "Job search", uz: "Ish qidirish", ru: "Поиск работы")
+    public var developer_superSearchTitle: String {
+        pick(en: "Super search", uz: "Super qidiruv", ru: "Суперпоиск")
     }
 
-    public var developer_jobSearchTip: String {
+    public var developer_superSearchTip: String {
         pick(
-            en: "The Jobs tab in search, the Job search page and job alerts",
-            uz: "Qidiruvdagi Ish tabi, Ish qidirish sahifasi va ish bildirishnomalari",
-            ru: "Вкладка «Работа» в поиске, страница поиска работы и уведомления о вакансиях"
+            en: "The Super search tab in search and the Super search page",
+            uz: "Qidiruvdagi Super qidiruv tabi va Super qidiruv sahifasi",
+            ru: "Вкладка «Суперпоиск» в поиске и страница суперпоиска"
         )
     }
 

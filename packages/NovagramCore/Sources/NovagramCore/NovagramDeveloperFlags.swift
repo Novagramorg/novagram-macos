@@ -22,15 +22,15 @@ public enum NovagramDeveloperFlags {
     private static let stickerPackSaveKey = "novagram_sticker_pack_save"
     // Read by TelegramCore too (fork-patches/telegramcore/NovagramAdEvents.swift): keep the name in sync.
     private static let adEventsOffKey = "novagram_ads_events_off"
-    public static let jobSearchKey = "novagram_dev_job_search"
+    public static let superSearchKey = "novagram_dev_job_search"
 
-    public static var isJobSearchEnabled: Bool {
-        get { return self.value(forKey: self.jobSearchKey) }
-        set { self.setValue(newValue, forKey: self.jobSearchKey) }
+    public static var isSuperSearchEnabled: Bool {
+        get { return self.value(forKey: self.superSearchKey) }
+        set { self.setValue(newValue, forKey: self.superSearchKey) }
     }
 
-    public static var jobSearchSignal: Signal<Bool, NoError> {
-        return self.signal { self.isJobSearchEnabled }
+    public static var superSearchSignal: Signal<Bool, NoError> {
+        return self.signal { self.isSuperSearchEnabled }
     }
 
     /// Show the currency rates row (Settings, under Analytics).
@@ -112,7 +112,7 @@ public enum NovagramDeveloperRole: String {
         case currencyRatesView
         case adsPanel
         case stickerPackSave
-        case jobSearch
+        case superSearch
         case callDataSaving
     }
 
@@ -128,7 +128,7 @@ public enum NovagramDeveloperRole: String {
             switch item {
             case .adEventsOff, .adsPanel:
                 return true
-            case .removeAllAds, .currencyRatesView, .stickerPackSave, .jobSearch, .callDataSaving:
+            case .removeAllAds, .currencyRatesView, .stickerPackSave, .superSearch, .callDataSaving:
                 return false
             }
         }
@@ -170,8 +170,8 @@ public enum NovagramDeveloperRole: String {
         if !role.canUse(.stickerPackSave) && NovagramDeveloperFlags.isStickerPackSaveEnabled {
             NovagramDeveloperFlags.isStickerPackSaveEnabled = false
         }
-        if !role.canUse(.jobSearch) && NovagramDeveloperFlags.isJobSearchEnabled {
-            NovagramDeveloperFlags.isJobSearchEnabled = false
+        if !role.canUse(.superSearch) && NovagramDeveloperFlags.isSuperSearchEnabled {
+            NovagramDeveloperFlags.isSuperSearchEnabled = false
         }
         if !role.canUse(.callDataSaving) {
             NovagramCallRecordingSettings.setDataSavingEnabled(false)

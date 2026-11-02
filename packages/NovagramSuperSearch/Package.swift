@@ -17,10 +17,10 @@ let deps: [(String, String)] = [
 ]
 
 let package = Package(
-    name: "NovagramJobSearch",
+    name: "NovagramSuperSearch",
     platforms: [.macOS(.v10_13)],
     products: [
-        .library(name: "NovagramJobSearch", targets: ["NovagramJobSearch"]),
+        .library(name: "NovagramSuperSearch", targets: ["NovagramSuperSearch"]),
     ],
     dependencies: [
         .package(name: "SSignalKit", path: "../../submodules/telegram-ios/submodules/SSignalKit"),
@@ -29,12 +29,12 @@ let package = Package(
     ] + deps.map { .package(name: $0.0, path: $0.1) },
     targets: [
         .target(
-            name: "NovagramJobSearch",
+            name: "NovagramSuperSearch",
             dependencies: [
                 .product(name: "SwiftSignalKit", package: "SSignalKit", condition: nil),
                 .product(name: "TelegramCore", package: "TelegramCore", condition: nil),
                 .product(name: "Postbox", package: "Postbox", condition: nil),
             ] + deps.map { .product(name: $0.0, package: $0.0, condition: nil) },
-            path: "Sources/NovagramJobSearch"),
+            path: "Sources/NovagramSuperSearch"),
     ]
 )

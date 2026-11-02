@@ -42,9 +42,9 @@ struct NovagramSettingsLink {
 }
 
 func openNovagramSettings(context: AccountContext, feature: String?) {
-    if feature == "jobs" {
-        if NovagramJobSearchAvailability.isEnabled {
-            NovagramHooks.shared.openJobSearch(context, nil)
+    if let feature, ["super-search", "super_search", "jobs"].contains(feature) {
+        if NovagramSuperSearchAvailability.isEnabled {
+            NovagramHooks.shared.openSuperSearch(context)
         }
         return
     }

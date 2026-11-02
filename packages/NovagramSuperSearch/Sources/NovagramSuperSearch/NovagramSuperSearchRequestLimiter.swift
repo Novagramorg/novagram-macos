@@ -1,19 +1,19 @@
 import Foundation
 import SwiftSignalKit
 
-private final class NovagramJobRequestSlot {
+private final class NovagramSuperSearchRequestSlot {
     var started = false
     var released = false
     var cancelled = false
 }
 
-final class NovagramJobRequestLimiter {
-    static let shared = NovagramJobRequestLimiter()
+final class NovagramSuperSearchRequestLimiter {
+    static let shared = NovagramSuperSearchRequestLimiter()
     static let maxConcurrentRequests = 6
 
     private let queue = Queue()
     private var active = 0
-    private var waiting: [(slot: NovagramJobRequestSlot, start: () -> Void)] = []
+    private var waiting: [(slot: NovagramSuperSearchRequestSlot, start: () -> Void)] = []
 
     func limited<T>(_ signal: Signal<T, NoError>) -> Signal<T, NoError> {
         return Signal { [weak self] subscriber in
@@ -21,7 +21,7 @@ final class NovagramJobRequestLimiter {
                 return EmptyDisposable
             }
             let disposable = MetaDisposable()
-            let slot = NovagramJobRequestSlot()
+            let slot = NovagramSuperSearchRequestSlot()
             let queue = self.queue
             queue.async {
                 guard !slot.cancelled else {
@@ -48,8 +48,8 @@ final class NovagramJobRequestLimiter {
         }
     }
 
-    private func enqueue(_ slot: NovagramJobRequestSlot, start: @escaping () -> Void) {
-        if active < NovagramJobRequestLimiter.maxConcurrentRequests {
+    private func enqueue(_ slot: NovagramSuperSearchRequestSlot, start: @escaping () -> Void) {
+        if active < NovagramSuperSearchRequestLimiter.maxConcurrentRequests {
             slot.started = true
             active += 1
             start()
@@ -58,7 +58,7 @@ final class NovagramJobRequestLimiter {
         }
     }
 
-    private func release(_ slot: NovagramJobRequestSlot) {
+    private func release(_ slot: NovagramSuperSearchRequestSlot) {
         guard slot.started else {
             waiting.removeAll(where: { $0.slot === slot })
             return
@@ -68,7 +68,7 @@ final class NovagramJobRequestLimiter {
         }
         slot.released = true
         active -= 1
-        while active < NovagramJobRequestLimiter.maxConcurrentRequests, !waiting.isEmpty {
+        while active < NovagramSuperSearchRequestLimiter.maxConcurrentRequests, !waiting.isEmpty {
             let next = waiting.removeFirst()
             guard !next.slot.cancelled else {
                 continue

@@ -7,7 +7,7 @@ import PrivateCallScreen
 import CallsUI
 import InAppSettings
 import SwiftSignalKit
-import NovagramJobSearch
+import NovagramSuperSearch
 import TranslateUI
 import ApiCredentials
 
@@ -28,7 +28,7 @@ func installNovagramHooks() {
     }
     hooks.accountWillLogOut = { accountId in
         NovagramAnalyticsManager.shared.accountWillLogOut(accountId: accountId)
-        novagramJobSearchClear(accountRecordId: accountId)
+        novagramSearchDataClear(accountRecordId: accountId)
     }
     hooks.openRecentActions = { context, peer in
         guard let context = context as? AccountContext else {
@@ -36,23 +36,17 @@ func installNovagramHooks() {
         }
         context.bindings.rootNavigation().push(ChannelEventLogController(context, peer: EnginePeer(peer)))
     }
-    hooks.openJobSearch = { context, savedSearchId in
+    hooks.openSuperSearch = { context in
         guard let context = context as? AccountContext else {
             return
         }
-        context.bindings.rootNavigation().push(NovagramJobSearchController(context: context, savedSearchId: savedSearchId))
-    }
-    hooks.jobSearchUnseenCount = { context in
-        return NovagramJobAlertMonitor.shared.unseenCount(account: NovagramJobSearchEngine.account(context))
-    }
-    hooks.handleNotificationClick = { userInfo in
-        return NovagramJobAlertMonitor.shared.handleNotificationClick(userInfo)
+        context.bindings.rootNavigation().push(NovagramSuperSearchController(context: context))
     }
     NovagramHooks.install(hooks)
     if let directory = ApiEnvironment.containerURL?.appendingPathComponent("novagram-archive", isDirectory: true) {
         NovagramMessageArchive.shared.configure(directory: directory)
     }
-    installNovagramJobSearchHooks()
+    installNovagramSuperSearchHooks()
     installNovagramSettingsHooks()
     installNovagramAdsHooks()
     installNovagramCallRecordHooks()
@@ -94,29 +88,40 @@ private func installNovagramCallRecordHooks() {
     }
 }
 
-private func installNovagramJobSearchHooks() {
-    var hooks = NovagramJobSearchHooks()
+private func installNovagramSuperSearchHooks() {
+    var hooks = NovagramSuperSearchHooks()
     hooks.openMessage = { context, message in
         guard let context = context as? AccountContext else {
             return
         }
         #if DEBUG
-        Logger.shared.log("NovagramJobSearch", "open post \(message.id)")
+        Logger.shared.log("NovagramSuperSearch", "open message \(message.id)")
         #endif
         context.engine.messages.ensureMessagesAreLocallyAvailable(messages: [EngineMessage(message)])
-        navigateToChat(navigation: context.bindings.rootNavigation(), context: context, chatLocation: .peer(message.id.peerId), focusTarget: .init(messageId: message.id))
+        novagramSuperSearchOpen(context: context, peerId: message.id.peerId, messageId: message.id)
+    }
+    hooks.openMessageId = { context, messageId in
+        guard let context = context as? AccountContext else {
+            return
+        }
+        novagramSuperSearchOpen(context: context, peerId: messageId.peerId, messageId: messageId)
     }
     hooks.openPeer = { context, peerId in
         guard let context = context as? AccountContext else {
             return
         }
-        navigateToChat(navigation: context.bindings.rootNavigation(), context: context, chatLocation: .peer(peerId))
+        novagramSuperSearchOpen(context: context, peerId: peerId, messageId: nil)
     }
-    NovagramJobSearchHooks.install(hooks)
+    NovagramSuperSearchHooks.install(hooks)
 }
 
-func novagramJobSearchDidStart(context: AccountContext) {
-    NovagramJobAlertMonitor.shared.start(context: context)
+// A locked chat asks for its PIN first, as when it is opened from the chat list.
+private func novagramSuperSearchOpen(context: AccountContext, peerId: PeerId, messageId: MessageId?) {
+    let reopen = { novagramSuperSearchOpen(context: context, peerId: peerId, messageId: messageId) }
+    if NovagramChatPincode.requiresUnlock(peerId: peerId, window: context.window, reopen: reopen) {
+        return
+    }
+    navigateToChat(navigation: context.bindings.rootNavigation(), context: context, chatLocation: .peer(peerId), focusTarget: ChatFocusTarget(messageId: messageId))
 }
 
 func novagramMessageArchiveDidStart(context: AccountContext) {
@@ -158,14 +163,9 @@ private func novagramReviewPromptIsBusy(_ context: AccountContext) -> Bool {
         || hasModals(context.window)
 }
 
-func novagramJobSearchDidStop(context: AccountContext) {
-    NovagramJobAlertMonitor.shared.stop(context: context)
-}
-
-func novagramJobSearchClear(accountRecordId: AccountRecordId) {
-    NovagramJobSearchData.clear(accountRecordId: accountRecordId.int64)
+func novagramSearchDataClear(accountRecordId: AccountRecordId) {
+    NovagramSuperSearchData.clear(accountRecordId: accountRecordId.int64)
     NovagramMessageArchive.shared.clear(accountRecordId: accountRecordId.int64)
-    NovagramJobAlertMonitor.shared.clearUnseen(accountRecordId: accountRecordId.int64)
 }
 
 private func installNovagramCallExtrasHooks() {

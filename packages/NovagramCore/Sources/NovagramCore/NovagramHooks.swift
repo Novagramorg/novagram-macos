@@ -14,9 +14,7 @@ public struct NovagramHooks {
     public var accountWillLogOut: (_ accountId: AccountRecordId) -> Void = { _ in }
     // Chat list menu → Recent actions (admin log) of a channel or supergroup.
     public var openRecentActions: (_ context: any AccountContextProtocol, _ peer: Peer) -> Void = { _, _ in }
-    public var openJobSearch: (_ context: any AccountContextProtocol, _ savedSearchId: String?) -> Void = { _, _ in }
-    public var jobSearchUnseenCount: (_ context: any AccountContextProtocol) -> Signal<Int, NoError> = { _ in .single(0) }
-    public var handleNotificationClick: (_ userInfo: [AnyHashable: Any]) -> Bool = { _ in false }
+    public var openSuperSearch: (_ context: any AccountContextProtocol) -> Void = { _ in }
 
     public init() {}
 

@@ -322,7 +322,7 @@ final class SharedNotificationManager : NSObject, NSUserNotificationCenterDelega
         let accountManager = self.accountManager
         let signal = combineLatest(self.activeAccounts.accounts.map { logoutFromAccount(id: $0.0, accountManager: self.accountManager, alreadyLoggedOutRemotely: false) }) |> deliverOnMainQueue
         appEncryption.remove()
-        self.activeAccounts.accounts.forEach { novagramJobSearchClear(accountRecordId: $0.0) } // Novagram
+        self.activeAccounts.accounts.forEach { novagramSearchDataClear(accountRecordId: $0.0) } // Novagram
         if #available(macOS 10.15, *) {
             _ = try? resetWalletLocalSecrets()
         }

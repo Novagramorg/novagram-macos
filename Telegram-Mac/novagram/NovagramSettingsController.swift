@@ -130,7 +130,7 @@ private struct NovagramSettingsState: Equatable {
     var currencyRatesView: Bool = false
     var adsPanel: Bool = false
     var stickerPackSave: Bool = false
-    var devJobSearch: Bool = false
+    var devSuperSearch: Bool = false
     var adEventsOff: Bool = false
     var callRecording: Bool = false
     var callDataSaving: Bool = false
@@ -226,7 +226,7 @@ private enum NovagramEntryId: Hashable {
     case protectionChatLock, protectionProxy, protectionForeign, protectionAutoDownload, protectionFooter
     case appearanceAccent, appearanceFooter
     case remindersUnread, remindersTime, remindersSound, autoApproveJoin, autoUnlimitedFolders, actionSuggestedFolders, autoFoldersPrompt, actionAdminFolder, autoFolderStyle, autoChannelHistory, autoStoryUnlock, autoTranslateChats, actionShareLink, autoFooter
-    case adsRemoveAll, devAdEventsOff, devCurrencyRates, devAdsPanel, devStickerPackSave, devJobSearch, devFooter
+    case adsRemoveAll, devAdEventsOff, devCurrencyRates, devAdsPanel, devStickerPackSave, devSuperSearch, devFooter
     case callRecording, callDataSaving
 }
 
@@ -283,7 +283,7 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .devCurrencyRates:         map = ("dollarsign.circle.fill", .green)
     case .devAdsPanel:              map = ("rectangle.stack.badge.person.crop.fill", .purple)
     case .devStickerPackSave:       map = ("square.and.arrow.down.on.square.fill", .orange)
-    case .devJobSearch:             map = ("briefcase.fill", .orange)
+    case .devSuperSearch:           map = ("magnifyingglass", .orange)
     case .devAdEventsOff:           map = ("eye.slash.circle.fill", .red)
     case .callRecording:            map = ("record.circle", .red)
     case .callDataSaving:           map = ("antenna.radiowaves.left.and.right", .green)
@@ -484,8 +484,8 @@ private enum NovagramEntry: Comparable, Identifiable {
                         NovagramDeveloperFlags.isStickerPackSaveEnabled = !value
                     case .devAdEventsOff:
                         NovagramDeveloperFlags.isAdEventsOff = !value
-                    case .devJobSearch:
-                        NovagramDeveloperFlags.isJobSearchEnabled = !value
+                    case .devSuperSearch:
+                        NovagramDeveloperFlags.isSuperSearchEnabled = !value
                     default:
                         break
                     }
@@ -615,7 +615,7 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
             (.currencyRatesView, { .developerToggle($0, .devCurrencyRates, l10n.developer_currencyRatesTitle, l10n.developer_currencyRatesTip, state.currencyRatesView, $1) }),
             (.adsPanel, { .developerToggle($0, .devAdsPanel, l10n.developer_adsPanelTitle, l10n.developer_adsPanelTip, state.adsPanel, $1) }),
             (.stickerPackSave, { .developerToggle($0, .devStickerPackSave, l10n.developer_stickerPackSaveTitle, l10n.developer_stickerPackSaveTip, state.stickerPackSave, $1) }),
-            (.jobSearch, { .developerToggle($0, .devJobSearch, l10n.developer_jobSearchTitle, l10n.developer_jobSearchTip, state.devJobSearch, $1) }),
+            (.superSearch, { .developerToggle($0, .devSuperSearch, l10n.developer_superSearchTitle, l10n.developer_superSearchTip, state.devSuperSearch, $1) }),
             (.callDataSaving, { .toggle($0, .callDataSaving, l10n.callDataSaving_title, l10n.callDataSaving_subtitle, state.callDataSaving, $1, NovagramDefaultsKey.callDataSaving) })
         ]
         let visibleRows = developerRows.filter { state.developerRole.canUse($0.item) }
@@ -860,14 +860,14 @@ class NovagramSettingsController: TableViewController {
             }
         }))
 
-        developerDisposable.set(combineLatest(NovagramDeveloperFlags.currencyRatesViewSignal, NovagramDeveloperFlags.adsPanelSignal, NovagramDeveloperFlags.stickerPackSaveSignal, NovagramDeveloperFlags.adEventsOffSignal, NovagramDeveloperRole.currentSignal, NovagramDeveloperFlags.jobSearchSignal, NovagramCallRecordingSettings.enabledSignal).start(next: { currencyRatesView, adsPanel, stickerPackSave, adEventsOff, developerRole, devJobSearch, _ in
+        developerDisposable.set(combineLatest(NovagramDeveloperFlags.currencyRatesViewSignal, NovagramDeveloperFlags.adsPanelSignal, NovagramDeveloperFlags.stickerPackSaveSignal, NovagramDeveloperFlags.adEventsOffSignal, NovagramDeveloperRole.currentSignal, NovagramDeveloperFlags.superSearchSignal, NovagramCallRecordingSettings.enabledSignal).start(next: { currencyRatesView, adsPanel, stickerPackSave, adEventsOff, developerRole, devSuperSearch, _ in
             updateState { state in
                 state.currencyRatesView = currencyRatesView
                 state.adsPanel = adsPanel
                 state.stickerPackSave = stickerPackSave
                 state.adEventsOff = adEventsOff
                 state.developerRole = developerRole
-                state.devJobSearch = devJobSearch
+                state.devSuperSearch = devSuperSearch
                 state.callRecording = NovagramCallRecordingSettings.isStoredEnabled
                 state.callDataSaving = NovagramCallRecordingSettings.isDataSavingEnabled
             }

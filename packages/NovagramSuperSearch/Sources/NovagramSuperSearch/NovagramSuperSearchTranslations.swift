@@ -3,9 +3,9 @@ import SwiftSignalKit
 import TelegramCore
 import NovagramSearchKit
 
-enum NovagramJobTranslations {
+enum NovagramSuperSearchTranslations {
     private static let maxCachedQueries = 200
-    private static let timeoutSeconds: Double = 8
+    private static let timeoutSeconds: Double = 3
     private static let cache = Atomic<[String: String]>(value: [:])
 
     static func fetch(engine: TelegramEngine, query: String, needed: [NovagramSearchLanguage]) -> Signal<[NovagramSearchLanguage: String], NoError> {
@@ -33,7 +33,7 @@ enum NovagramJobTranslations {
                 |> `catch` { _ -> Signal<String?, NoError> in
                     return .single(nil)
                 }
-            let limited = NovagramJobRequestLimiter.shared.limited(request |> take(1))
+            let limited = NovagramSuperSearchRequestLimiter.shared.limited(request |> take(1))
             return (limited |> map { (language, $0) } |> then(.single((language, nil)))) |> take(1) |> timeout(timeoutSeconds, queue: Queue.concurrentDefaultQueue(), alternate: .single((language, nil)))
         }
         return combineLatest(signals) |> map { pairs in
