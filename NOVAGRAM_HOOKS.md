@@ -890,3 +890,13 @@ iOS parity with CallRecordingKit `e3637d7` (pin d4291aec8 -> e3637d7): the share
 - Settings page: a VIDEO QUALITY block after the auto switch, only while Call recording is on: `qualityHeader`, three checkmark rows `qualityTitle(_:)` for `CallRecordingVideoQuality.allCases`, `qualityFooter`; the choice applies from the next recording.
 
 Manual repro: Settings > Chat > Call recording on > pick Audio only > record a video call > the file is `.m4a`; pick High > `.mp4` at 30 fps; the choice survives a relaunch and matches iOS.
+
+## Mac build number 283358 (2026-11-02)
+
+| File | Line | Change |
+| --- | --- | --- |
+| `Telegram-Mac/Info.plist` | `CFBundleVersion` | `283357` -> `283358` (`<!-- Novagram -->`) |
+| `TelegramShare/Info.plist` | `CFBundleVersion` | `283357` -> `283358` (`<!-- Novagram -->`) |
+
+The Mac App Store needs a build number higher than the last uploaded one (2.0.16 went up as 283357 on 2026-10-28), and upstream had not bumped it. On an upstream merge that changes these lines, keep the higher number. The store version (13.1.1) still goes only on the command line (`NOVAGRAM_VERSION`).
+
