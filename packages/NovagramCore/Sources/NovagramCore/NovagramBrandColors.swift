@@ -31,15 +31,15 @@ public enum NovagramBrandColors {
     // MARK: - Default accent of each built-in theme
     // Keys are TelegramBuiltinTheme raw values. One line per theme: change a value to recolor that theme.
     public static let themeAccents: [String: NSColor] = [
-        "day": brand500,
-        "dayClassic": brand500,
+        "day": brand600,
+        "dayClassic": brand600,
         "dark": brand500,
         "nightAccent": brand500,
         "system": brand500
     ]
 
     // When true, the Day accent also paints the Day outgoing bubbles; when false Day keeps its own bubbles.
-    public static let dayOutgoingBubblesBranded = false
+    public static let dayOutgoingBubblesBranded = true
 
     private static let dayBubbleBottomBrightness: CGFloat = 0.9
 

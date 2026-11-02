@@ -1061,7 +1061,10 @@ enum NovagramUnlimitedPins {
 enum NovagramWhiteThemeAccent {
     private static let lightThemes: [TelegramBuiltinTheme] = [.day, .dayClassic]
     private static let builtinThemes: [TelegramBuiltinTheme] = [.day, .dayClassic, .dark, .nightAccent, .system]
-    private static let brandAccentMigrationKey = "novagram_brand_accent_v1"
+    private static let brandAccentMigrationKey = "novagram_brand_accent_v2"
+    // v1 saved brand500 on the light themes too; v2 moves them to the light theme value of the table.
+    private static let firstBrandAccentMigrationKey = "novagram_brand_accent_v1"
+    private static let firstBrandAccent: UInt32 = 0x0a9bf5
     // The old Novagram build had red built-in palettes, so a red accent saved there is not a real choice.
     private static let oldBuildRedAccents: Set<UInt32> = [0xb40000, 0xff3b30]
 
@@ -1095,6 +1098,9 @@ enum NovagramWhiteThemeAccent {
         _ = (updateThemeInteractivetly(accountManager: accountManager, f: { settings in
             var accents = settings.accents
             accents.removeAll(where: { $0.cloud == nil && oldBuildRedAccents.contains($0.color.accent.argb & 0x00FFFFFF) })
+            if defaults.bool(forKey: firstBrandAccentMigrationKey) {
+                accents.removeAll(where: { $0.cloud == nil && lightThemes.contains($0.name) && $0.color.messages == nil && $0.color.accent.argb & 0x00FFFFFF == firstBrandAccent })
+            }
             for name in builtinThemes where !accents.contains(where: { $0.name == name && $0.cloud == nil }) {
                 if let ours = brandAccent(for: name) {
                     accents.append(LocalAccentColor(name: name, color: ours, cloud: nil))
