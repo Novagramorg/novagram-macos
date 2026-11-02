@@ -113,7 +113,6 @@ public enum NovagramDeveloperRole: String {
         case adsPanel
         case stickerPackSave
         case jobSearch
-        case callRecording
         case callDataSaving
     }
 
@@ -129,7 +128,7 @@ public enum NovagramDeveloperRole: String {
             switch item {
             case .adEventsOff, .adsPanel:
                 return true
-            case .removeAllAds, .currencyRatesView, .stickerPackSave, .jobSearch, .callRecording, .callDataSaving:
+            case .removeAllAds, .currencyRatesView, .stickerPackSave, .jobSearch, .callDataSaving:
                 return false
             }
         }
@@ -173,10 +172,6 @@ public enum NovagramDeveloperRole: String {
         }
         if !role.canUse(.jobSearch) && NovagramDeveloperFlags.isJobSearchEnabled {
             NovagramDeveloperFlags.isJobSearchEnabled = false
-        }
-        if !role.canUse(.callRecording) {
-            NovagramCallRecordingSettings.setEnabled(false)
-            NovagramCallRecordingSettings.setAutoEnabled(false)
         }
         if !role.canUse(.callDataSaving) {
             NovagramCallRecordingSettings.setDataSavingEnabled(false)

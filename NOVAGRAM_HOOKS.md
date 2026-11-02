@@ -919,3 +919,14 @@ Telegram files (`// Novagram` lines 484 → 486):
 - `SettingsUI/AppAppearanceViewController.swift` (1): `accentList = novagramAccentList(accentList, palette: appearance.presentation.colors, cloudTheme: appearance.presentation.cloudTheme) // Novagram`, after `var accentList = …`.
 
 Manual repro: `defaults delete <pro_messager suite> novagram_brand_accent_v1`, launch → the current built-in theme turns brand blue, turn "Brand accent in light theme" On and Off → Day stays brand blue; switch Day → Dark → Night → System: brand blue everywhere; Appearance picker shows the brand color first; pick another accent, relaunch → it stays.
+
+## Call recording is public (2026-11-02)
+
+The manager approved call recording for both apps (owner, via the iOS session). It leaves the hidden Developer section and works for every user and every role. No Telegram file changed (`// Novagram` lines: 486 before, 486 after).
+
+- `Telegram-Mac/novagram/NovagramSettingsController.swift`: the single "Call recording" row (value On / Off, opens `NovagramCallRecordingSettingsController`) is the last row of the Chat section, after "Forward Without Name" (same place as iOS), on macOS 14+ (`NovagramCallRecordingSettings.isSupported`). It is gone from the Developer rows.
+- `NovagramCore/NovagramDeveloperFlags.swift`: `NovagramDeveloperRole.Switch.callRecording` is removed; a director login no longer turns `novagram_call_recording` / `novagram_call_recording_auto` off.
+- Slugs `call-recording`, `call-recording-auto`, `call-recording-folder` and `call-recordings` (`novagramSettingsSlugAllowed`) need only macOS 14+, no Developer reveal and no role.
+- Unchanged: the keys and their default (off), the consent alert, the chat notice, the REC badge, the recordings list. "Use less data for calls" (`novagram_call_data_saving`) stays in the Developer section, still unapproved.
+
+Manual repro: with the Developer section hidden, Novagram Settings → Chat → last row "Call recording" (Off) → the page; turn it on → folder picker; `tg://settings/novagrampro/call-recording` highlights the row; a director login keeps it on.

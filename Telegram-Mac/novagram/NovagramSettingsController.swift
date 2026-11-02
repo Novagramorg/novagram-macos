@@ -531,7 +531,13 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     entries.append(.toggle(next(), .chatGhostActive, l10n.settings_chat_ghostActive_title, l10n.settings_chat_ghostActive_subtitle, state.ghostModeActive, .innerItem, NovagramDefaultsKey.ghostModeActive))
     entries.append(.toggle(next(), .chatGhost, l10n.settings_chat_ghost_title, nil, state.showGhostMode, .innerItem, NovagramDefaultsKey.showGhostMode))
     entries.append(.toggle(next(), .chatRoundVideo, l10n.settings_chat_roundVideo_title, l10n.settings_chat_roundVideo_subtitle, state.roundVideoFromGallery, .innerItem, NovagramDefaultsKey.roundVideoFromGallery))
-    entries.append(.toggle(next(), .chatForwardHideNames, l10n.settings_chat_forwardHideNames_title, l10n.settings_chat_forwardHideNames_subtitle, state.forwardHideNames, .lastItem, NovagramDefaultsKey.forwardHideNames))
+    // Call recording is approved for every user (2026-11-02): its row ends the Chat section and opens its own page.
+    let showsCallRecording = NovagramCallRecordingSettings.isSupported
+    entries.append(.toggle(next(), .chatForwardHideNames, l10n.settings_chat_forwardHideNames_title, l10n.settings_chat_forwardHideNames_subtitle, state.forwardHideNames, showsCallRecording ? .innerItem : .lastItem, NovagramDefaultsKey.forwardHideNames))
+    if showsCallRecording {
+        let callRecordingRow = NovagramCallRecordingSettings.pageRowTexts(isOn: state.callRecording)
+        entries.append(.disclosurePlaceholder(next(), .callRecording, callRecordingRow.title, callRecordingRow.value, .lastItem, "call_recording_page"))
+    }
     entries.append(.footer(next(), .chatFooter, l10n.settings_chat_footer))
 
     // ─── MESSAGES ───
@@ -603,7 +609,7 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     if state.adsRevealed {
         entries.append(.section(sectionId)); sectionId += 1
         entries.append(.header(next(), .header(7), l10n.developer_sectionTitle))
-        var developerRows: [(item: NovagramDeveloperRole.Switch, entry: (Int, GeneralViewType) -> NovagramEntry)] = [
+        let developerRows: [(item: NovagramDeveloperRole.Switch, entry: (Int, GeneralViewType) -> NovagramEntry)] = [
             (.removeAllAds, { .adsToggle($0, .adsRemoveAll, NovagramAdsGate.toggleTitle, l10n.developer_removeAdsTip, !state.showAds, $1) }),
             (.adEventsOff, { .developerToggle($0, .devAdEventsOff, l10n.developer_adEventsOffTitle, l10n.developer_adEventsOffTip, state.adEventsOff, $1) }),
             (.currencyRatesView, { .developerToggle($0, .devCurrencyRates, l10n.developer_currencyRatesTitle, l10n.developer_currencyRatesTip, state.currencyRatesView, $1) }),
@@ -612,10 +618,6 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
             (.jobSearch, { .developerToggle($0, .devJobSearch, l10n.developer_jobSearchTitle, l10n.developer_jobSearchTip, state.devJobSearch, $1) }),
             (.callDataSaving, { .toggle($0, .callDataSaving, l10n.callDataSaving_title, l10n.callDataSaving_subtitle, state.callDataSaving, $1, NovagramDefaultsKey.callDataSaving) })
         ]
-        if NovagramCallRecordingSettings.isSupported {
-            let callRecordingRow = NovagramCallRecordingSettings.pageRowTexts(isOn: state.callRecording)
-            developerRows.append((.callRecording, { .disclosurePlaceholder($0, .callRecording, callRecordingRow.title, callRecordingRow.value, $1, "call_recording_page") }))
-        }
         let visibleRows = developerRows.filter { state.developerRole.canUse($0.item) }
         for (index, row) in visibleRows.enumerated() {
             entries.append(row.entry(next(), bestGeneralViewType(visibleRows, for: index)))
@@ -971,7 +973,7 @@ let novagramCallRecordingsSlug = "call-recordings"
 func novagramSettingsSlugAllowed(_ slug: String) -> Bool {
     let role = NovagramDeveloperRole.current
     if novagramCallRecordingSettingsSlugs.contains(slug) || slug == novagramCallRecordingsSlug {
-        return NovagramAdsGate.isRevealed && role.canUse(.callRecording) && NovagramCallRecordingSettings.isSupported
+        return NovagramCallRecordingSettings.isSupported
     }
     if slug == novagramCallDataSavingSettingsSlug {
         return NovagramAdsGate.isRevealed && role.canUse(.callDataSaving)
