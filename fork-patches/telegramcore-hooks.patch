@@ -1,30 +1,8 @@
-diff --git a/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift b/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift
-index 3d99e59d34..380c460330 100644
---- a/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift
-+++ b/submodules/TelegramCore/Sources/State/AccountStateManagementUtils.swift
-@@ -4119,6 +4119,7 @@ func replayFinalState(
-     }
-     
-     var peerIdsWithAddedSecretMessages = Set<PeerId>()
-+    let novagramBotSession = novagramIsBotSession(transaction: transaction, accountPeerId: accountPeerId) // Novagram
-     
-     var updatedTypingActivities: [PeerActivitySpace: [PeerId: PeerInputActivity?]] = [:]
-     var updatedIncomingThreadReadStates: [PeerAndBoundThreadId: MessageId.Id] = [:]
-@@ -4435,7 +4436,9 @@ func replayFinalState(
-                     }
-                 }
-             
-+                novagramInitializeBotDMReadState(isBotSession: novagramBotSession, transaction: transaction, messages: messages, location: location) // Novagram
-                 let _ = transaction.addMessages(messages, location: location)
-+                novagramForceBotChatInclusion(isBotSession: novagramBotSession, transaction: transaction, messages: messages, location: location) // Novagram
-                 if case .UpperHistoryBlock = location {
-                     for message in messages {
-                         let chatPeerId = message.id.peerId
 diff --git a/submodules/TelegramCore/Sources/State/Holes.swift b/submodules/TelegramCore/Sources/State/Holes.swift
-index 5137a035d3..4ab0308663 100644
+index 0c03828fbe..e99d9265f0 100644
 --- a/submodules/TelegramCore/Sources/State/Holes.swift
 +++ b/submodules/TelegramCore/Sources/State/Holes.swift
-@@ -1377,7 +1377,7 @@ func fetchChatListHole(postbox: Postbox, network: Network, accountPeerId: PeerId
+@@ -1665,7 +1665,7 @@ func fetchChatListHole(postbox: Postbox, network: Network, accountPeerId: PeerId
              }
              
              if let replacePinnedItemIds = fetchedChats.pinnedItemIds {
@@ -47,10 +25,10 @@ index a7249d6fcd..628ca73c0d 100644
          })
          
 diff --git a/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift b/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift
-index efe3ecc81f..9aa2e16fce 100644
+index 479c65796d..905390817a 100644
 --- a/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift
 +++ b/submodules/TelegramCore/Sources/State/ManagedMessageHistoryHoles.swift
-@@ -192,11 +192,11 @@ private final class ManagedMessageHistoryHolesContext {
+@@ -255,11 +255,11 @@ private final class ManagedMessageHistoryHolesContext {
              let entry = pendingEntry.entry
              switch pendingEntry.entry.hole {
              case let .peer(hole):
@@ -60,8 +38,8 @@ index efe3ecc81f..9aa2e16fce 100644
 -                    source: .network(self.network),
 +                    network: self.network, // Novagram
                      postbox: self.postbox,
--                    peerInput: .direct(peerId: hole.peerId, threadId: hole.threadId), namespace: hole.namespace, direction: pendingEntry.entry.direction, space: pendingEntry.entry.space, count: pendingEntry.entry.count)
-+                    hole: hole, direction: pendingEntry.entry.direction, space: pendingEntry.entry.space, count: pendingEntry.entry.count) // Novagram
+-                    peerInput: .direct(peerId: hole.peerId, threadId: hole.threadId), namespace: hole.namespace, direction: pendingEntry.entry.direction, space: pendingEntry.entry.space, count: pendingEntry.entry.count, pendingReferences: self.pendingReferences)
++                    hole: hole, direction: pendingEntry.entry.direction, space: pendingEntry.entry.space, count: pendingEntry.entry.count, pendingReferences: self.pendingReferences) // Novagram
                  |> deliverOn(self.queue)).start(completed: { [weak self] in
                      guard let self = self else {
                          return
@@ -99,18 +77,44 @@ index 90b23e6167..751537f2f3 100644
                  transaction.updateCurrentPeerNotificationSettings(notificationSettings)
                  
 diff --git a/submodules/TelegramCore/Sources/State/ResetState.swift b/submodules/TelegramCore/Sources/State/ResetState.swift
-index e7f2209780..b86c8ec6c1 100644
+index deda3e04c7..3569cacece 100644
 --- a/submodules/TelegramCore/Sources/State/ResetState.swift
 +++ b/submodules/TelegramCore/Sources/State/ResetState.swift
-@@ -123,7 +123,7 @@ func _internal_resetAccountState(postbox: Postbox, network: Network, accountPeer
-                 }
-                 
-                 if let replacePinnedItemIds = fetchedChats.pinnedItemIds {
--                    transaction.setPinnedItemIds(groupId: .root, itemIds: replacePinnedItemIds.map(PinnedItemId.peer))
-+                    transaction.setPinnedItemIds(groupId: .root, itemIds: NovagramLocalPins.merged(serverItemIds: replacePinnedItemIds.map(PinnedItemId.peer), accountPeerId: accountPeerId, groupId: .root)) // Novagram
-                 }
-                 
-                 for (peerId, summary) in fetchedChats.mentionTagSummaries {
+@@ -190,7 +190,7 @@ func _internal_resetAccountState(postbox: Postbox, network: Network, accountPeer
+             }
+             
+             if let replacePinnedItemIds = fetchedChats.pinnedItemIds {
+-                transaction.setPinnedItemIds(groupId: .root, itemIds: replacePinnedItemIds.map(PinnedItemId.peer))
++                transaction.setPinnedItemIds(groupId: .root, itemIds: NovagramLocalPins.merged(serverItemIds: replacePinnedItemIds.map(PinnedItemId.peer), accountPeerId: accountPeerId, groupId: .root)) // Novagram
+             }
+             
+             for (peerId, summary) in fetchedChats.mentionTagSummaries {
+diff --git a/submodules/TelegramCore/Sources/State/Sync/StateReplay+Messages.swift b/submodules/TelegramCore/Sources/State/Sync/StateReplay+Messages.swift
+index cf1ab15d9c..6c7fa38c26 100644
+--- a/submodules/TelegramCore/Sources/State/Sync/StateReplay+Messages.swift
++++ b/submodules/TelegramCore/Sources/State/Sync/StateReplay+Messages.swift
+@@ -77,7 +77,9 @@ extension ReplayContext {
+             }
+         }
+ 
++        novagramInitializeBotDMReadState(isBotSession: novagramBotSession, transaction: transaction, messages: messages, location: location) // Novagram
+         let _ = transaction.addMessages(messages, location: location)
++        novagramForceBotChatInclusion(isBotSession: novagramBotSession, transaction: transaction, messages: messages, location: location) // Novagram
+         if case .UpperHistoryBlock = location {
+             for message in messages {
+                 let chatPeerId = message.id.peerId
+diff --git a/submodules/TelegramCore/Sources/State/Sync/StateReplay.swift b/submodules/TelegramCore/Sources/State/Sync/StateReplay.swift
+index 4ca07602e9..3ad1940830 100644
+--- a/submodules/TelegramCore/Sources/State/Sync/StateReplay.swift
++++ b/submodules/TelegramCore/Sources/State/Sync/StateReplay.swift
+@@ -214,6 +214,7 @@ final class ReplayContext {
+     // MARK: - Accumulators
+     /// Persisted by `finalize`: the secret chats whose queued encrypted messages it decrypts.
+     var peerIdsWithAddedSecretMessages = Set<PeerId>()
++    lazy var novagramBotSession: Bool = novagramIsBotSession(transaction: self.transaction, accountPeerId: self.accountPeerId) // Novagram
+     /// Event: typing activity. `finalize` adds the secret chats' typing and clears their authors'.
+     var updatedTypingActivities: [PeerActivitySpace: [PeerId: PeerInputActivity?]] = [:]
+     /// Event: each thread's highest incoming read id.
 diff --git a/submodules/TelegramCore/Sources/TelegramEngine/Messages/AdMessages.swift b/submodules/TelegramCore/Sources/TelegramEngine/Messages/AdMessages.swift
 index a8e5b04b9a..c51481974a 100644
 --- a/submodules/TelegramCore/Sources/TelegramEngine/Messages/AdMessages.swift

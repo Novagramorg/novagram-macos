@@ -234,6 +234,8 @@ Not ported: the old emerald Next button (`NovagramBrandColors.primary`), same re
 
 `fork-patches/telegramcore/NovagramBotAuthorization.swift` (13.1: `case let .authorization(authorizationData)`), `NovagramBotSession.swift`, `fork-patches/telegramcore-hooks.patch` regenerated against `release-13.1.1` (AccountStateManagementUtils, ManagedChatListHoles, ManagedMessageHistoryHoles, ManagedPendingPeerNotificationSettings, ChatListFiltering), `fork-patches/apply-telegramcore-patches.sh`.
 
+2026-11-12, upstream 13.2 (`telegram-ios` `24638bc69`): the patch was carried over with a 3-way cherry-pick, all 21 hook lines kept. Upstream split `replayFinalState` out of `AccountStateManagementUtils.swift` (file deleted) into `State/Sync/StateReplay*.swift`: the bot session flag is now `lazy var novagramBotSession` on `ReplayContext` (`StateReplay.swift`), and the two bot calls wrap `transaction.addMessages` in `applyAddMessages` (`StateReplay+Messages.swift`). `fetchMessageHistoryHole` got a `pendingReferences` parameter: `novagramManagedMessageHistoryHole` takes it and passes it on (`NovagramBotSession.swift`), `ManagedMessageHistoryHoles.swift` passes `self.pendingReferences`. Upstream now also patches `telegram-ios` itself (`scripts/telegram-ios-macos.patch`, applied by `scripts/configure_frameworks.sh` → `prepare-telegram-ios.sh`); it touches other files, both patches apply together.
+
 ### F39 strings
 
 `Telegram-Mac/novagram/NovagramSettingsController.swift`: the rows the old fork hard-coded in Uzbek (ask before send, auto-approve, suggested/admin folders, footer) now use `NovagramL10n` (en/uz/ru).
