@@ -9,7 +9,6 @@ import OpenSSLEncryption
 import BuildConfig
 import Localization
 import FoundationUtils
-import RLottie
 import PasscodeCore
 import NovagramShare // Novagram
 

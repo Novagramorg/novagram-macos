@@ -815,10 +815,16 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
         return strings().telegramPrivacyAndSecurityViewController
     }
     private let privacySettingsPromise = Promise<AccountPrivacySettings?>()
+    private let currentInfoDisposable = MetaDisposable()
 
 
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+    }
+
+    open override func readyToDetach() {
+        super.readyToDetach()
+        self.currentInfoDisposable.set(nil)
     }
 
     private let twoStepAccessConfiguration: Promise<TwoStepVeriticationAccessConfiguration?> = Promise(nil)
@@ -848,7 +854,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
 
         let settings:Signal<ProxySettings, NoError> = proxySettings(accountManager: context.sharedContext.accountManager)
 
-        let currentInfoDisposable = MetaDisposable()
+        let currentInfoDisposable = self.currentInfoDisposable
         actionsDisposable.add(currentInfoDisposable)
 
         let updateAccountTimeoutDisposable = MetaDisposable()
@@ -859,15 +865,20 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
         actionsDisposable.add(updatePasskeyDataDisposable)
         
         let privacySettingsPromise = self.privacySettingsPromise
+        let loadedPrivacySettings = privacySettingsPromise.get()
+            |> filter { $0 != nil }
+            |> take(1)
+            |> deliverOnMainQueue
+            |> filter { [weak self] _ in
+                return self?.navigationController?.controller === self && !hasModals(context.window)
+            }
 
         let arguments = PrivacyAndSecurityControllerArguments(context: context, openBlockedUsers: { [weak self] in
             if let context = self?.context {
                 pushControllerImpl(BlockedPeersViewController(context))
             }
         }, openLastSeenPrivacy: { [currentInfoDisposable] in
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .presence, current: info.presence, callSettings: nil, phoneDiscoveryEnabled: nil, globalSettings: info.globalSettings, updated: { updated, _, _, globalSettings in
@@ -888,9 +899,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
                 }
             }))
         }, openGroupsPrivacy: { [currentInfoDisposable] in
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .groupInvitations, current: info.groupInvitations, callSettings: nil, phoneDiscoveryEnabled: nil, globalSettings: info.globalSettings, updated: { updated, _, _, globalSettings in
@@ -911,9 +920,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
                 }
             }))
         }, openVoiceCallPrivacy: { [currentInfoDisposable] in
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .voiceCalls, current: info.voiceCalls, callSettings: info.voiceCallsP2P, phoneDiscoveryEnabled: nil, globalSettings: info.globalSettings, updated: { updated, p2pUpdated, _, globalSettings in
@@ -934,9 +941,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
                 }
             }))
         }, openBioPrivacy: { [currentInfoDisposable] in
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .bio, current: info.bio, callSettings: nil, phoneDiscoveryEnabled: nil, globalSettings: info.globalSettings, updated: { updated, p2pUpdated, _, globalSettings in
@@ -957,9 +962,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
                 }
             }))
         }, openBirthdayPrivacy: { [currentInfoDisposable] in
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .birthday, current: info.birthday, callSettings: nil, phoneDiscoveryEnabled: nil, globalSettings: info.globalSettings, updated: { updated, p2pUpdated, _, globalSettings in
@@ -980,9 +983,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
                 }
             }))
         }, openProfilePhotoPrivacy: { [currentInfoDisposable] in
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .profilePhoto, current: info.profilePhoto, phoneDiscoveryEnabled: nil, globalSettings: info.globalSettings, updated: { updated, _, _, globalSettings in
@@ -1003,9 +1004,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
                 }
             }))
         }, openForwardPrivacy: { [currentInfoDisposable] in
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .forwards, current: info.forwards, phoneDiscoveryEnabled: nil, globalSettings: info.globalSettings, updated: { updated, _, _, globalSettings in
@@ -1026,9 +1025,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
                 }
             }))
         }, openPhoneNumberPrivacy: { [currentInfoDisposable] in
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .phoneNumber, current: info.phoneNumber, phoneDiscoveryEnabled: info.phoneDiscoveryEnabled, updated: { updated, _, phoneDiscoveryEnabled, globalSettings in
@@ -1050,9 +1047,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
             }))
         }, openVoicePrivacy: { [currentInfoDisposable] in
         
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .voiceMessages, current: info.voiceMessages, callSettings: info.voiceCallsP2P, phoneDiscoveryEnabled: nil, globalSettings: info.globalSettings, updated: { updated, p2pUpdated, _, globalSettings in
@@ -1073,9 +1068,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
                 }
             }))
         }, openMessagesPrivacy: {
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { info in
                 if let info = info {
                     pushControllerImpl(MessagesPrivacyController(context: context, noPaidMessages: info.noPaidMessages, globalSettings: info.globalSettings, updated: { (noPaidMessages, updated) in
@@ -1192,12 +1185,10 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
                     }
                 }))
             }
-        }, setupGlobalAutoremove: { [weak self, updateAccountTimeoutDisposable] in
+        }, setupGlobalAutoremove: { [weak self, updateAccountTimeoutDisposable, currentInfoDisposable] in
             if let strongSelf = self {
-                let signal = privacySettingsPromise.get()
-                    |> take(1)
-                    |> deliverOnMainQueue
-                updateAccountTimeoutDisposable.set(signal.start(next: { [weak updateAccountTimeoutDisposable, weak strongSelf] privacySettingsValue in
+                let signal = loadedPrivacySettings
+                currentInfoDisposable.set(signal.start(next: { [weak updateAccountTimeoutDisposable, weak strongSelf] privacySettingsValue in
                     if privacySettingsValue != nil, let strongSelf = strongSelf {
 
                         let timeoutAction: (Int32, Bool) -> Void = { timeout, save in
@@ -1256,9 +1247,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
         }, toggleAutoArchive: { value in
             _ = showModalProgress(signal: context.engine.privacy.updateAccountAutoArchiveChats(value: value), for: context.window).start()
         }, openGiftsPrivacy: { [currentInfoDisposable] in
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .gifts, current: info.giftsAutoSave, callSettings: info.voiceCallsP2P, phoneDiscoveryEnabled: nil, globalSettings: info.globalSettings, updated: { updated, p2pUpdated, _, globalSettings in
@@ -1279,9 +1268,7 @@ open class PrivacyAndSecurityViewController<Context: AccountContextProtocol>: Ta
                 }
             }))
         }, openSavedMusicPrivacy: { [currentInfoDisposable] in
-            let signal = privacySettingsPromise.get()
-                |> take(1)
-                |> deliverOnMainQueue
+            let signal = loadedPrivacySettings
             currentInfoDisposable.set(signal.start(next: { [weak currentInfoDisposable] info in
                 if let info = info {
                     pushControllerImpl(SelectivePrivacySettingsController(context, kind: .savedMusic, current: info.savedMusic, callSettings: info.voiceCallsP2P, phoneDiscoveryEnabled: nil, globalSettings: info.globalSettings, updated: { updated, p2pUpdated, _, globalSettings in

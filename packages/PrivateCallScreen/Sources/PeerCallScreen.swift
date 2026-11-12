@@ -9,6 +9,7 @@ import AppKit
 import KeyboardKey
 import Localization
 import IOKit.pwr_mgt
+import AppAnalytics
 
 protocol CallViewUpdater {
     func updateState(_ state: PeerCallState, arguments: Arguments, transition: ContainedViewLayoutTransition)
@@ -424,6 +425,7 @@ public final class PeerCallScreen : ViewController {
                 CallWindowTransition.dismiss(window: self.screen, content: self.view, source: self.transitionSource, cornerRadius: CallWindowTransition.windowCornerRadius)
             }
             _ = self.enableScreenSleep()
+            Analytics.shared.screens.hide(ObjectIdentifier(self))
 
             self.onCompletion?()
             self.onCompletion = nil
@@ -437,6 +439,7 @@ public final class PeerCallScreen : ViewController {
         
         _ = disableScreenSleep()
         
+        Analytics.shared.screens.show(ObjectIdentifier(self), screen: isConference ? AnalyticsScreen.callConferenceIncoming : AnalyticsScreen.callActive)
         
         if self.presentTransition != nil {
             return

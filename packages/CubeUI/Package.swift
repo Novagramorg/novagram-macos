@@ -34,6 +34,6 @@ let package = Package(
                 .product(name: "UniqueGiftBackground", package: "UniqueGiftBackground", condition: nil),
             ],
             path: "Sources/CubeUI",
-            resources: [.process("Resources/Assets.xcassets")]), // Novagram
+            resources: [.process("Resources/Assets.xcassets")]),
     ]
 )

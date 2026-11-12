@@ -24,6 +24,7 @@ let package = Package(
         .package(name: "AlertsUI", path: "../AlertsUI"),
         .package(name: "ProxyUtils", path: "../ProxyUtils"),
         .package(name: "QRCodeUtils", path: "../QRCodeUtils"),
+        .package(name: "AppAnalytics", path: "../AppAnalytics"),
     ],
     targets: [
         .target(
@@ -44,6 +45,7 @@ let package = Package(
                 .product(name: "AlertsUI", package: "AlertsUI", condition: nil),
                 .product(name: "ProxyUtils", package: "ProxyUtils", condition: nil),
                 .product(name: "QRCodeUtils", package: "QRCodeUtils", condition: nil),
+                .product(name: "AppAnalytics", package: "AppAnalytics", condition: nil),
             ],
             path: "Sources/ProxyUI"),
     ]

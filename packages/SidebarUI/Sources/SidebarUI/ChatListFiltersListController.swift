@@ -13,6 +13,7 @@ import Postbox
 import TelegramCore
 import InAppSettings
 import TGUIKit
+import AppAnalytics
 
 
 private final class ChatListPresetArguments {
@@ -319,6 +320,7 @@ public func ChatListFiltersListController(context: any AccountContextProtocol, e
 
 
     let controller = InputDataController(dataSignal: dataSignal, title: strings().chatListFilterListTitle, removeAfterDisappear: false, hasDone: false, identifier: "filters")
+    controller.analyticsScreen = .settingsFolders
 
 
     controller.updateDatas = { data in

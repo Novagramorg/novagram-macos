@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# Novagram (fork of Telegram macOS 13.1)
+# Novagram (fork of Telegram macOS 13.2)
 
 Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted keys such as `pro_messager`, `fenix_show_ads`, `__fenix_master__` and every Apple identifier keep their old values). Team **Vipads MCHJ**, Team ID `ZDBP5RSRZF`, bundle id `uz.fenixuz.app` (share extension `uz.fenixuz.app.TelegramShare`), App Store app `id6768202244`. This repo is `~/Documents/Telegram/macOS` (it was `macOS-13` until 2026-10-27). The old fork (Telegram macOS 12.x base) was removed on 2026-10-27; its full history is in `~/Documents/Novagram-backups/macOS-old-fork-2026-10-27.bundle` (`git clone <bundle>` to read it); the port plan is `../PORT_MAP_macOS13.md`. The iOS app is `../Telegram-iOS`.
 
@@ -33,3 +33,4 @@ Brand **Novagram** (formerly Fenixuz: all code is named Novagram now; persisted 
 - `./novagram-build.sh` (Debug, real pass/fail, DerivedData `/tmp/tgmac13-dd`), `./novagram-build.sh run` launches, `./novagram-build.sh appstore` also sets `APP_STORE` in packages.
 - App Store release: `NOVAGRAM_VERSION=<the iOS version> ./novagram-publish.sh` archives with `APP_STORE`, checks the archive and exports `build/export/<name>/Novagram.pkg` for Transporter (uploads nothing). The Mac version follows iOS 1:1 and is set only on the command line, never in `project.pbxproj`.
 - Fresh clone: `git submodule update --init --recursive`, `scripts/xcode27.sh apply`, `./fork-patches/apply-telegramcore-patches.sh`, `sh scripts/configure_frameworks.sh`, `scripts/novagram-local.sh hide`, then `./novagram-build.sh`.
+Follow the [Telegram-iOS patch staging rule](AGENTS.md#commit-checks) before committing.

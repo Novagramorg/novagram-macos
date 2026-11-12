@@ -9,6 +9,7 @@ import Postbox
 import SwiftSignalKit
 import Sparkle
 import CrashRecoveryUI
+import AppAnalytics
 
 
 
@@ -258,7 +259,7 @@ func AppUpdateViewController() -> InputDataController {
         return .none
     }, afterDisappear: {
 
-    }, hasDone: false, identifier: "app_update")
+    }, hasDone: false, identifier: "app_update").analytics(.settingsAppUpdate)
     
     
 }
@@ -517,6 +518,9 @@ private class ExternalUpdateDriver : SUBasicUpdateDriver {
         updateSharedState {
             return $0.withUpdatedLoadingState(.readyToInstall(self.updateItem))
         }
+        if isCurrentDriver {
+            removeUnusedUpdateDownloads(keeping: self)
+        }
     }
     
     override func unarchiver(_ ua: Any!, extractedProgress progress: Double) {
@@ -711,6 +715,26 @@ private func promoteStagedUpdate(_ staged: ExternalUpdateDriver) {
         $0.withUpdatedLoadingState(.readyToInstall(staged.updateItem))
     }
     previous?.cleanUpDownload()
+    removeUnusedUpdateDownloads(keeping: staged)
+}
+
+private func removeUnusedUpdateDownloads(keeping ready: ExternalUpdateDriver) {
+    guard let bundleIdentifier = Bundle.main.bundleIdentifier, let cachesURL = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first, let downloadPath = ready.downloadPath else {
+        return
+    }
+    let root = cachesURL.appendingPathComponent(bundleIdentifier).appendingPathComponent("org.sparkle-project.Sparkle").appendingPathComponent("PersistentDownloads").standardizedFileURL.path
+    let readyComponents = (downloadPath as NSString).standardizingPath.components(separatedBy: "/")
+    let rootComponents = root.components(separatedBy: "/")
+    guard readyComponents.count > rootComponents.count, Array(readyComponents.prefix(rootComponents.count)) == rootComponents else {
+        return
+    }
+    let readyDirectory = readyComponents[rootComponents.count]
+    resourcesQueue.async {
+        let names = (try? FileManager.default.contentsOfDirectory(atPath: root)) ?? []
+        for name in names where name != readyDirectory {
+            try? FileManager.default.removeItem(atPath: (root as NSString).appendingPathComponent(name))
+        }
+    }
 }
 
 private func dropStagedUpdate(_ staged: ExternalUpdateDriver, failed: Bool) {

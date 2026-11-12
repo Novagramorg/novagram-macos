@@ -8,6 +8,7 @@ import Postbox
 import RangeSet
 import IOKit.pwr_mgt
 import TelegramMedia
+import AudioPlayerCore
 import Localization
 import TelegramTheme
 import TelegramContext
@@ -29,10 +30,11 @@ import TelegramMediaResources
 import InputDataUI
 
 
-private func makePlayer(account: Account, reference: FileMediaReference, fetchAutomatically: Bool = false, isProtected: Bool = false) -> (UniversalVideoContentView & NSView) {
+private func makePlayer(engine: TelegramEngine, reference: FileMediaReference, fetchAutomatically: Bool = false, isProtected: Bool = false) -> (UniversalVideoContentView & NSView) {
+    let account = engine.account
     let player: (UniversalVideoContentView & NSView)
-    if isHLSVideo(file: reference.media) {
-        player = HLSVideoJSNativeContentView(accountId: account.id, postbox: account.postbox, userLocation: reference.userLocation, fileReference: reference, streamVideo: true, loopVideo: false, enableSound: true, baseRate: FastSettings.playingVideoRate, fetchAutomatically: false, volume: FastSettings.volumeRate, initialQuality: FastSettings.videoQuality)
+    if isHLSVideo(file: reference.media), let hlsPlayer = HLSVideoNativeContentView(engine: engine, userLocation: reference.userLocation, fileReference: reference, baseRate: FastSettings.playingVideoRate, volume: FastSettings.volumeRate, initialQuality: FastSettings.videoQuality) {
+        player = hlsPlayer
     } else if shouldUseChunkedVideoPlayer(file: reference.media) {
         player = ChunkedNativeMediaPlayer(postbox: account.postbox, reference: reference, fetchAutomatically: fetchAutomatically, preventsCapture: isProtected)
     } else {
@@ -71,6 +73,8 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
     public var togglePictureInPictureImpl:((Bool, PictureInPictureControl)->Void)?
     
     private var isPaused: Bool = true
+    private let mediaControls = MediaPlaybackControlCenter()
+    private var mediaControlsActive = false
     private var forceHiddenControls: Bool = false
     private var _videoFramePreview: MediaPlayerFramePreview?
     private var mode: PictureInPictureControlMode = .normal
@@ -129,21 +133,52 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
         self.context = context
         super.init()
         bar = .init(height: 0)
+        mediaControls.play = { [weak self] in
+            guard let self, self.mediaControlsActive else { return false }
+            self.play()
+            return true
+        }
+        mediaControls.pause = { [weak self] in
+            guard let self, self.mediaControlsActive else { return false }
+            self.pause()
+            return true
+        }
+        mediaControls.togglePlayPause = { [weak self] in
+            guard let self, self.mediaControlsActive else { return false }
+            self.playOrPause()
+            return true
+        }
     }
-    
+
+    private func activateMediaControls() {
+        guard mediaControlsActive else { return }
+        mediaControls.activate()
+        mediaControls.updateControlsAvaiability(nextEnabled: false, prevEnabled: false, seekEnabled: false)
+        if let status = genericView.status {
+            mediaControls.setupNowPlaying(videoTitle: strings().chatListVideo, status: status)
+        }
+    }
+
+    func deactivateMediaControls() {
+        mediaControlsActive = false
+        mediaControls.clearNowPlaying()
+    }
+
     public var status: Signal<MediaPlayerStatus, NoError> {
         return mediaPlayer.status
     }
     
     public func play(_ startTime: TimeInterval? = nil) {
+        let view = self.genericView
+        activateMediaControls()
         if let startTime = startTime, startTime > 0 {
-            mediaPlayer.seek(startTime, play: true)
+            view.mediaPlayer.seek(startTime, play: true)
         } else {
-            mediaPlayer.play()
+            view.mediaPlayer.play()
         }
         self.isPaused = false
         self.frameStepTimestamp = nil
-        self.genericView.hideFrameStepOverlay()
+        view.hideFrameStepOverlay()
     }
     
     public func setBaseRate(_ baseRate: Double) {        
@@ -152,6 +187,7 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
     }
     
     public func playOrPause() {
+        activateMediaControls()
         self.isPaused = !self.isPaused
         self.frameStepTimestamp = nil
         if !self.isPaused {
@@ -178,7 +214,9 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
     }
     
     public func didExit() {
-        
+        if pictureInPicture {
+            deactivateMediaControls()
+        }
     }
     
     public func isPlaying() -> Bool {
@@ -310,18 +348,18 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
 
       
         
-        window.set(handler: { [weak self] _ in
+        window.setGalleryKeyHandler({ [weak self] _ in
             self?.runAdMessages([message], 10, 15)
 
             return .invoked
         }, with: self, for: .T, priority: .supreme, modifierFlags: [.command])
 
-        window.set(handler: { [weak self] _ in
+        window.setGalleryKeyHandler({ [weak self] _ in
             self?.stepFrameBackward()
             return .invoked
         }, with: self, for: .Comma, priority: .modal)
 
-        window.set(handler: { [weak self] _ in
+        window.setGalleryKeyHandler({ [weak self] _ in
             self?.stepFrameForward()
             return .invoked
         }, with: self, for: .Period, priority: .modal)
@@ -335,7 +373,9 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-      
+        mediaControlsActive = !isControlsLimited
+        activateMediaControls()
+
         if let window = window {
             setHandlersOn(window: window)
         }
@@ -343,6 +383,9 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
     }
     
     public override func viewDidDisappear(_ animated: Bool) {
+        if !pictureInPicture {
+            deactivateMediaControls()
+        }
         super.viewWillDisappear(animated)
         super.viewDidDisappear(animated)
         hideOnIdleDisposable.set(nil)
@@ -448,20 +491,7 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
         
         let account = self.account
         
-        if isHLSVideo(file: reference.media) {
-            let fetchSignal = HLSVideoContent.minimizedHLSQualityPreloadData(postbox: account.postbox, file: reference, userLocation: .other, prefixSeconds: 10, autofetchPlaylist: true, initialQuality: FastSettings.videoQuality)
-            |> mapToSignal { fileAndRange -> Signal<Never, NoError> in
-                guard let fileAndRange else {
-                    return .complete()
-                }
-                return freeMediaFileResourceInteractiveFetched(postbox: account.postbox, userLocation: .other, fileReference: fileAndRange.0, resource: fileAndRange.0.media.resource, range: (fileAndRange.1, .default))
-                |> ignoreValues
-                |> `catch` { _ -> Signal<Never, NoError> in
-                    return .complete()
-                }
-            }
-            partDisposable.set(fetchSignal.start())
-        } else {
+        if !(self.mediaPlayer is HLSVideoNativeContentView) {
             let preload = preloadVideoResource(postbox: account.postbox, userLocation: .other, userContentType: .init(file: reference.media), resourceReference: reference.resourceReference(reference.media.resource), duration: 3.0)
             partDisposable.set(preload.start())
         }
@@ -530,6 +560,9 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
             _ = statusValue.swap(status)
            
             self?.genericView.status = status
+            if self?.mediaControlsActive == true {
+                self?.mediaControls.setupNowPlaying(videoTitle: strings().chatListVideo, status: status)
+            }
         }))
         _ = reference.media.resource.size ?? 0
         
@@ -771,7 +804,7 @@ public class SVideoController: GenericViewController<SVideoView>, PictureInPictu
     }
     
     public override func initializer() -> SVideoView {
-        mediaPlayer = makePlayer(account: account, reference: reference, isProtected: isProtected)
+        mediaPlayer = makePlayer(engine: context.engine, reference: reference, isProtected: isProtected)
         return SVideoView(frame: _frameRect, mediaPlayer: self.mediaPlayer)
     }
     

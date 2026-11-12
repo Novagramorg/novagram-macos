@@ -19,6 +19,7 @@ import InAppSettings
 import AvatarUI
 import ShortPeerRow
 import LocalAnimations
+import AppAnalytics
 
 private struct LogoutControllerState : Equatable {
     
@@ -149,6 +150,7 @@ public func LogoutViewController<Context: AccountContextProtocol>(context: Conte
     }
     
     let controller = InputDataController(dataSignal: signal |> map { InputDataSignalValue(entries: $0) }, title: strings().logoutOptionsTitle, hasDone: false)
+    controller.analyticsScreen = .settingsLogout
 
     controller.onDeinit = {
         logoutConfirmationDisposable.dispose()

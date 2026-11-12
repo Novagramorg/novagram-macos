@@ -151,7 +151,7 @@ New Novagram files inside Telegram packages (ours, whole file):
 | F13 Ghost (media) | `GalleryUI/.../GalleryViewer.swift`, `ChatUI/.../SingleTimeMediaViewer.swift`, `AudioPlayerCore/.../AudioPlayerController.swift` | `markMessageContentAsConsumedInteractively` skipped while Ghost is on |
 | F13 Ghost (stories) | `StoriesUI/.../StoryChatContent.swift` | the three `markAsSeen(id:)` return early |
 | F13 Ghost (chat list) | `ChatListUI/.../ChatListRowItem.swift` `markAsRead` | `clearPeerUnseenPersonalMessagesInteractively` gated; `PeersListController.swift` header: `ghost` button next to proxy (update, title width, layout) |
-| F21 ask before send | `ChatController.swift` | `sendAppFile` and `sendMedias`: the original `invoke` closure is renamed (`novagramSendAppFile` / `novagramSendMedias`) and `invoke` now asks first; `sendMedia` (recorded voice) is renamed `novagramSendMedia` and the new `chatInteraction.sendMedia` asks first (cancel also cancels the voice send animation). The old fork only gated `sendMedias`, so recorded voice was never confirmed |
+| F21 ask before send | `ChatController.swift` | `sendAppFile` and `sendMedias`: the original `invoke` closure is renamed (`novagramSendAppFile` / `novagramSendMedias`) and `invoke` now asks first; the recorded voice / media path: since upstream 13.2 every media send (`sendMedia`, `sendMediaWithJourney`, `sendRecordingMediaWithAnalytics`) goes through the `sendMediaWithAnalytics` closure, so that closure is renamed `novagramSendMediaWithAnalytics` and a new `sendMediaWithAnalytics` asks first (cancel discards the analytics journey, ends the recording request and cancels the voice send animation). The old fork only gated `sendMedias`, so recorded voice was never confirmed |
 | F17 outgoing transforms | `ChatHistoryModel/.../SenderController.swift` | text `enqueue` gains `skipAutoTranslate: Bool = false`; auto text + auto translate after the media preview block; style entity appended to the text entities; heart effect (`NovagramOutgoing.effectId`) in the text path and in `enqueue(media:[Media]...)`; `recordSent(media)` remembers the last sticker; `sendAutoSticker` after the text messages are enqueued |
 | F19 round video | `ChatUI/.../ChatInputAttachView.swift` | item after the File item (hidden when the channel bans round videos) |
 | F11 / F12 hidden chats, foreign block | `ChatListUI/.../ChatListController.swift` | one `prepare.removeAll(where: NovagramChatListFilter.isFiltered...)` after the pending-removals filter (covers additional items too); Cmd+Shift+H installed once (`NovagramHiddenChatsShortcut.install()` in `viewDidLoad`; the old fork added a monitor per chat list) |
@@ -411,11 +411,13 @@ Transporter warned on 2.0.16 (ITMS 91182): `SFCompactRounded-Semibold.otf` (Tele
 
 2.0.16 crashed (EXC_BREAKPOINT in `EditImageControlsView.updateUserInterface`) when the photo editor opened: send a photo, right-click → Edit, 📎 → Edit. `ImageCanvasUI`, `CubeUI` and `PrivateCallScreen` declared `.copy("Resources/Assets.xcassets")`, so Xcode 27 copied the catalog as a raw folder (no `Assets.car`) and every `NSImage(resource:)` from those bundles trapped: the photo editor, the 1:1 call screen icons (`ic_microphoneoff` traps the same way), gift crafting. Checked outside the app: the shipped bundle traps, the same catalog compiled with `actool` loads.
 
+Upstream 13.2 (`f280d81ef`, merged 2026-11-12) made the same `.process` change in all three `Package.swift` files, so they carry no Novagram hook any more.
+
 | File | Change |
 | --- | --- |
-| `packages/ImageCanvasUI/Package.swift` | `resources: [.process("Resources/Assets.xcassets")]` (was `.copy`) |
-| `packages/CubeUI/Package.swift` | the same |
-| `packages/PrivateCallScreen/Package.swift` | the same |
+| `packages/ImageCanvasUI/Package.swift` | ~~`resources: [.process("Resources/Assets.xcassets")]` (was `.copy`)~~ now upstream |
+| `packages/CubeUI/Package.swift` | ~~the same~~ now upstream |
+| `packages/PrivateCallScreen/Package.swift` | ~~the same~~ now upstream |
 | `novagram-publish.sh` (ours) | archive check: fails when a package bundle still holds a raw `.xcassets` folder (it fails on the 2.0.16 archive) |
 
 Manual repro for regressions: send a photo to Saved Messages, right-click it → Edit, click 📎 → Edit: the photo editor must open. Start a 1:1 call: the call screen must show its buttons.

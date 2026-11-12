@@ -25,6 +25,8 @@ import ChatHistoryModel
 import ChatUI
 import ChatModeTypes
 import InlineStickerLayer
+import HTMLBubbles
+import AppAnalytics
 
 public struct PeerListHiddenItems : Equatable {
     public var archive: ItemHideStatus
@@ -1688,18 +1690,14 @@ public class PeerListContainerView : Control {
         let searchRect = NSMakeRect(searchLeading, searchY, size.width - searchLeading - edge, componentSize.height)
 
 
-        let bottomInset: CGFloat = 0
-
         transition.updateFrame(view: searchView, frame: searchRect)
         searchView.updateLayout(size: searchRect.size, transition: transition)
         searchView.isHidden = state.splitState == .minimisize || (mode.isForumLike && !displaysFullForumHeader)
         
 
 
-        ContainedViewLayoutTransition.immediate.updateFrame(view: tableView, frame: NSMakeRect(0, 0, size.width, size.height - bottomInset))
-        updateTableMask(spaceHeight: navigationHeight)
-
         updateBottomControls(size: size, transition: transition)
+        updateTableMask(spaceHeight: navigationHeight)
         
         var controlPoint = NSMakePoint(containerSize.width - 14, floorToScreenPixels(backingScaleFactor, (statusHeight - componentSize.height)/2.0))
 
@@ -1889,7 +1887,7 @@ public class PeerListContainerView : Control {
             }
             return true
         })
-        tableView.scrollerInsets = .init(left: 0, right: 0, top: top, bottom: contentBottomInset)
+        tableView.scrollerInsets = .init(left: 0, right: 0, top: top, bottom: 0)
         updateTableMask(spaceHeight: top)
     }
 
@@ -1912,6 +1910,16 @@ public class PeerListContainerView : Control {
             bottomControlsY = rect.minY
         }
         let overlay = layoutBottomOverlay?(bottomControlsY, transition)
+        var tableHeight = size.height
+        if state?.splitState == .minimisize, let overlay {
+            tableHeight = min(tableHeight, max(0, overlay.minY - 12))
+        }
+        let tableFrame = NSMakeRect(0, 0, size.width, tableHeight)
+        if tableView.frame != tableFrame {
+            ContainedViewLayoutTransition.immediate.updateFrame(view: tableView, frame: tableFrame)
+            updateTableMask(spaceHeight: navigationHeight)
+        }
+
         if let view = self.scrollerView {
             let gap: CGFloat = 12
             let visualInset = (view.frame.height - (view.glassSize?.height ?? view.frame.height)) / 2
@@ -1921,6 +1929,10 @@ public class PeerListContainerView : Control {
                 rect.origin.y = min(overlay.midY - rect.height / 2, bottomControlsY - rect.height - gap + visualInset)
                 if rect.insetBy(dx: -6, dy: 0).intersects(overlay) {
                     rect.origin.y = overlay.minY - rect.height - gap + visualInset
+                }
+                if tableHeight > 0, tableHeight < size.height {
+                    let dividerGap: CGFloat = 4
+                    rect.origin.y = min(rect.minY, tableHeight - dividerGap - rect.height + visualInset)
                 }
             }
             transition.updateFrame(view: view, frame: rect)
@@ -2244,6 +2256,7 @@ private class SearchContainer : Control {
 }
 
 open class PeersListController<Context: AccountContextProtocol>: TelegramGenericViewController<PeerListContainerView, Context>, TableViewDelegate {
+    private let htmlDemoContents = HTMLDemoChatCache()
     
     
     open func findGroupStableId(for stableId: AnyHashable) -> AnyHashable? {
@@ -2394,16 +2407,6 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
                     searchSection.select(index, false)
                 }
             })
-        }
-    }
-    
-    open func updatePinnedItems(_ items: [PinnedItemId]) {
-        if let searchSection {
-            for section in searchSection.sections {
-                if let controller = section.controller as? SearchController<Context>, controller.isLoaded() {
-                    controller.pinnedItems = items
-                }
-            }
         }
     }
     
@@ -2874,6 +2877,7 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
             self?.revealStoriesState()
         }, setupFilter: { [weak self] filter in
             if self?.stateValue.with({ $0.filterData.filter }) != filter {
+                Analytics.shared.send(AnalyticsEvents.chatListFolderSelect(folderKind: filter == .allChats ? .allChats : .custom, via: .click))
             }
             self?.navigationController?.back()
             self?.updateState { current in
@@ -2914,6 +2918,9 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
             if let custom = self?.customContextMenu() {
                 return custom
             }
+            if case .savedMessagesChats = self?.state?.mode {
+                return menu
+            }
             if let peer = self?.state?.forumPeer {
                 var items: [ContextMenuItem] = []
 
@@ -2927,7 +2934,7 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
                     }, itemImage: MenuAnimation.menu_show_info.value))
                 }
 
-                if chatController == nil || (chatController?.chatInteraction.chatLocation != .peer(peer.peer.id)) {
+                if !peer.peer.flags.contains(.displayForumAsSidebar), chatController == nil || (chatController?.chatInteraction.chatLocation != .peer(peer.peer.id)) {
                     items.append(ContextMenuItem(strings().forumTopicContextShowAsMessages, handler: { [weak self] in
                         self?.open(with: .chatId(.chatList(peer.peer.id), peer.peer.id, -1), forceAnimated: true)
                         _ = context.engine.peers.updateForumViewAsMessages(peerId: peer.peer.id, value: true).start()
@@ -2953,20 +2960,6 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
                 menu.addItem(ContextMenuItem(strings().newContactTitle, handler: {
                     showModal(with: ChatListUIHooks.shared.makeAddContactModal(context), for: context.window)
                 }, itemImage: MenuAnimation.menu_add_member.value))
-            } else if case .savedMessagesChats = self?.state?.mode {
-                
-                let displayAsTopics = self?.state?.displaySavedAsTopics ?? false
-                
-                menu.addItem(ContextMenuItem(strings().chatSavedMessagesViewAsMessages, handler: {
-                    context.engine.peers.updateSavedMessagesViewAsTopics(value: false)
-                    self?.navigationController?.back()
-                    ChatUIHooks.shared.navigateToChat(context.bindings.rootNavigation(), context, .peer(context.peerId))
-                }, itemImage: !displayAsTopics ? MenuAnimation.menu_check_selected.value : nil))
-                
-                menu.addItem(ContextMenuItem(strings().chatSavedMessagesViewAsChats, handler: {
-                    context.engine.peers.updateSavedMessagesViewAsTopics(value: true)
-                    ForumUI.open(context.peerId, addition: false, context: context)
-                }, itemImage: displayAsTopics ? MenuAnimation.menu_check_selected.value : nil))
             } else if self?.state?.mode.groupId == .archive {
                 menu.addItem(ContextMenuItem(strings().peerListArchiveSettings, handler: {
                     if let controller = FeatureNavigationHooks.shared.makeArchiveSettingsController(context, self?.state?.privacy, { updated in
@@ -3243,7 +3236,6 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
                     }
                 }, options: self.searchOptions, frame: rect, target: target, communityId: searchCommunityId, tags: initialTags)
 //                searchController.defaultQuery = self.genericView.searchView.query
-                searchController.pinnedItems = self.collectPinnedItems
                     
                 searchController.setPeerAsTag = { [weak self] peer in
                     self?.genericView.searchView.setString("")
@@ -3270,8 +3262,7 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
                         }
                     }, options: tag.searchOptions, frame: rect, target: target, communityId: searchCommunityId, tags: tag.searchTags(state.peerTag?.id, hashtag: state.hashtag))
 //                    searchController.defaultQuery = self.genericView.searchView.query
-                    searchController.pinnedItems = self.collectPinnedItems
-                    
+
                     searchController.navigationController = self.navigationController
                     
                     
@@ -3384,10 +3375,6 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
         }
     }
    
-    
-    open var collectPinnedItems:[PinnedItemId] {
-        return []
-    }
     
 
     
@@ -3512,6 +3499,21 @@ open class PeersListController<Context: AccountContextProtocol>: TelegramGeneric
                 self.genericView.searchView.cancelSearch()
                 self.genericView.searchView.change(state: .None, true)
                 ForumUI.open(peerId, addition: false, context: context, threadId: threadId)
+            }
+        case let .htmlDemo(id):
+            if let chat = HTMLDemoCatalog.chat(id) {
+                let contents = htmlDemoContents.contents(chat: chat, accountPeerId: context.peerId, accountName: (context.myPeer as? TelegramUser)?.firstName ?? "You")
+                contents.openDemoRival = { [context] in
+                    _ = (context.sharedContext.activeAccountsWithInfo |> take(1) |> deliverOnMainQueue).start(next: { accounts in
+                        if let account = accounts.accounts.first(where: { $0.account.id != context.account.id }) {
+                            ChatListUIHooks.shared.openDemoAccount(context, account.account.id)
+                        }
+                    })
+                }
+                contents.openExternalLink = { url in
+                    ChatHistoryLink.execute(inapp: ChatHistoryLink.external(link: url, true))
+                }
+                navigation.push(ChatAdditionController(context: context, chatLocation: .peer(context.peerId), mode: .customChatContents(contents: contents)), true, clearStack: true)
             }
         case .systemDeprecated, .sharedFolderUpdated, .reveal, .empty, .loading, .space, .suspicious, .savedMessageIndex, .custom, .auction, .birthdays, .grace:
             break

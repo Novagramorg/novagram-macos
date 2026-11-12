@@ -129,6 +129,7 @@ public class FastSettings {
     private static let kEntertainmentType = "kEntertainmentType"
     private static let kSidebarType = "kSidebarType1"
     private static let kSidebarShownType = "kSidebarShownType2"
+    private static let kSidebarAlwaysEnabled = "kSidebarAlwaysEnabled1"
     private static let kDebugWebApp = "kDebugWebApp"
     private static let kRecordingStateType = "kRecordingStateType"
     private static let kInAppSoundsType = "kInAppSoundsType"
@@ -412,14 +413,21 @@ public class FastSettings {
             UserDefaults(suiteName: "pro_messager")?.set(newValue, forKey: "show_peer_id") // Novagram
         }
     }
-    
-    
-    
-    public static var sidebarEnabled:Bool {
-        return UserDefaults.standard.bool(forKey: kSidebarType)
-    }
-    
+
+    private static let migrateSidebarAlwaysEnabled: Void = {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: kSidebarAlwaysEnabled) else {
+            return
+        }
+        if !defaults.bool(forKey: kSidebarType) {
+            defaults.set(true, forKey: kSidebarShownType)
+        }
+        defaults.removeObject(forKey: kSidebarType)
+        defaults.set(true, forKey: kSidebarAlwaysEnabled)
+    }()
+
     public static var sidebarShown: Bool {
+        _ = migrateSidebarAlwaysEnabled
         return !UserDefaults.standard.bool(forKey: kSidebarShownType)
     }
     
@@ -535,12 +543,8 @@ public class FastSettings {
         return !UserDefaults.standard.bool(forKey: "open_in_quick_look_\(ext)")
     }
     public static func toggleSidebarShown(_ enable: Bool) {
+        _ = migrateSidebarAlwaysEnabled
         UserDefaults.standard.set(!enable, forKey: kSidebarShownType)
-        UserDefaults.standard.synchronize()
-    }
-
-    public static func toggleSidebar(_ enable: Bool) {
-        UserDefaults.standard.set(enable, forKey: kSidebarType)
         UserDefaults.standard.synchronize()
     }
     

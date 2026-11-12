@@ -39,6 +39,7 @@ let package = Package(
         .package(name: "ProxyUtils", path: "../ProxyUtils"),
         .package(name: "ProxyUI", path: "../ProxyUI"),
         .package(name: "InlineStickerLayer", path: "../InlineStickerLayer"),
+        .package(name: "AppAnalytics", path: "../AppAnalytics"),
     ],
     targets: [
         .target(
@@ -74,6 +75,7 @@ let package = Package(
                 .product(name: "ProxyUtils", package: "ProxyUtils", condition: nil),
                 .product(name: "ProxyUI", package: "ProxyUI", condition: nil),
                 .product(name: "InlineStickerLayer", package: "InlineStickerLayer", condition: nil),
+                .product(name: "AppAnalytics", package: "AppAnalytics", condition: nil),
             ],
             path: "Sources/AuthUI"),
     ]
