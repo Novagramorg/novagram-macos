@@ -568,7 +568,7 @@ fileprivate func prepareEntries(from:[AppearanceWrapperEntry<ChatListSearchEntry
             return SearchStoryFoundItem(initialSize, stableId: entry.stableId, list: state, context: arguments.context, query: query, action: {
                 arguments.openStorySearch(state)
             })
-        case let .novagramAdPeer(peer, token, _): return novagramSearchAdRow(initialSize, peer: peer, token: token, context: arguments.context, stableId: entry.stableId, contextMenuItems: { peerContextMenuItems(peer: peer, pinnedItems: pinnedItems, arguments: arguments, isRecent: false) }) // Novagram
+        case let .novagramAdPeer(peer, token, _): return novagramSearchAdRow(initialSize, peer: peer, token: token, context: arguments.context, stableId: entry.stableId, contextMenuItems: { peerContextMenuItems(peer: peer, arguments: arguments, isRecent: false) }) // Novagram
         case let .novagramArchive(item, _): return novagramArchiveSearchRow(initialSize, item: item, context: arguments.context, stableId: entry.stableId) // Novagram
         case let .disclaimer(text):
             return GeneralTextRowItem(initialSize, stableId: entry.stableId, height: 50, text: .markdown(text, linkHandler: { link in

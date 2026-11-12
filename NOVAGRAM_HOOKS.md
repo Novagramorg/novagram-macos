@@ -239,6 +239,8 @@ Not ported: the old emerald Next button (`NovagramBrandColors.primary`), same re
 | File | Change |
 | --- | --- |
 | `Telegram.xcodeproj/project.pbxproj` | upstream 13.2 target `WidgetEngineService` (XPC service embedded in the app): Debug + Release `DEVELOPMENT_TEAM = ZDBP5RSRZF` (was `6N38VWS5BX`) and `PRODUCT_BUNDLE_IDENTIFIER = uz.fenixuz.app.WidgetEngine` (was `ru.keepcoder.Telegram.WidgetEngine`); the app finds the service through `WidgetEngineXPC.embeddedServiceName()`, so no code change |
+| `Telegram-Mac/utils/InAppLinks.swift` | upstream 13.2 `analyticsLinkContext` switch: `.novagramSettings` joins the `.settings` group (`validated(context)`) (1 line) |
+| `packages/ChatListUI/Sources/ChatListUI/SearchController.swift` | sponsored peer row: `peerContextMenuItems(peer:arguments:isRecent:)` without `pinnedItems` (upstream #158 removed the parameter) |
 
 ### F39 strings
 

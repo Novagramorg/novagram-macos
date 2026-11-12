@@ -935,6 +935,7 @@ private func analyticsLinkContext(_ inapp: inAppLink, inherited: AnalyticsContex
          let .tonTransfer(_, context, _),
          let .sendGrams(_, context, _),
          let .settings(_, context, _),
+         let .novagramSettings(_, context, _), // Novagram
          let .invoice(_, context, _),
          let .premiumOffer(_, _, context),
          let .restorePurchase(_, context),
