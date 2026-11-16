@@ -39,3 +39,6 @@ url=git@github.com:TelegramMessenger/libprisma.git
 [submodule "packages/NovagramReviewPromptKit"]
 	path = packages/NovagramReviewPromptKit
 	url = https://github.com/Novagramorg/novagram-review-prompt-kit-sdk
+[submodule "packages/NovagramUzScriptKit"]
+	path = packages/NovagramUzScriptKit
+	url = https://github.com/Novagramorg/novagram-uzscript-kit-sdk.git

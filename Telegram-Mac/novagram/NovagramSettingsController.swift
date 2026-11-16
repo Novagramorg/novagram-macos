@@ -221,7 +221,7 @@ private enum NovagramEntryId: Hashable {
     case topAbout, topRate, topRateFooter
     case interfaceHideFolders, interfaceStories, interfaceMutual, interfaceUnlimitedPins, interfaceFooter
     case chatDeleted, chatEditedHistory, chatFirstMessage, chatGhostActive, chatGhost, chatRoundVideo, chatForwardHideNames, chatFooter
-    case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingTranslateLang, messagingTranslateConfirm, messagingAskVoice, messagingAskSticker, messagingAutoSticker, messagingHeartEffect, messagingFooter
+    case messagingTextStyle, messagingAutoText, messagingAutoTranslate, messagingTranslateToggle, messagingNewAlphabet, messagingTranslateLang, messagingTranslateConfirm, messagingAskVoice, messagingAskSticker, messagingAutoSticker, messagingHeartEffect, messagingFooter
     case sttEnabled, sttLanguage, sttVoiceTranslate
     case protectionChatLock, protectionProxy, protectionForeign, protectionAutoDownload, protectionFooter
     case appearanceAccent, appearanceFooter
@@ -262,6 +262,7 @@ private func novagramSettingsRowIcon(_ id: NovagramEntryId) -> CGImage? {
     case .messagingAutoText:        map = ("text.append", .teal)
     case .messagingAutoTranslate:   map = ("globe", .pink)
     case .messagingTranslateToggle: map = ("character.bubble.fill", .pink)
+    case .messagingNewAlphabet:     map = ("character.textbox", .green)
     case .messagingTranslateLang:   map = ("character.book.closed.fill", .lightBlue)
     case .messagingAskVoice:        map = ("mic.badge.plus", .orange)
     case .messagingAskSticker:      map = ("face.smiling.inverse", .gold)
@@ -423,7 +424,7 @@ private enum NovagramEntry: Comparable, Identifiable {
                 initialSize, stableId: stableId,
                 name: title,
                 icon: novagramSettingsRowIcon(entryId),
-                type: .nextContext(label),
+                type: entryId == .messagingNewAlphabet ? .imageContext(NovagramNewAlphabet.newBadge, label) : .nextContext(label),
                 viewType: viewType,
                 action: {
                     arguments.openSubController(subKey)
@@ -549,6 +550,7 @@ private func novagramSettingsEntries(state: NovagramSettingsState, l10n: Novagra
     let trLabel = state.autoTranslateEnabled ? l10n.settings_state_enabled : l10n.settings_state_disabled
     entries.append(.disclosurePlaceholder(next(), .messagingAutoTranslate, l10n.settings_messaging_autoTranslate_title, trLabel, .innerItem, "auto_translate"))
     entries.append(.toggle(next(), .messagingTranslateToggle, l10n.settings_messaging_translateToggle_title, l10n.settings_messaging_translateToggle_subtitle, state.showTranslateMessages, .innerItem, NovagramDefaultsKey.showTranslateMessages))
+    entries.append(.disclosurePlaceholder(next(), .messagingNewAlphabet, NovagramNewAlphabet.rowTitle, "", .innerItem, "new_alphabet"))
     entries.append(.disclosurePlaceholder(next(), .messagingTranslateLang, l10n.settings_messaging_translateLanguage_title, "", .innerItem, "translate_language"))
     entries.append(.toggle(next(), .messagingTranslateConfirm, l10n.settings_translateConfirm_title, l10n.settings_translateConfirm_subtitle, state.translateConfirmEnabled, .innerItem, NovagramDefaultsKey.translateConfirmEnabled))
     entries.append(.toggle(next(), .messagingAskVoice, l10n.settings_askVoice_title, l10n.settings_askVoice_subtitle, state.askBeforeSendVoice, .innerItem, NovagramDefaultsKey.askBeforeSendVoice))
@@ -793,6 +795,8 @@ class NovagramSettingsController: TableViewController {
                     nav?.push(NovagramAutoTranslateController(context))
                 case "translate_language":
                     nav?.push(NovagramTranslationLanguageController(context))
+                case "new_alphabet":
+                    nav?.push(NovagramNewAlphabetController())
                 case "folder_style":
                     let l10n = NovagramL10n.current
                     let current = self.stateValue.with { $0.folderStyle }
@@ -942,7 +946,7 @@ private let novagramSettingsSlugs: [(NovagramEntryId, String)] = [
     (.interfaceHideFolders, "hide-folders"), (.interfaceStories, "stories"), (.interfaceMutual, "mutual-contacts"), (.interfaceUnlimitedPins, "unlimited-pins"),
     (.chatDeleted, "deleted-messages"), (.chatEditedHistory, "edited-history"), (.chatFirstMessage, "first-message"), (.chatGhostActive, "ghost-mode"), (.chatGhost, "ghost-button"),
     (.chatRoundVideo, "round-video"), (.chatForwardHideNames, "forward-hide-names"),
-    (.messagingTextStyle, "text-style"), (.messagingAutoText, "auto-text"), (.messagingAutoTranslate, "auto-translate"), (.messagingTranslateToggle, "translate-button"),
+    (.messagingTextStyle, "text-style"), (.messagingAutoText, "auto-text"), (.messagingAutoTranslate, "auto-translate"), (.messagingTranslateToggle, "translate-button"), (.messagingNewAlphabet, "new-alphabet"),
     (.messagingTranslateLang, "translate-language"), (.messagingTranslateConfirm, "translate-on-send"), (.messagingAskVoice, "send-confirm"), (.messagingAskSticker, "send-confirm-sticker"),
     (.messagingAutoSticker, "auto-sticker"), (.messagingHeartEffect, "heart-effect"),
     (.sttEnabled, "voice-to-text"), (.sttLanguage, "voice-language"), (.sttVoiceTranslate, "voice-translate"),

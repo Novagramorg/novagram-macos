@@ -1,4 +1,5 @@
 import NovagramCore // Novagram
+import NovagramCore // Novagram
 import Cocoa
 import TGUIKit
 import TelegramCore
@@ -261,6 +262,7 @@ public class ChatMessageItem: ChatRowItem {
                      }
                  }
              }
+             (text, attributes) = NovagramUzScript.displayed(text, attributes: attributes) // Novagram
              
             let messageAttr:NSMutableAttributedString
             if ChatRowItem.isUnsupported(message) {

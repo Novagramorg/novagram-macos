@@ -22,7 +22,8 @@ let package = Package(
         .package(name: "TelegramTheme", path: "../TelegramTheme"),
         .package(name: "NovagramSearchKit", path: "../NovagramSearchKit"),
         .package(name: "NovagramCallRecordingKit", path: "../NovagramCallRecordingKit"),
-        .package(name: "NovagramReviewPromptKit", path: "../NovagramReviewPromptKit")
+        .package(name: "NovagramReviewPromptKit", path: "../NovagramReviewPromptKit"),
+        .package(name: "NovagramUzScriptKit", path: "../NovagramUzScriptKit")
     ],
     targets: [
         // NovagramServices SDK (private repo, release v1.2.1), macOS slice only. It holds the review
@@ -58,6 +59,7 @@ let package = Package(
                 .product(name: "TelegramContext", package: "TelegramContext", condition: nil),
                 .product(name: "TelegramTheme", package: "TelegramTheme", condition: nil),
                 .product(name: "NovagramSearchKit", package: "NovagramSearchKit", condition: nil),
+                .product(name: "NovagramUzScriptCore", package: "NovagramUzScriptKit", condition: nil),
                 .product(name: "NovagramCallRecordingCore", package: "NovagramCallRecordingKit", condition: nil),
                 .product(name: "NovagramCallRecordingUI", package: "NovagramCallRecordingKit", condition: nil),
                 .product(name: "NovagramReviewPromptCore", package: "NovagramReviewPromptKit", condition: nil),

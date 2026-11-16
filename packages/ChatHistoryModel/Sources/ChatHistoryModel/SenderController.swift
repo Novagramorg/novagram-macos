@@ -250,8 +250,9 @@ public class Sender: NSObject {
 
             
            
+            let (novagramText, novagramAttributes) = NovagramUzScript.outgoing(subState.inputText, attributes: attributes, peerId: peerId) // Novagram
             if !subState.inputText.isEmpty || mediaReference != nil {
-                return .message(text: subState.inputText, attributes: attributes, inlineStickers: subState.inlineMedia, mediaReference: mediaReference, threadId: threadId, replyToMessageId: replyId, replyToStoryId: replyStoryId, localGroupingKey: nil, correlationId: nil, bubbleUpEmojiOrStickersets: dynamicEmojiOrder ? subState.upstairCollections : [])
+                return .message(text: novagramText, attributes: novagramAttributes, inlineStickers: subState.inlineMedia, mediaReference: mediaReference, threadId: threadId, replyToMessageId: replyId, replyToStoryId: replyStoryId, localGroupingKey: nil, correlationId: nil, bubbleUpEmojiOrStickersets: dynamicEmojiOrder ? subState.upstairCollections : []) // Novagram
             } else {
                 return nil
             }

@@ -910,3 +910,15 @@ Manual repro: Settings > Chat > Call recording on > pick Audio only > record a v
 
 The Mac App Store needs a build number higher than the last uploaded one (2.0.16 went up as 283357 on 2026-10-28), and upstream had not bumped it. On an upstream merge that changes these lines, keep the higher number. The store version (13.1.1) still goes only on the command line (`NOVAGRAM_VERSION`).
 
+
+## Yangi alifbo (2026-11-16)
+
+Uzbek script converter, shared with iOS through `packages/NovagramUzScriptKit` (git submodule, https://github.com/Novagramorg/novagram-uzscript-kit-sdk, pin 560e2fa, library `NovagramUzScriptCore`, owned by the iOS session). Settings in the `pro_messager` suite: `novagram_uzscript_send_new`, `novagram_uzscript_read_new`, `novagram_uzscript_chat_menu` (Bool, default off), `novagram_uzscript_chat_scripts` (per-chat override, key `String(peerId.toInt64())`). Texts uz/en/ru/zh from `UzScriptStrings(languageCode:)`. Captions are not converted in v1.
+
+| File | Change |
+|---|---|
+| `packages/ChatHistoryModel/.../SenderController.swift` | text `enqueue`, per 4096 piece: `let (novagramText, novagramAttributes) = NovagramUzScript.outgoing(subState.inputText, attributes: attributes, peerId: peerId)`; the `.message(text:attributes:...)` line uses them (2 lines) |
+| `packages/ChatUI/.../ChatMessageItem.swift` | `import NovagramCore`; after the translate/summarize block `(text, attributes) = NovagramUzScript.displayed(text, attributes: attributes)` (screen only) |
+| `packages/PeerInfoUI/.../PeerInfoHeadItem.swift` | user actions, before Block: `novagramNewAlphabetActionItem(...)` (1 line) |
+
+Ours: `NovagramCore/NovagramUzScript.swift` (entity mapping; protected: Code, Pre, Url, TextUrl, Mention, TextMention, Hashtag, BotCommand, Email, CustomEmoji; the per-chat override wins over the global switch via `UzScriptSettings.effectiveSendScript`; a result over 4096 UTF-16 units sends the original), `NovagramCore/NovagramNewAlphabetController.swift` (page: hero, 3 switches, captions note, "Convert text" tool), `PeerInfoUI/NovagramNewAlphabetAction.swift`, the Messages row in `Telegram-Mac/novagram/NovagramSettingsController.swift` (NEW badge, slug `new-alphabet`, same as iOS), `NovagramCore/Package.swift` dependency.
