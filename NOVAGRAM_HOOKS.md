@@ -913,7 +913,7 @@ The Mac App Store needs a build number higher than the last uploaded one (2.0.16
 
 ## Yangi alifbo (2026-11-16)
 
-Uzbek script converter, shared with iOS through `packages/NovagramUzScriptKit` (git submodule, https://github.com/Novagramorg/novagram-uzscript-kit-sdk, pin 560e2fa, library `NovagramUzScriptCore`, owned by the iOS session). Settings in the `pro_messager` suite: `novagram_uzscript_send_new`, `novagram_uzscript_read_new`, `novagram_uzscript_chat_menu` (Bool, default off), `novagram_uzscript_chat_scripts` (per-chat override, key `String(peerId.toInt64())`). Texts uz/en/ru/zh from `UzScriptStrings(languageCode:)`. Captions are not converted in v1.
+Uzbek script converter, shared with iOS through `packages/NovagramUzScriptKit` (git submodule, https://github.com/Novagramorg/novagram-uzscript-kit-sdk, pin f8c9488, library `NovagramUzScriptCore`, owned by the iOS session). Settings in the `pro_messager` suite: `novagram_uzscript_send_new`, `novagram_uzscript_read_new`, `novagram_uzscript_chat_menu` (Bool, default off), `novagram_uzscript_chat_scripts` (per-chat override, key `String(peerId.toInt64())`). Texts uz/en/ru/zh from `UzScriptStrings(languageCode:)`. Captions are not converted in v1.
 
 | File | Change |
 |---|---|
