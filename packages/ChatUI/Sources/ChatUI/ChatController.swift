@@ -10972,6 +10972,7 @@ open class ChatController<Context: AccountContextProtocol>: TelegramGenericViewC
                     }, itemImage: MenuAnimation.menu_show_info.value))
                 }
                 if NovagramSettingsKey.bool("show_view_first_message") { items.append(ContextMenuItem(NovagramL10n.current.settings_chat_firstMessage_title, handler: { [weak self] in self?.chatInteraction.scrollToTheFirst(); NovagramReviewPrompt.record(.viewFirstMessage) }, itemImage: MenuAnimation.menu_sort_up.value)) } // Novagram
+                if let novagramItem = novagramNewAlphabetMenuItem(peer: peerViewMainPeer(peerView), accountPeerId: context.peerId, window: context.window) { items.append(novagramItem) } // Novagram
 
 
                 if let notificationSettings = peerView.notificationSettings as? TelegramPeerNotificationSettings, !self.isAdChat {

@@ -24,26 +24,41 @@ public enum NovagramUzScript {
         return converted
     }
 
-    // The profile menu item while "Lotin ↔ Кирилл" is on: its title, and the action that flips the chat between
-    // Cyrillic and the default script and returns the confirmation text.
-    public static func chatMenuToggle(peerId: PeerId) -> (title: String, toggle: () -> String)? {
+    public struct ChatScriptChoice {
+        public let title: String
+        public let isSelected: Bool
+        // Saves the choice and returns the confirmation text, or nil when there is nothing to confirm.
+        public let select: () -> String?
+    }
+
+    private static let chatScriptChoices: [UzScript?] = [nil, .cyrillic, .latin1995, .latin2027]
+
+    // The chat header menu while "Lotin ↔ Кирилл" is on: a submenu title and one choice per script, nil = default.
+    public static func chatScriptMenu(peerId: PeerId) -> (title: String, choices: [ChatScriptChoice])? {
         let settings = UzScriptSettings()
         guard settings.cyrillicLatinEnabled else {
             return nil
         }
         let peerKey = peerId.toInt64()
-        let isCyrillic = settings.chatSendScript(peerKey: peerKey) == .cyrillic
-        let title = isCyrillic ? UzScriptStrings.menuCyrillicToLatin : UzScriptStrings.menuLatinToCyrillic
-        return (title, {
-            let texts = UzScriptStrings(languageCode: appCurrentLanguage.languageCode)
-            if isCyrillic {
-                settings.setChatSendScript(nil, peerKey: peerKey)
-                return texts.sendingInLatinNotice
-            } else {
-                settings.setChatSendScript(.cyrillic, peerKey: peerKey)
-                return texts.sendingInCyrillicNotice
-            }
-        })
+        let current = settings.chatSendScript(peerKey: peerKey)
+        let texts = UzScriptStrings(languageCode: appCurrentLanguage.languageCode)
+        let choices = chatScriptChoices.map { script -> ChatScriptChoice in
+            return ChatScriptChoice(title: script.map { texts.scriptName($0) } ?? texts.chatScriptDefault, isSelected: current == script, select: {
+                settings.setChatSendScript(script, peerKey: peerKey)
+                guard let script else {
+                    return nil
+                }
+                switch script {
+                case .cyrillic:
+                    return texts.sendingInCyrillicNotice
+                case .latin2027:
+                    return texts.sendingInNewLatinNotice
+                default:
+                    return texts.sendingInLatinNotice
+                }
+            })
+        }
+        return (texts.chatScriptMenuTitle, choices)
     }
 
     // Screen only: the stored message is never edited.

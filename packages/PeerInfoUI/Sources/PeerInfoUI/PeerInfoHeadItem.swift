@@ -169,7 +169,6 @@ private func actionItems<Context: AccountContextProtocol>(item: PeerInfoHeadItem
                     }
                 }))
             }
-            if let novagramItem = novagramNewAlphabetActionItem(peer: peer, accountPeerId: item.context.peerId, color: item.accentColor, window: item.context.window) { items.append(novagramItem) } // Novagram
             if peer.id != item.context.peerId, let cachedData = item.peerView.cachedData as? CachedUserData, item.peerView.peerIsContact {
                 items.append(ActionItem(text: (!cachedData.isBlocked ? strings().peerInfoBlockUser : strings().peerInfoUnblockUser), color: item.accentColor, image: !cachedData.isBlocked ? theme.icons.profile_block : theme.icons.profile_unblock, animation: cachedData.isBlocked ? .menu_unblock : .menu_restrict, destruct: true, action: {
                     arguments.updateBlocked(peer: peer, !cachedData.isBlocked, false)
