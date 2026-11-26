@@ -1,0 +1,4 @@
+.build/
+Tests/TopicTests/Generated.swift
+
+Tests/TopicTests/GeneratedBindings.swift

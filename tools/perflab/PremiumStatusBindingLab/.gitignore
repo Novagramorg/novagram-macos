@@ -1,0 +1,4 @@
+.build/
+results/
+Tests/StatusTests/Generated.swift
+Tests/StatusTests/Environment.swift

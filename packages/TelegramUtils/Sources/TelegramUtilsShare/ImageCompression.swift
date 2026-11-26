@@ -1,0 +1,1 @@
+../TelegramUtils/ImageCompression.swift

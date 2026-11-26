@@ -1,0 +1,4 @@
+.build/
+Sources/PeerRows/Generated.swift
+Sources/PeerRows/GeneratedAccessories.swift
+Sources/PeerRows/GeneratedPaidBadge.swift

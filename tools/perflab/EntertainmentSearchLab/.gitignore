@@ -1,0 +1,3 @@
+.build/
+Sources/SearchLab/Generated*.swift
+provenance.json

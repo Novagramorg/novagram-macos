@@ -1,0 +1,1 @@
+This forward run passed its functional checks but is excluded from final timings. The pre-run compiler check was empty; the post-run check found swift-frontend processes 94605, 94606, 94607 and 94608.

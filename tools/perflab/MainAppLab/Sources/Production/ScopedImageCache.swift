@@ -1,0 +1,1 @@
+../../../../../packages/TGUIKit/Sources/ScopedImageCache.swift

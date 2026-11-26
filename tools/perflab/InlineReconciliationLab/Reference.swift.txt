@@ -1,0 +1,10 @@
+        var removeKeys: [InlineStickerItemLayer.Key] = []
+        for (key, itemLayer) in inlineStickerItemViews {
+            if !validIds.contains(key) {
+                removeKeys.append(key)
+                itemLayer.removeFromSuperlayer()
+            }
+        }
+        for key in removeKeys {
+            inlineStickerItemViews.removeValue(forKey: key)
+        }

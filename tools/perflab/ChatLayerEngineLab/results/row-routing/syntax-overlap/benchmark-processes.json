@@ -1,0 +1,38 @@
+{
+  "benchmark": {
+    "before": [],
+    "after": [],
+    "command": [
+      "swift",
+      "test",
+      "--package-path",
+      "tools/perflab/ChatLayerEngineLab",
+      "--scratch-path",
+      "/tmp/ChatLayerEngineLab-release",
+      "-c",
+      "release",
+      "--skip-build",
+      "--filter",
+      "RowRoutingTests.testRoutingBenchmarks"
+    ],
+    "exit_code": 0
+  },
+  "benchmark-repeat": {
+    "before": [],
+    "after": [],
+    "command": [
+      "swift",
+      "test",
+      "--package-path",
+      "tools/perflab/ChatLayerEngineLab",
+      "--scratch-path",
+      "/tmp/ChatLayerEngineLab-release",
+      "-c",
+      "release",
+      "--skip-build",
+      "--filter",
+      "RowRoutingTests.testRoutingBenchmarks"
+    ],
+    "exit_code": 0
+  }
+}

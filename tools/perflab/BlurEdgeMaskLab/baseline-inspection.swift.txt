@@ -1,0 +1,4 @@
+
+extension BlurEdgeView {
+    public func maskForLab(size: CGSize) -> CIImage? { verticalGradient(size: size) }
+}

@@ -1,0 +1,4 @@
+.build/
+results/
+Tests/SharedTextControlsTests/ReferenceLabel.swift
+Tests/SharedTextControlsTests/ReferenceTitle.swift

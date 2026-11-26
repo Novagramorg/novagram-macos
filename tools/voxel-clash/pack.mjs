@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root = path.dirname(fileURLToPath(import.meta.url));
+const css = fs.readFileSync(path.join(root, 'public/style.css'), 'utf8');
+const js = fs.readFileSync(path.join(root, 'public/game.js'), 'utf8');
+const html = '<!doctype html>\n<html><head><meta charset="utf-8"><style>' + css + '</style></head><body><div class="game"><div class="top"><div class="brand"><div class="eyebrow">THE FLOATING KINGDOMS</div><div class="title">Voxel Clash</div></div></div><div class="stage" data-3d></div></div><script src="app:three"></script><script>' + js + '</script></body></html>\n';
+const target = path.resolve(root, '../../packages/HTMLBubbles/Tests/HTMLBubblesTests/Fixtures/multiplayer/voxel-clash.html');
+fs.writeFileSync(target, html);
+console.log('Packed the shared Three.js game into the Telegram HTML bubble.');

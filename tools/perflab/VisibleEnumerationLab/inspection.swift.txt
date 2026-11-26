@@ -1,0 +1,6 @@
+
+extension TableView {
+    public var enumerationLabStorage: UInt {
+        list.withUnsafeBufferPointer { UInt(bitPattern: $0.baseAddress) }
+    }
+}

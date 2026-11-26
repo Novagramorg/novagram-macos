@@ -1,0 +1,3 @@
+.build/
+results/
+Tests/CounterUpdateTests/ReferenceCounter.swift

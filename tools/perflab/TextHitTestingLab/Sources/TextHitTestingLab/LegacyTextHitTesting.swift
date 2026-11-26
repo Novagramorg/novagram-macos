@@ -1,0 +1,1 @@
+../../../../../packages/TGUIKit/Tests/TGUIKitTests/LegacyTextHitTesting.swift

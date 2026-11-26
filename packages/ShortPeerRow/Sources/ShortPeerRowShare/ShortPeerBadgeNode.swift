@@ -1,0 +1,1 @@
+../ShortPeerRow/ShortPeerBadgeNode.swift
